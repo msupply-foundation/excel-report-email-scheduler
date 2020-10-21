@@ -1,0 +1,1 @@
+export { locales } from './translations';

@@ -1,0 +1,1 @@
+export { ConfigPageFactory } from './ConfigPageFactory';

@@ -1,0 +1,58 @@
+{
+  "type": "app",
+  "name": "mSupply",
+  "id": "msupply",
+  "info": {
+    "description": "Interface for managing mSupply instance integration with Grafana",
+    "author": {
+      "name": "mSupply Foundation",
+      "url": "https://msupply.foundation/"
+    },
+    "keywords": [],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://www.msupply.org.nz/"
+      },
+      {
+        "name": "License",
+        "url": "https://en.wikipedia.org/wiki/Software_license"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "includes": [
+    {
+      "type": "page",
+      "name": "mSupply App",
+      "path": "/a/msupply/",
+      "role": "Viewer",
+      "addToNav": true,
+      "defaultNav": true
+    },
+    {
+      "type": "page",
+      "name": "App configuration",
+      "path": "/plugins/msupply/?page=page1",
+      "role": "Viewer",
+      "addToNav": true
+    }
+  ],
+  "dependencies": {
+    "grafanaVersion": "7.0.x",
+    "plugins": [
+      {
+        "id": "msupply-datasource",
+        "name": "mSupply Datasource",
+        "version": "1.0",
+        "type": "datasource"
+      }
+    ]
+  }
+}
