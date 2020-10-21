@@ -1,10 +1,10 @@
 {
   "type": "datasource",
-  "name": "msupply-emailer",
-  "id": "msupply-emailer",
+  "name": "msupply-datasource",
+  "id": "msupply-datasource",
   "metrics": true,
   "backend": true,
-  "executable": "gpx_msupply-emailer",
+  "executable": "gpx_msupply-datasource",
   "info": {
     "description": "",
     "author": {
@@ -28,7 +28,7 @@
     ],
     "screenshots": [],
     "version": "1.0.0",
-    "updated": "2020-10-19"
+    "updated": "2020-10-21"
   },
   "dependencies": {
     "grafanaVersion": "7.x.x",

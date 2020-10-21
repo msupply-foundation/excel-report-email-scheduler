@@ -1,5 +1,5 @@
 {
-  "name": "msupply-msupply-emailer",
+  "name": "msupply-datasource",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -12,12 +12,19 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@grafana/data": "^7.0.0",
-    "@grafana/toolkit": "^7.0.0",
     "@grafana/runtime": "^7.0.0",
+    "@grafana/toolkit": "^7.0.0",
     "@grafana/ui": "^7.0.0",
     "@types/lodash": "latest"
   },
   "engines": {
     "node": ">=12 <13"
+  },
+  "dependencies": {
+    "react-intl-universal": "^2.4.1"
+  },
+  "resolutions": {
+    "**/react": "16.12.0",
+    "**/react-dom": "16.12.0"
   }
 }
