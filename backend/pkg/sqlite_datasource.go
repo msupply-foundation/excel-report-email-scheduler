@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
@@ -16,6 +17,13 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+// TODOs:
+// SQL In separate files.
+// Repository structs for each table? i.e. `ScheduleRepository` which has the methods `ScheduleRepository.update()` etc to partition the datasource struct.
+// Common serialization/deserialization methods
+// Better/consistent erroring
+// Better/consistent return values
 
 // Basic SQLite datasource
 type SQLiteDatasource struct {
@@ -68,7 +76,6 @@ func (datasource *SQLiteDatasource) QueryData(ctx context.Context, request *back
 		response.Responses[query.RefID] = res
 	}
 
-	// TODO: Handle error better?
 	return response, nil
 }
 
@@ -113,13 +120,12 @@ func (datasource *SQLiteDatasource) CheckHealth(ctx context.Context, req *backen
 }
 
 func (datasource *SQLiteDatasource) Init() {
-	db, _ := sql.Open("sqlite3", "./data/msupply.db")
+	db, _ := sql.Open("sqlite3", datasource.path)
 	defer db.Close()
 
 	err := db.Ping()
 	if err != nil {
 		log.DefaultLogger.Warn("Could not ping database")
-		// return nil, err
 	}
 
 	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, dashboardID TEXT, interval INTEGER, nextReportTime INTEGER)")
@@ -149,11 +155,11 @@ func (datasource *SQLiteDatasource) settingsExists() bool {
 	rows.Next()
 	rows.Scan(&exists)
 
+	log.DefaultLogger.Warn(string(strconv.FormatBool(exists)))
 	return exists
 }
 
 func (datasource *SQLiteDatasource) createOrUpdateSettings(config Config) (bool, error) {
-
 	db, _ := sql.Open("sqlite3", datasource.path)
 	defer db.Close()
 
@@ -167,4 +173,68 @@ func (datasource *SQLiteDatasource) createOrUpdateSettings(config Config) (bool,
 		stmt.Close()
 	}
 	return true, nil
+}
+
+func (datasource *SQLiteDatasource) getSettings() *Config {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	var grafanaUsername, grafanaPassword, email, emailPassword string
+
+	if datasource.settingsExists() {
+		var id, grafanaUsername, grafanaPassword, email, emailPassword string
+		rows, _ := db.Query("SELECT * FROM Config")
+		defer rows.Close()
+		rows.Next()
+		rows.Scan(&id, &grafanaUsername, &grafanaPassword, &email, &emailPassword)
+		log.DefaultLogger.Warn(id, grafanaUsername, grafanaPassword, email, emailPassword)
+		return &Config{GrafanaUsername: grafanaUsername, GrafanaPassword: grafanaPassword, Email: email, EmailPassword: emailPassword}
+	}
+	log.DefaultLogger.Warn("found")
+
+	return &Config{GrafanaUsername: grafanaUsername, GrafanaPassword: grafanaPassword, Email: email, EmailPassword: emailPassword}
+}
+
+func (datasource *SQLiteDatasource) createSchedule(schedule Schedule) *Schedule {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("INSERT INTO Schedule (ID, dashboardID, nextReportTime, interval) VALUES (?,?,?,?)")
+	stmt.Exec("a", schedule.DashboardID, schedule.NextReportTime, schedule.Interval)
+	defer stmt.Close()
+
+	return nil
+}
+
+func (datasource *SQLiteDatasource) updateSchedule(id string, schedule Schedule) *Schedule {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("UPDATE Schedule SET dashboardID = ?, nextReportTime = ?, interval = ? where id = ?")
+	stmt.Exec(schedule.DashboardID, schedule.NextReportTime, schedule.Interval, id)
+	defer stmt.Close()
+
+	return nil
+}
+
+func (datasource *SQLiteDatasource) getSchedules() []Schedule {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	var schedules []Schedule
+
+	rows, _ := db.Query("SELECT * FROM Schedule")
+	defer rows.Close()
+
+	for rows.Next() {
+		var ID, DashboardID string
+		var Interval, NextReportTime int
+
+		rows.Scan(&ID, &DashboardID, &Interval, &NextReportTime)
+		schedule := Schedule{ID, Interval, NextReportTime, DashboardID}
+
+		schedules = append(schedules, schedule)
+	}
+
+	return schedules
 }
