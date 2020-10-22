@@ -11,7 +11,8 @@ func getServeOptions() datasource.ServeOpts {
 	// into `NewInstanceManger` is called when the instance is created
 	// for the first time or when a datasource configuration changed.
 
-	sqlDatasource := getDataSource()
+	// TODO: Handle error here
+	sqlDatasource, _ := getDataSource()
 	httpHandler := getHttpHandler(sqlDatasource)
 
 	return datasource.ServeOpts{

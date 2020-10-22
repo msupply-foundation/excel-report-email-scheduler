@@ -24,6 +24,8 @@ func main() {
 	serveOptions := getServeOptions()
 	err := datasource.Serve(serveOptions)
 
+	// TODO: Defer a Close() ?
+
 	if err != nil {
 		log.DefaultLogger.Error(err.Error())
 		os.Exit(1)

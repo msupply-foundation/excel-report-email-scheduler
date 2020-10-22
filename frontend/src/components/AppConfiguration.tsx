@@ -25,7 +25,7 @@ export const AppConfiguration: FC<Props> = (props: Props) => {
   };
 
   const onSubmit = (newJsonData: FormValues) => {
-    getBackendSrv().post(`/api/plugins/msupply-datasource/resources/hello`, newJsonData);
+    getBackendSrv().post(`/api/plugins/msupply-datasource/resources/settings`, newJsonData);
     getBackendSrv().post(`/api/plugins/${props.plugin.meta.id}/settings`, {
       ...props.plugin.meta,
       jsonData: newJsonData,

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	_ "database/sql/driver"
 	"encoding/json"
 	"net/http"
 	"os"
@@ -31,8 +32,9 @@ type queryModel struct {
 	Format string `json:"format"`
 }
 
-func getDataSource() *SQLiteDatasource {
+func getDataSource() (*SQLiteDatasource, error) {
 	instanceManager := datasource.NewInstanceManager(getDataSourceInstanceSettings)
+
 	sqlDatasource := &SQLiteDatasource{
 		instanceManager: instanceManager,
 		path:            "./data/msupply.db",
@@ -40,7 +42,7 @@ func getDataSource() *SQLiteDatasource {
 
 	sqlDatasource.Init()
 
-	return sqlDatasource
+	return sqlDatasource, nil
 }
 
 func getDataSourceInstanceSettings(setting backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
@@ -111,13 +113,10 @@ func (datasource *SQLiteDatasource) CheckHealth(ctx context.Context, req *backen
 }
 
 func (datasource *SQLiteDatasource) Init() {
-	db, err := sql.Open("sqlite3", datasource.path)
-	if err != nil {
-		log.DefaultLogger.Warn("Could not open database")
-		// return nil, err
-	}
+	db, _ := sql.Open("sqlite3", "./data/msupply.db")
+	defer db.Close()
 
-	err = db.Ping()
+	err := db.Ping()
 	if err != nil {
 		log.DefaultLogger.Warn("Could not ping database")
 		// return nil, err
@@ -125,6 +124,8 @@ func (datasource *SQLiteDatasource) Init() {
 
 	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, dashboardID TEXT, interval INTEGER, nextReportTime INTEGER)")
 	stmt.Exec()
+	defer stmt.Close()
+
 	if err != nil {
 		log.DefaultLogger.Warn("Could not create table!")
 		log.DefaultLogger.Warn(err.Error())
@@ -135,4 +136,35 @@ func (datasource *SQLiteDatasource) Init() {
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportRecipient (id TEXT PRIMARY KEY, userID TEXT, email TEXT, scheduleID TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
 
+}
+
+func (datasource *SQLiteDatasource) settingsExists() bool {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	var exists bool
+	rows, _ := db.Query("SELECT EXISTS(SELECT 1 FROM Config)")
+
+	defer rows.Close()
+	rows.Next()
+	rows.Scan(&exists)
+
+	return exists
+}
+
+func (datasource *SQLiteDatasource) createOrUpdateSettings(config Config) (bool, error) {
+
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	if datasource.settingsExists() {
+		stmt, _ := db.Prepare("UPDATE Config set id = ?, grafanaUsername = ?, grafanaPassword = ?, email = ?, emailPassword = ?")
+		stmt.Exec("ID", config.GrafanaUsername, config.GrafanaPassword, config.Email, config.EmailPassword)
+		stmt.Close()
+	} else {
+		stmt, _ := db.Prepare("INSERT INTO Config (id, grafanaUsername, grafanaPassword, email, emailPassword) VALUES (?,?,?,?,?)")
+		stmt.Exec("ID", config.GrafanaUsername, config.GrafanaPassword, config.Email, config.EmailPassword)
+		stmt.Close()
+	}
+	return true, nil
 }
