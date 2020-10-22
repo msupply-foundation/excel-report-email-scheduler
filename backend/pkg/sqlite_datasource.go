@@ -238,3 +238,70 @@ func (datasource *SQLiteDatasource) getSchedules() []Schedule {
 
 	return schedules
 }
+
+func (datasource *SQLiteDatasource) createReportRecipient(reportRecipient ReportRecipient) *ReportRecipient {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("INSERT INTO ReportRecipient (ID, userID, ScheduleID, email) VALUES (?,?,?,?)")
+	stmt.Exec("a", reportRecipient.UserID, reportRecipient.ScheduleID, reportRecipient.Email)
+
+	defer stmt.Close()
+
+	return nil
+}
+
+func (datasource *SQLiteDatasource) updateReportRecipient(id string, reportRecipient ReportRecipient) *ReportRecipient {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("UPDATE ReportRecipient SET UserID = ?, ScheduleID = ? where id = ?")
+	stmt.Exec(reportRecipient.UserID, reportRecipient.ScheduleID, id)
+	defer stmt.Close()
+
+	return nil
+}
+
+func (datasource *SQLiteDatasource) deleteReportRecipient(id string) (bool, error) {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("DELETE ReportRecipient WHERE ID = ?")
+	stmt.Exec(id)
+	defer stmt.Close()
+
+	return true, nil
+}
+
+func (datasource *SQLiteDatasource) getReportRecipients() []ReportRecipient {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	var recipients []ReportRecipient
+
+	rows, _ := db.Query("SELECT * FROM ReportRecipient")
+	defer rows.Close()
+
+	for rows.Next() {
+		var ID, UserID, ScheduleID, Email string
+		rows.Scan(&ID, &UserID, &ScheduleID)
+		recipient := ReportRecipient{ID, UserID, ScheduleID, Email}
+		recipients = append(recipients, recipient)
+	}
+
+	return recipients
+}
+
+func (datasource *SQLiteDatasource) getReportRecipient(id string) ReportRecipient {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	row := db.QueryRow("SELECT * FROM ReportRecipient WHERE ID = ?", id)
+
+	// TODO: Handle the case where it doesn't exist
+	var ID, UserID, ScheduleID, Email string
+	row.Scan(&ID, &UserID, &ScheduleID, &Email)
+	recipient := ReportRecipient{ID, UserID, ScheduleID, Email}
+
+	return recipient
+}
