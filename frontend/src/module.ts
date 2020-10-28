@@ -2,7 +2,7 @@ import { ComponentClass } from 'react';
 import { AppPlugin, AppRootProps } from '@grafana/data';
 
 import { ConfigPageFactory } from './containers';
-import { AppConfiguration, ExampleRootPage } from './components';
+import { AppConfiguration, RootPage } from './components';
 
 /**
  * Grafana requires an export "plugin" which is a react component which will have
@@ -14,7 +14,7 @@ import { AppConfiguration, ExampleRootPage } from './components';
 export const plugin = new AppPlugin()
 
   // Root page navigated to through {GrafanaURL}/a/pluginId
-  .setRootPage((ExampleRootPage as unknown) as ComponentClass<AppRootProps>)
+  .setRootPage((RootPage as unknown) as ComponentClass<AppRootProps>)
 
   // Navigated through {GrafanaURL}/plugins/{pluginId} or {GrafanaURL}/plugins/{pluginId}?page=page1
   .addConfigPage({

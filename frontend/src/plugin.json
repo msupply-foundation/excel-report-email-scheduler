@@ -2,6 +2,7 @@
   "type": "app",
   "name": "mSupply",
   "id": "msupply",
+
   "info": {
     "description": "Interface for managing mSupply instance integration with Grafana",
     "author": {
@@ -32,6 +33,23 @@
       "type": "page",
       "name": "mSupply App",
       "path": "/a/msupply/",
+      "role": "Viewer",
+      "addToNav": true,
+      "defaultNav": true
+    },
+    {
+      "type": "page",
+      "name": "mSupply App2",
+      "path": "/plugins/msupply-app/?page=page2",
+      "role": "Viewer",
+      "addToNav": true,
+      "defaultNav": true,
+      "component": "Hello"
+    },
+    {
+      "type": "page",
+      "name": "mSupply App3",
+      "path": "/a/msupply/edit",
       "role": "Viewer",
       "addToNav": true,
       "defaultNav": true

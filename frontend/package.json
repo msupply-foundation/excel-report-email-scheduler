@@ -21,7 +21,12 @@
     "node": ">=12 <13"
   },
   "dependencies": {
-    "react-intl-universal": "^2.4.1"
+    "@types/classnames": "^2.2.10",
+    "classnames": "^2.2.6",
+    "moment": "^2.29.1",
+    "react-intl-universal": "^2.4.1",
+    "react-query": "^2.25.2",
+    "react-query-devtools": "^2.6.0"
   },
   "resolutions": {
     "**/react": "16.12.0",

@@ -10,5 +10,20 @@
   "saveDetails": "Save details",
   "saveDetailsDescription": "Save and update the newly added information.",
   "required": "Required!",
-  "submit": "Submit"
+  "submit": "Submit",
+  "report_groups": "Report Groups",
+  "report_schedules": "Report Schedules",
+  "add_report_group": "Add report group",
+  "msupply": "mSupply",
+  "delete_report_group": "Delete report group",
+  "delete_report_group_question": "Are you sure you want to delete this report group?",
+  "delete": "DELETE",
+  "no_email": "No email for this user",
+  "edit_report_group": "Edit Report Group",
+  "name": "Name",
+  "group_name": "Group name",
+  "description": "Description",
+  "group_description": "Group description",
+  "add_schedule": "Add Schedule",
+  "edit_report_schedule": "Edit Report Schedule"
 }

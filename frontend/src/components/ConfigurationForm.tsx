@@ -56,7 +56,7 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => (
           >
             <Input
               defaultValue={email}
-              placeholder={intl.get('emailUsername')}
+              placeholder={intl.get('email')}
               name="email"
               ref={register({ required: intl.get('required') })}
               css=""
