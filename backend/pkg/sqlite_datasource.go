@@ -129,7 +129,7 @@ func (datasource *SQLiteDatasource) Init() {
 		log.DefaultLogger.Warn("Could not ping database")
 	}
 
-	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER)")
+	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
 	stmt.Exec()
 	defer stmt.Close()
 
@@ -213,9 +213,9 @@ func (datasource *SQLiteDatasource) createSchedule() (Schedule, error) {
 	defer db.Close()
 
 	newUuid := uuid.New().String()
-	schedule := Schedule{ID: newUuid, NextReportTime: 0, Interval: 0, Name: "", Description: "", Lookback: 0}
-	stmt, _ := db.Prepare("INSERT INTO Schedule (ID,  nextReportTime, interval, name, description, lookback) VALUES (?,?,?,?,?,?)")
-	stmt.Exec(newUuid, 0, 0, "", "", 0)
+	schedule := Schedule{ID: newUuid, NextReportTime: 0, Interval: 0, Name: "", Description: "", Lookback: 0, ReportGroupID: ""}
+	stmt, _ := db.Prepare("INSERT INTO Schedule (ID,  nextReportTime, interval, name, description, lookback, reportGroupID) VALUES (?,?,?,?,?,?,?)")
+	stmt.Exec(newUuid, 0, 60*1000*60*24, "New report schedule", "", 0, "")
 	defer stmt.Close()
 
 	return schedule, nil
@@ -225,11 +225,25 @@ func (datasource *SQLiteDatasource) updateSchedule(id string, schedule Schedule)
 	db, _ := sql.Open("sqlite3", datasource.path)
 	defer db.Close()
 
-	stmt, _ := db.Prepare("UPDATE Schedule SET nextReportTime = ?, interval = ?, name = ?, description = ?, lookback = ? where id = ?")
-	stmt.Exec(schedule.NextReportTime, schedule.Interval, schedule.Name, schedule.Description, schedule.Lookback, id)
+	stmt, _ := db.Prepare("UPDATE Schedule SET nextReportTime = ?, interval = ?, name = ?, description = ?, lookback = ?, reportGroupID = ? where id = ?")
+	stmt.Exec(schedule.NextReportTime, schedule.Interval, schedule.Name, schedule.Description, schedule.Lookback, schedule.ReportGroupID, id)
 	defer stmt.Close()
 
 	return nil
+}
+
+func (datasource *SQLiteDatasource) deleteSchedule(id string) (bool, error) {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("DELETE FROM Schedule WHERE id = ?")
+	stmt.Exec(id)
+	stmt, _ = db.Prepare("DELETE FROM ReportContent WHERE scheduleID = ?")
+	stmt.Exec(id)
+
+	defer stmt.Close()
+
+	return true, nil
 }
 
 func (datasource *SQLiteDatasource) getSchedules() []Schedule {
@@ -242,11 +256,11 @@ func (datasource *SQLiteDatasource) getSchedules() []Schedule {
 	defer rows.Close()
 
 	for rows.Next() {
-		var ID, Name, Description string
+		var ID, Name, Description, ReportGroupID string
 		var Interval, NextReportTime, Lookback int
 
-		rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback)
-		schedule := Schedule{ID, Interval, NextReportTime, Name, Description, Lookback}
+		rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID)
+		schedule := Schedule{ID, Interval, NextReportTime, Name, Description, Lookback, ReportGroupID}
 
 		schedules = append(schedules, schedule)
 	}

@@ -23,4 +23,12 @@ export type Schedule = {
   interval?: number;
   nextReportTime?: number;
   lookback?: number;
+  reportGroupID: string;
+};
+
+export type ReportContent = {
+  id: string;
+  panelID: number;
+  storeID: string;
+  lookback: number;
 };

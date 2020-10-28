@@ -5,6 +5,7 @@ import { Spinner } from '@grafana/ui';
 import { getSchedules } from 'api';
 import { useQuery } from 'react-query';
 import { Schedule } from 'common/types';
+import { ColorScheme } from '@grafana/data';
 
 type Props = {
   onRowPress: (toggle: any) => void;
@@ -19,6 +20,7 @@ const listStyle = classNames({
 
 export const ScheduleList: FC<Props> = ({ onRowPress }) => {
   const { data: schedules, isLoading } = useQuery('reportSchedules', getSchedules);
+
   return isLoading ? (
     <Spinner />
   ) : (

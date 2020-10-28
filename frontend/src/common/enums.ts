@@ -9,4 +9,12 @@ export enum ScheduleKey {
   DESCRIPTION = 'description',
   ID = 'id',
   INTERVAL = 'interval',
+  REPORT_GROUP_ID = 'reportGroupID',
+}
+
+export enum ReportContentKey {
+  STORE_ID = 'storeID',
+  ID = 'id',
+  LOOKBACK = 'lookback',
+  PANEL_ID = 'panelID',
 }

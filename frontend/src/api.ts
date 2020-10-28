@@ -1,6 +1,5 @@
 import { getBackendSrv } from '@grafana/runtime';
-import { ReportGroupMember } from 'common/types';
-import { Schedule } from 'components/ReportSchedulesTab';
+import { ReportGroupMember, Schedule } from 'common/types';
 
 export const getRecipients = () => getBackendSrv().get('api/plugins/msupply-datasource/resources/report-recipient');
 
@@ -118,10 +117,15 @@ export const createSchedule = async () => {
   return getBackendSrv().post('./api/plugins/msupply-datasource/resources/schedule');
 };
 
+export const deleteSchedule = async (schedule: Schedule) => {
+  return getBackendSrv().delete(`./api/plugins/msupply-datasource/resources/schedule/${schedule?.id}`);
+};
+
 export const getReportContent = async (_: string, scheduleID: string) => {
   const content: any[] = await getBackendSrv().get(
     `./api/plugins/msupply-datasource/resources/report-content?schedule-id=${scheduleID}`
   );
+  return content;
   return content.reduce((acc: any, value: any) => ({ ...acc, [value.panelID]: value }), {});
 };
 

@@ -3,33 +3,27 @@ import intl from 'react-intl-universal';
 import { Input, Field, Modal, Button, Select, ConfirmModal } from '@grafana/ui';
 
 import { queryCache, useMutation, useQuery } from 'react-query';
-import { deleteReportContent, createReportContent, getPanels, getReportContent, updateSchedule } from 'api';
+import {
+  deleteSchedule,
+  deleteReportContent,
+  createReportContent,
+  getPanels,
+  getReportContent,
+  updateSchedule,
+} from 'api';
 
 import { css } from 'emotion';
 
 import { PanelList } from './PanelList';
 import { useToggle } from 'hooks';
-import { Schedule } from 'common/types';
+import { ReportContent, Schedule } from 'common/types';
 import { EditScheduleForm } from './Schedules/EditScheduleForm';
+import { ScheduleKey } from 'common/enums';
 
 type Props = {
   onClose: () => void;
   isOpen: boolean;
-  reportSchedule: ReportSchedule;
-};
-
-type ReportContent = {
-  id?: string;
-  panelID?: string;
-};
-
-type ReportSchedule = {
-  id?: string;
-  interval?: number;
-  nextReportTime?: number;
-  name?: string;
-  description?: string;
-  lookback?: number;
+  reportSchedule: Schedule;
 };
 
 const modalAdjustments = css`
@@ -45,7 +39,7 @@ const headerAdjustments = css`
 `;
 
 export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, isOpen }) => {
-  const [schedule, setReportSchedule] = useState<ReportSchedule>(reportSchedule);
+  const [schedule, setReportSchedule] = useState<Schedule>(reportSchedule);
   const [deleteAlertIsOpen, setDeleteAlertIsOpen] = useToggle(false);
 
   const { data: content } = useQuery<ReportContent[] | null[]>({
@@ -60,11 +54,20 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
     config: { enabled: !!reportSchedule },
   });
 
+  const [updateReportSchedule] = useMutation(updateSchedule, {
+    onSuccess: () => queryCache.refetchQueries(['reportSchedules']),
+  });
+
   const [createContent] = useMutation(createReportContent, {
     onSuccess: () => queryCache.refetchQueries(['reportContent', reportSchedule?.id]),
   });
+
   const [deleteContent] = useMutation(deleteReportContent, {
     onSuccess: () => queryCache.refetchQueries(['reportContent', reportSchedule?.id]),
+  });
+
+  const [deleteReportSchedule] = useMutation(deleteSchedule, {
+    onSuccess: () => queryCache.refetchQueries(['reportSchedules']),
   });
 
   const onTogglePanel = async (panel: any) => {
@@ -82,13 +85,18 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
     if (!schedule) setReportSchedule(reportSchedule);
   }, [reportSchedule]);
 
-  const onUpdateSchedule = (key: any, newValue: string) => {
+  // TODO: Handle error cases
+  const onUpdateSchedule = (key: ScheduleKey, newValue: string | number) => {
     const newState: Schedule = { ...schedule, [key]: newValue };
-
-    // Optimistically update state
-    // TODO: Handle error case
+    // Optimistically update state to reflect changes immediately in UI.
     setReportSchedule(newState);
-    updateSchedule(newState);
+    updateReportSchedule(newState);
+  };
+
+  const onConfirmDelete = () => {
+    deleteReportSchedule(schedule);
+    setDeleteAlertIsOpen();
+    onClose();
   };
 
   const onUpdateReportContent = (key: string, newValue: any) => {
@@ -111,21 +119,13 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
       onDismiss={onClose}
     >
       <div className={headerAdjustments}>
-        <EditScheduleForm schedule={schedule} onUpdate={() => {}} />
-        <Button size="md" variant="destructive">
+        <EditScheduleForm schedule={schedule} onUpdate={onUpdateSchedule} />
+        <Button size="md" variant="destructive" onClick={setDeleteAlertIsOpen}>
           {intl.get('delete')}
         </Button>
       </div>
 
-      <PanelList
-        scheduleID={reportSchedule?.id}
-        checked={content}
-        withChecks
-        onRowPress={onTogglePanel}
-        data={panels}
-        titleKey="title"
-        descriptionKey="description"
-      />
+      <PanelList schedule={reportSchedule} />
 
       <ConfirmModal
         isOpen={deleteAlertIsOpen}
@@ -133,7 +133,7 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
         body={intl.get('delete_report_group_question')}
         confirmText={intl.get('delete')}
         icon="exclamation-triangle"
-        onConfirm={() => {}}
+        onConfirm={onConfirmDelete}
         onDismiss={setDeleteAlertIsOpen}
       />
     </Modal>

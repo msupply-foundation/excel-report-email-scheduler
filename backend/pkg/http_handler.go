@@ -43,6 +43,7 @@ type Schedule struct {
 	Name           string `json:"name"`
 	Description    string `json:"description"`
 	Lookback       int    `json:"lookback"`
+	ReportGroupID  string `json:"reportGroupID"`
 }
 
 type ReportRecipient struct {
@@ -67,6 +68,7 @@ func getHttpHandler(sqliteDatasource *SQLiteDatasource) backend.CallResourceHand
 	mux.HandleFunc("/schedule", getCreateScheduleHandler(sqliteDatasource)).Methods("POST")
 	mux.HandleFunc("/schedule/{id}", getUpdateScheduleHandler(sqliteDatasource)).Methods("PUT")
 	mux.HandleFunc("/schedule", getFetchSchedulesHandler(sqliteDatasource)).Methods("GET")
+	mux.HandleFunc("/schedule/{id}", getDeleteScheduleHandler(sqliteDatasource)).Methods("DELETE")
 
 	mux.HandleFunc("/report-recipient/{id}", getFetchReportRecipientHandler(sqliteDatasource)).Methods("GET")
 	mux.HandleFunc("/report-recipient", getFetchReportRecipientsHandler(sqliteDatasource)).Methods("GET")
@@ -396,6 +398,19 @@ func getUpdateReportContentHandler(sqliteDatasource *SQLiteDatasource) func(rw h
 		sqliteDatasource.updateReportContent(id, group)
 
 		json.NewEncoder(rw).Encode(group)
+		rw.WriteHeader(http.StatusOK)
+	}
+}
+
+func getDeleteScheduleHandler(sqliteDatasource *SQLiteDatasource) func(rw http.ResponseWriter, request *http.Request) {
+	return func(rw http.ResponseWriter, request *http.Request) {
+		vars := mux.Vars(request)
+		id := vars["id"]
+
+		// TODO: Handle error
+		success, _ := sqliteDatasource.deleteSchedule(id)
+
+		json.NewEncoder(rw).Encode(success)
 		rw.WriteHeader(http.StatusOK)
 	}
 }

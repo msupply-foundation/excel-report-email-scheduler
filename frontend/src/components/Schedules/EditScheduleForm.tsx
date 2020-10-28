@@ -4,15 +4,18 @@ import { css } from 'emotion';
 import { Field, Input, Select } from '@grafana/ui';
 
 import { ScheduleKey } from 'common/enums';
-import { Schedule } from 'common/types';
+import { ReportGroup, Schedule } from 'common/types';
+import { useQuery } from 'react-query';
+import { getReportGroups } from 'api';
+import { SelectableValue } from '@grafana/data';
 
-const intervals = [
-  { label: 'Daily', value: 60 * 1000 * 60 * 24 },
-  { label: 'Weekly', value: 60 * 1000 * 60 * 24 * 7 },
-  { label: 'Fortnightly', value: 60 * 1000 * 60 * 24 * 14 },
-  { label: 'Monthly', value: 60 * 1000 * 60 * 24 * 30 },
-  { label: 'Quarterly', value: 60 * 1000 * 60 * 24 * 30 * 6 },
-  { label: 'Yearly', value: 60 * 1000 * 60 * 24 * 30 * 12 },
+const getIntervals = () => [
+  { label: intl.get('daily'), value: 60 * 1000 * 60 * 24 },
+  { label: intl.get('weekly'), value: 60 * 1000 * 60 * 24 * 7 },
+  { label: intl.get('fortnightly'), value: 60 * 1000 * 60 * 24 * 14 },
+  { label: intl.get('monthly'), value: 60 * 1000 * 60 * 24 * 30 },
+  { label: intl.get('quarterly'), value: 60 * 1000 * 60 * 24 * 30 * 6 },
+  { label: intl.get('yearly'), value: 60 * 1000 * 60 * 24 * 30 * 12 },
 ];
 
 const container = css`
@@ -32,40 +35,66 @@ type Props = {
   schedule: Schedule;
 };
 
-export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => (
-  <div className={container}>
-    <Field className={flexWrapping} label={intl.get('name')} description={intl.get('group_name')}>
-      <Input
-        onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.NAME, value)}
-        name={intl.get('name')}
-        defaultValue={schedule.name}
-        placeholder={intl.get('name')}
-        css=""
-      />
-    </Field>
+export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
+  const { data: reportGroups } = useQuery('reportGroup', getReportGroups);
 
-    <Field className={flexWrapping} label={intl.get('description')} description={intl.get('group_description')}>
-      <Input
-        onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.DESCRIPTION, value)}
-        name={intl.get('description')}
-        defaultValue={schedule.description}
-        placeholder={intl.get('description')}
-        css=""
-      />
-    </Field>
-    <Field className={flexWrapping} label="Report interval" description="The interval frequency for emails to be sent">
-      <Select
-        value={intervals.filter((interval: any) => interval.value === schedule?.interval)}
-        options={intervals}
-        onChange={(selected: any) => {}}
-      />
-    </Field>
-    <Field className={flexWrapping} label="Report interval" description="The interval frequency for emails to be sent">
-      <Select
-        value={intervals.filter((interval: any) => interval.value === schedule?.interval)}
-        options={intervals}
-        onChange={(selected: any) => {}}
-      />
-    </Field>
-  </div>
-);
+  return (
+    <div className={container}>
+      <Field className={flexWrapping} label={intl.get('name')} description={intl.get('group_name')}>
+        <Input
+          onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.NAME, value)}
+          name={intl.get('name')}
+          defaultValue={schedule.name}
+          placeholder={intl.get('name')}
+          css=""
+        />
+      </Field>
+
+      <Field className={flexWrapping} label={intl.get('description')} description={intl.get('group_description')}>
+        <Input
+          onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.DESCRIPTION, value)}
+          name={intl.get('description')}
+          defaultValue={schedule.description}
+          placeholder={intl.get('description')}
+          css=""
+        />
+      </Field>
+      <Field
+        className={flexWrapping}
+        label={intl.get('report_interval')}
+        description={intl.get('report_interval_description')}
+      >
+        <Select
+          value={getIntervals().filter((interval: any) => interval.value === schedule?.interval)}
+          options={getIntervals()}
+          onChange={(selected: SelectableValue) => {
+            onUpdate(ScheduleKey.INTERVAL, selected.value);
+          }}
+        />
+      </Field>
+      <Field
+        className={flexWrapping}
+        label={intl.get('report_group')}
+        description={intl.get('report_group_description')}
+      >
+        <Select
+          value={reportGroups
+            ?.filter((reportGroup: ReportGroup) => reportGroup.id === schedule.reportGroupID)
+            .map((reportGroup: ReportGroup) => ({
+              label: reportGroup.name,
+              description: reportGroup.description,
+              value: reportGroup,
+            }))}
+          options={reportGroups?.map((reportGroup: ReportGroup) => ({
+            label: reportGroup.name,
+            description: reportGroup.description,
+            value: reportGroup,
+          }))}
+          onChange={(selected: SelectableValue<ReportGroup>) => {
+            onUpdate(ScheduleKey.REPORT_GROUP_ID, selected?.value?.id ?? '');
+          }}
+        />
+      </Field>
+    </div>
+  );
+};
