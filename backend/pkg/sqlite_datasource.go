@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
@@ -128,7 +129,7 @@ func (datasource *SQLiteDatasource) Init() {
 		log.DefaultLogger.Warn("Could not ping database")
 	}
 
-	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, dashboardID TEXT, interval INTEGER, nextReportTime INTEGER)")
+	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER)")
 	stmt.Exec()
 	defer stmt.Close()
 
@@ -139,7 +140,19 @@ func (datasource *SQLiteDatasource) Init() {
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS Config (id TEXT PRIMARY KEY, grafanaUsername TEXT, grafanaPassword TEXT, emailPassword TEXT, email TEXT)")
 	stmt.Exec()
 
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportRecipient (id TEXT PRIMARY KEY, userID TEXT, email TEXT, scheduleID TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
+	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportRecipient (id TEXT PRIMARY KEY, userID TEXT)")
+	stmt.Exec()
+
+	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroup (id TEXT PRIMARY KEY, name TEXT, description TEXT)")
+	stmt.Exec()
+
+	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroupMembership (id TEXT PRIMARY KEY, userID TEXT, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
+	stmt.Exec()
+
+	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS GroupSchedule (id TEXT PRIMARY KEY, scheduleID TEXT, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id), FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
+	stmt.Exec()
+
+	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, lookback INTEGER, storeID TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
 
 }
@@ -195,23 +208,25 @@ func (datasource *SQLiteDatasource) getSettings() *Config {
 	return &Config{GrafanaUsername: grafanaUsername, GrafanaPassword: grafanaPassword, Email: email, EmailPassword: emailPassword}
 }
 
-func (datasource *SQLiteDatasource) createSchedule(schedule Schedule) *Schedule {
+func (datasource *SQLiteDatasource) createSchedule() (Schedule, error) {
 	db, _ := sql.Open("sqlite3", datasource.path)
 	defer db.Close()
 
-	stmt, _ := db.Prepare("INSERT INTO Schedule (ID, dashboardID, nextReportTime, interval) VALUES (?,?,?,?)")
-	stmt.Exec("a", schedule.DashboardID, schedule.NextReportTime, schedule.Interval)
+	newUuid := uuid.New().String()
+	schedule := Schedule{ID: newUuid, NextReportTime: 0, Interval: 0, Name: "", Description: "", Lookback: 0}
+	stmt, _ := db.Prepare("INSERT INTO Schedule (ID,  nextReportTime, interval, name, description, lookback) VALUES (?,?,?,?,?,?)")
+	stmt.Exec(newUuid, 0, 0, "", "", 0)
 	defer stmt.Close()
 
-	return nil
+	return schedule, nil
 }
 
 func (datasource *SQLiteDatasource) updateSchedule(id string, schedule Schedule) *Schedule {
 	db, _ := sql.Open("sqlite3", datasource.path)
 	defer db.Close()
 
-	stmt, _ := db.Prepare("UPDATE Schedule SET dashboardID = ?, nextReportTime = ?, interval = ? where id = ?")
-	stmt.Exec(schedule.DashboardID, schedule.NextReportTime, schedule.Interval, id)
+	stmt, _ := db.Prepare("UPDATE Schedule SET nextReportTime = ?, interval = ?, name = ?, description = ?, lookback = ? where id = ?")
+	stmt.Exec(schedule.NextReportTime, schedule.Interval, schedule.Name, schedule.Description, schedule.Lookback, id)
 	defer stmt.Close()
 
 	return nil
@@ -227,11 +242,11 @@ func (datasource *SQLiteDatasource) getSchedules() []Schedule {
 	defer rows.Close()
 
 	for rows.Next() {
-		var ID, DashboardID string
-		var Interval, NextReportTime int
+		var ID, Name, Description string
+		var Interval, NextReportTime, Lookback int
 
-		rows.Scan(&ID, &DashboardID, &Interval, &NextReportTime)
-		schedule := Schedule{ID, Interval, NextReportTime, DashboardID}
+		rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback)
+		schedule := Schedule{ID, Interval, NextReportTime, Name, Description, Lookback}
 
 		schedules = append(schedules, schedule)
 	}
@@ -243,8 +258,8 @@ func (datasource *SQLiteDatasource) createReportRecipient(reportRecipient Report
 	db, _ := sql.Open("sqlite3", datasource.path)
 	defer db.Close()
 
-	stmt, _ := db.Prepare("INSERT INTO ReportRecipient (ID, userID, ScheduleID, email) VALUES (?,?,?,?)")
-	stmt.Exec("a", reportRecipient.UserID, reportRecipient.ScheduleID, reportRecipient.Email)
+	stmt, _ := db.Prepare("INSERT INTO ReportRecipient (ID, userID) VALUES (?,?)")
+	stmt.Exec("a", reportRecipient.UserID)
 
 	defer stmt.Close()
 
@@ -255,8 +270,8 @@ func (datasource *SQLiteDatasource) updateReportRecipient(id string, reportRecip
 	db, _ := sql.Open("sqlite3", datasource.path)
 	defer db.Close()
 
-	stmt, _ := db.Prepare("UPDATE ReportRecipient SET UserID = ?, ScheduleID = ? where id = ?")
-	stmt.Exec(reportRecipient.UserID, reportRecipient.ScheduleID, id)
+	stmt, _ := db.Prepare("UPDATE ReportRecipient SET UserID = ? WHERE id = ?")
+	stmt.Exec(reportRecipient.UserID, id)
 	defer stmt.Close()
 
 	return nil
@@ -266,7 +281,7 @@ func (datasource *SQLiteDatasource) deleteReportRecipient(id string) (bool, erro
 	db, _ := sql.Open("sqlite3", datasource.path)
 	defer db.Close()
 
-	stmt, _ := db.Prepare("DELETE ReportRecipient WHERE ID = ?")
+	stmt, _ := db.Prepare("DELETE FROM ReportRecipient WHERE ID = ?")
 	stmt.Exec(id)
 	defer stmt.Close()
 
@@ -283,9 +298,9 @@ func (datasource *SQLiteDatasource) getReportRecipients() []ReportRecipient {
 	defer rows.Close()
 
 	for rows.Next() {
-		var ID, UserID, ScheduleID, Email string
-		rows.Scan(&ID, &UserID, &ScheduleID)
-		recipient := ReportRecipient{ID, UserID, ScheduleID, Email}
+		var ID, UserID string
+		rows.Scan(&ID, &UserID)
+		recipient := ReportRecipient{ID, UserID}
 		recipients = append(recipients, recipient)
 	}
 
@@ -299,9 +314,168 @@ func (datasource *SQLiteDatasource) getReportRecipient(id string) ReportRecipien
 	row := db.QueryRow("SELECT * FROM ReportRecipient WHERE ID = ?", id)
 
 	// TODO: Handle the case where it doesn't exist
-	var ID, UserID, ScheduleID, Email string
-	row.Scan(&ID, &UserID, &ScheduleID, &Email)
-	recipient := ReportRecipient{ID, UserID, ScheduleID, Email}
+	var ID, UserID string
+	row.Scan(&ID, &UserID)
+	recipient := ReportRecipient{ID, UserID}
 
 	return recipient
+}
+
+func (datasource *SQLiteDatasource) getReportGroups() []ReportGroup {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	var reportGroups []ReportGroup
+
+	rows, _ := db.Query("SELECT * FROM ReportGroup")
+	defer rows.Close()
+
+	for rows.Next() {
+		var ID, Name, Description string
+		rows.Scan(&ID, &Name, &Description)
+		reportGroup := ReportGroup{ID, Name, Description}
+		reportGroups = append(reportGroups, reportGroup)
+	}
+
+	return reportGroups
+}
+
+func (datasource *SQLiteDatasource) createReportGroup() (ReportGroup, error) {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	reportGroup := ReportGroup{ID: uuid.New().String(), Name: "New report group", Description: ""}
+	stmt, _ := db.Prepare("INSERT INTO ReportGroup (id, name, description) VALUES (?,?,?)")
+	stmt.Exec(reportGroup.ID, reportGroup.Name, reportGroup.Description)
+	defer stmt.Close()
+
+	return reportGroup, nil
+}
+
+func (datasource *SQLiteDatasource) updateReportGroup(id string, reportGroup ReportGroup) ReportGroup {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("UPDATE ReportGroup SET name = ?, description = ? where id = ?")
+	stmt.Exec(reportGroup.Name, reportGroup.Description, id)
+	defer stmt.Close()
+
+	return reportGroup
+}
+
+func (datasource *SQLiteDatasource) deleteReportGroup(id string) (bool, error) {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("DELETE FROM ReportGroup WHERE id = ?")
+	stmt.Exec(id)
+	stmt, _ = db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
+	stmt.Exec(id)
+
+	defer stmt.Close()
+
+	return true, nil
+}
+
+func (datasource *SQLiteDatasource) getReportGroupMemberships(groupID string) []ReportGroupMembership {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	var memberships []ReportGroupMembership
+
+	rows, _ := db.Query("SELECT * FROM ReportGroupMembership WHERE reportGroupID = ?", groupID)
+	defer rows.Close()
+
+	for rows.Next() {
+		var ID, UserID, ReportGroupID string
+		rows.Scan(&ID, &UserID, &ReportGroupID)
+		membership := ReportGroupMembership{ID, UserID, ReportGroupID}
+		memberships = append(memberships, membership)
+	}
+
+	return memberships
+}
+
+func (datasource *SQLiteDatasource) createReportGroupMembership(members []ReportGroupMembership) ([]ReportGroupMembership, error) {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	var addedMemberships []ReportGroupMembership
+	for _, member := range members {
+		newUuid := uuid.New().String()
+		stmt, _ := db.Prepare("INSERT INTO ReportGroupMembership (ID, userID, reportGroupID) VALUES (?,?,?)")
+		stmt.Exec(newUuid, member.ReportRecipientID, member.ReportGroupID)
+		member.ID = newUuid
+		addedMemberships = append(addedMemberships, member)
+		defer stmt.Close()
+	}
+
+	// TODO: Return report assignment
+	return addedMemberships, nil
+}
+
+func (datasource *SQLiteDatasource) deleteReportGroupMembership(id string) (bool, error) {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("DELETE FROM ReportGroupMembership WHERE id = ?")
+	stmt.Exec(id)
+	defer stmt.Close()
+
+	// TODO: Proper return values, returning error or false? or just an error, probably
+	return true, nil
+}
+
+func (datasource *SQLiteDatasource) getReportContent(scheduleID string) ([]ReportContent, error) {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	var reportContent []ReportContent
+
+	rows, _ := db.Query("SELECT * FROM ReportContent WHERE scheduleID = ?", scheduleID)
+	defer rows.Close()
+
+	for rows.Next() {
+		var ID, ScheduleID, StoreID string
+		var Lookback, PanelID int
+		rows.Scan(&ID, &ScheduleID, &PanelID, &Lookback, &StoreID)
+		content := ReportContent{ID, ScheduleID, PanelID, Lookback, StoreID}
+		reportContent = append(reportContent, content)
+	}
+
+	return reportContent, nil
+}
+
+func (datasource *SQLiteDatasource) deleteReportContent(id string) (bool, error) {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("DELETE FROM ReportContent WHERE ID = ?")
+	stmt.Exec(id)
+	defer stmt.Close()
+
+	return true, nil
+}
+
+func (datasource *SQLiteDatasource) createReportContent(newReportContentValues ReportContent) (ReportContent, error) {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	reportContent := ReportContent{ID: uuid.New().String(), ScheduleID: newReportContentValues.ScheduleID, PanelID: newReportContentValues.PanelID, Lookback: 0, StoreID: ""}
+	stmt, _ := db.Prepare("INSERT INTO ReportContent (id, scheduleID, panelID, lookback, storeID) VALUES (?,?,?,?,?)")
+	stmt.Exec(reportContent.ID, reportContent.ScheduleID, reportContent.PanelID, reportContent.Lookback, reportContent.StoreID)
+	defer stmt.Close()
+
+	return reportContent, nil
+}
+
+func (datasource *SQLiteDatasource) updateReportContent(id string, reportGroup ReportContent) ReportContent {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	stmt, _ := db.Prepare("UPDATE ReportContent SET scheduleID = ?, panelID = ?, storeID = ?, lookback = ? where id = ?")
+	stmt.Exec(reportGroup.ScheduleID, reportGroup.PanelID, reportGroup.StoreID, reportGroup.Lookback, id)
+	defer stmt.Close()
+
+	return reportGroup
 }
