@@ -46,7 +46,7 @@ func sendEmail() {
 
 	// Send the email to Bob, Cora and Dan.
 	if err := d.DialAndSend(m); err != nil {
-		log.DefaultLogger.Error(err.Error())
+		// log.DefaultLogger.Error(err.Error())
 	}
 }
 
@@ -92,15 +92,37 @@ func getPanelsForSchedules(sqlite *SQLiteDatasource) {
 	// const lookup = schedules.reduce((acc, value) => ({...acc, [value.id]: sqlite.getPanels(scheduleID)}) , {})
 }
 
-func createReports(sqlite *SQLiteDatasource) {
-
+func createReports() {
 	// Get the panels for each schedule
 	// const panelLookup = getPanelsForSchedules()
 
-	// for each schedule, for each panel, query for the panel data
+	// For each schedule, for each panel, query for the panel data
 	// and create an excel file where each tab is a panel table.
 	// save in a new lookup the shape:
 	// { {scheduleID}: excelFilePath }
+
+	// f := excelize.NewFile()
+	f, e := excelize.OpenFile("test.xlsx")
+
+	if e != nil {
+		log.DefaultLogger.Error("erorr opening", e.Error())
+
+	}
+
+	// Create a new sheet.
+	index := f.NewSheet("Sheet2")
+	// Set value of a cell.
+	f.SetCellValue("Sheet1", "B2", 100)
+	f.SetCellValue("Sheet2", "A2", "Hello Tony.")
+
+	// Set active sheet of the workbook.
+	f.SetActiveSheet(index)
+
+	// Save xlsx file by the given path. Should use something like
+	// the schedule ID.
+	if err := f.SaveAs("./data/Book1.xlsx"); err != nil {
+		fmt.Println(err)
+	}
 }
 
 func sendEmails(sqlite *SQLiteDatasource) {
