@@ -31,28 +31,19 @@
   "includes": [
     {
       "type": "page",
-      "name": "mSupply App",
-      "path": "/a/msupply/",
+      "name": "Reporting groups",
+      "path": "/a/msupply/?tab=report-group",
       "role": "Viewer",
       "addToNav": true,
       "defaultNav": true
     },
     {
       "type": "page",
-      "name": "mSupply App2",
-      "path": "/plugins/msupply-app/?page=page2",
+      "name": "Report Schedules",
+      "path": "/a/msupply/?tab=report-schedule",
       "role": "Viewer",
       "addToNav": true,
-      "defaultNav": true,
-      "component": "Hello"
-    },
-    {
-      "type": "page",
-      "name": "mSupply App3",
-      "path": "/a/msupply/edit",
-      "role": "Viewer",
-      "addToNav": true,
-      "defaultNav": true
+      "defaultNav": false
     },
     {
       "type": "page",
