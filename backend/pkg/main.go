@@ -20,14 +20,15 @@ import (
 // }
 func main() {
 
-	// Start listening to requests sent from Grafana. This call is blocking and
-	// and waits until Grafana shutsdown or the plugin exits.
 	serveOptions, sqliteDatasource := getServeOptions()
-	err := datasource.Serve(serveOptions)
 
 	c := cron.New()
 	c.AddFunc("@every 1m", getScheduler(sqliteDatasource))
 	c.Start()
+
+	// Start listening to requests sent from Grafana. This call is blocking and
+	// and waits until Grafana shutsdown or the plugin exits.
+	err := datasource.Serve(serveOptions)
 
 	// TODO: Defer a Close() ?
 

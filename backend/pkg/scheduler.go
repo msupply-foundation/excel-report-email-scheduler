@@ -1,14 +1,61 @@
 package main
 
-import "github.com/grafana/grafana-plugin-sdk-go/backend/log"
+import (
+	"fmt"
+	"net/smtp"
+
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+)
 
 type EmailConfig struct {
 	email    string
 	password string
 }
 
+type SmtpServer struct {
+	host string
+	port string
+}
+
+func (smtpServer *SmtpServer) Address() string {
+	return smtpServer.host + ":" + smtpServer.port
+}
+
 // Possibly take the email config, an attachment and some array of recipients?
-func sendEmail() {}
+func sendEmail() {
+
+	// TODO: Password and email from params. Leave hard coded for now
+	// for dev'in
+	from := "testemailsussol@gmail.com"
+
+	// This password is an app-specific password. The real password
+	// to the account is kathmandu312. Seems to require me to generate
+	// and use an app-specific password. :shrug:
+	password := "ybtkmpesjptowmru"
+	to := []string{
+		"griffinjoshua5@gmail.com",
+	}
+
+	// TODO: Host and port need to be added to datasource config?
+	smtpServer := SmtpServer{host: "smtp.gmail.com", port: "587"}
+
+	// TODO: Subject, message to be added to datasource config? Or schedule config?
+	message := []byte("Reports from mSupply")
+
+	// I don't really know what I'm doing with this auth.
+	// PlainAuth works and reading the docs it seems to fail
+	// if not using TLS. So I guess it's probably OK.
+	auth := smtp.PlainAuth("", from, password, smtpServer.host)
+
+	err := smtp.SendMail(smtpServer.Address(), auth, from, to, message)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println("Email Sent!")
+}
 
 // TODO: Handle cases where an email config doesn't exist or invalid etc.
 // Could send an email to somewhere else, sussol support or something
@@ -86,6 +133,7 @@ func cleanup() {
 
 func getScheduler(sqlite *SQLiteDatasource) func() {
 	return func() {
+		sendEmail()
 		log.DefaultLogger.Info("Scheduler!")
 	}
 }
