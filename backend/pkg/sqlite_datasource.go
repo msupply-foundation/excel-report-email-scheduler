@@ -493,3 +493,18 @@ func (datasource *SQLiteDatasource) updateReportContent(id string, reportGroup R
 
 	return reportGroup
 }
+
+// TODO: Handle error cases and also might need to add additional
+// fields i.e. SMTP etc
+func (datasource *SQLiteDatasource) getEmailConfig() EmailConfig {
+	db, _ := sql.Open("sqlite3", datasource.path)
+	defer db.Close()
+
+	var email, password string
+
+	row := db.QueryRow("SELECT email, emailPassword as password FROM Config")
+	row.Scan(&email, &password)
+
+	return EmailConfig{email: email, password: password}
+
+}
