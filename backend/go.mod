@@ -8,4 +8,6 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/grafana/grafana-plugin-sdk-go v0.65.0
 	github.com/mattn/go-sqlite3 v1.14.4
+	github.com/robfig/cron v1.2.0
+	github.com/robfig/cron/v3 v3.0.0
 )
