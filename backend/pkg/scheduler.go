@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/grafana/simple-datasource-backend/pkg/api"
 	"gopkg.in/gomail.v2"
 )
 
@@ -92,25 +95,47 @@ func createReports() {
 	// save in a new lookup the shape:
 	// { {scheduleID}: excelFilePath }
 
-	// f := excelize.NewFile()
+	dashboard, err := api.GetDashboard("")
+
+	if err != nil {
+		log.DefaultLogger.Error(err.Error())
+	}
+
+	rawSQL := dashboard.GetRawSQL(2)
+	queryRequest, err := api.NewQueryRequest(rawSQL).ToRequestBody()
+
+	if err != nil {
+		log.DefaultLogger.Error(err.Error())
+		// return nil, err
+	}
+
+	response, err := http.Post("http://admin:admin@localhost:3000/api/tsdb/query", "application/json", queryRequest)
+
+	if err != nil {
+		log.DefaultLogger.Error(err.Error())
+		// return nil, err
+	}
+
+	qr, err := api.QueryFromResponse(response)
+
 	f, e := excelize.OpenFile("./data/test.xlsx")
 
 	if e != nil {
 		log.DefaultLogger.Error("erorr opening", e.Error())
-
 	}
 
-	// Create a new sheet.
-	index := f.NewSheet("Sheet2")
-	// Set value of a cell.
-	f.SetCellValue("Sheet1", "B2", 100)
-	f.SetCellValue("Sheet2", "A2", "Hello Tony.")
+	columns := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"}
+	ri := 0
+	for _, row := range qr.Results.A.Tables[0].Rows {
+		ci := 0
+		for range qr.Results.A.Tables[0].Columns {
+			cellRef := columns[ci] + strconv.Itoa(ri+1)
+			f.SetCellValue("Sheet1", cellRef, row[ci])
+			ci += 1
+		}
+		ri += 1
+	}
 
-	// Set active sheet of the workbook.
-	f.SetActiveSheet(index)
-
-	// Save xlsx file by the given path. Should use something like
-	// the schedule ID.
 	if err := f.SaveAs("./data/Book1.xlsx"); err != nil {
 		fmt.Println(err)
 	}
