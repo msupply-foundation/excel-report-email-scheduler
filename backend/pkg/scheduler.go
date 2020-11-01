@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -118,18 +119,57 @@ func createReports() {
 
 	qr, err := api.QueryFromResponse(response)
 
-	f, e := excelize.OpenFile("./data/test.xlsx")
+	// Open the template
+	f, e := excelize.OpenFile("./data/template.xlsx")
+
+	// Regexp which matches a cell reference [TODO: Handle $ refs]
+	reg := regexp.MustCompile("([A-Za-z]+)|([0-9]+)")
+
+	// Search for the {title} cell to add into the template
+	result := f.SearchSheet("Sheet1", "{{title}}")
+	f.SetCellValue("Sheet1", result[0], "This is a dynamically added title")
+
+	// Same for the date
+	result = f.SearchSheet("Sheet1", "{{date}}")
+	f.SetCellValue("Sheet1", result[0], "This is a dynamically added date")
+
+	// Find where to start the rows from
+	rowStart := f.SearchSheet("Sheet1", "{{rows}}")
+	split := reg.FindAllString(rowStart[0], 2)
+	rowIndex, _ := strconv.Atoi(split[1])
+
+	// Same with the headers
+	headerStart := f.SearchSheet("Sheet1", "{{headers}}")
+	split = reg.FindAllString(headerStart[0], 2)
+	headerIndex, _ := strconv.Atoi(split[1])
 
 	if e != nil {
 		log.DefaultLogger.Error("erorr opening", e.Error())
 	}
 
+	// Replace the header row with the column text values.
 	columns := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"}
-	ri := 0
+	ci := 0
+	for _, column := range qr.Results.A.Tables[0].Columns {
+		cellRef := columns[ci] + strconv.Itoa(headerIndex)
+		f.SetCellValue("Sheet1", cellRef, column.Text)
+		ci += 1
+	}
+
+	// Duplicate enough rows
+	ri := rowIndex + 1
+	i := 0
+	for i < len(qr.Results.A.Tables[0].Rows)-1 {
+		f.DuplicateRow("Sheet1", rowIndex)
+		i += 1
+	}
+
+	// Insert row content into each duplicated row
+	ri = rowIndex
 	for _, row := range qr.Results.A.Tables[0].Rows {
-		ci := 0
+		ci = 0
 		for range qr.Results.A.Tables[0].Columns {
-			cellRef := columns[ci] + strconv.Itoa(ri+1)
+			cellRef := columns[ci] + strconv.Itoa(ri)
 			f.SetCellValue("Sheet1", cellRef, row[ci])
 			ci += 1
 		}

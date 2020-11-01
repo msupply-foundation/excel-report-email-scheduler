@@ -122,6 +122,19 @@ type DashboardResponse struct {
 	} `json:"dashboard"`
 }
 
+type TablePanel struct {
+	ID      int             `json:"id"`
+	Title   string          `json:"title"`
+	RawSql  string          `json:"rawSql"`
+	Rows    [][]interface{} `json:"rows"`
+	Columns [][]interface{} `json:"columns"`
+}
+
+type Dashboard struct {
+	Panels map[int]TablePanel `json:"panels"`
+	UID    string             `json:"uid"`
+}
+
 func DashboardFromResponse(response *http.Response) (*DashboardResponse, error) {
 	var dashboardResponse DashboardResponse
 	defer response.Body.Close()
