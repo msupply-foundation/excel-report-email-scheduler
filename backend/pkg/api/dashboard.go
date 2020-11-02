@@ -5,6 +5,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/grafana/simple-datasource-backend/pkg/auth"
 )
 
 type DashboardResponse struct {
@@ -122,20 +125,12 @@ type DashboardResponse struct {
 	} `json:"dashboard"`
 }
 
-type TablePanel struct {
-	ID      int             `json:"id"`
-	Title   string          `json:"title"`
-	RawSql  string          `json:"rawSql"`
-	Rows    [][]interface{} `json:"rows"`
-	Columns [][]interface{} `json:"columns"`
-}
-
 type Dashboard struct {
-	Panels map[int]TablePanel `json:"panels"`
-	UID    string             `json:"uid"`
+	Panels []TablePanel `json:"panels"`
+	UID    string       `json:"uid"`
 }
 
-func DashboardFromResponse(response *http.Response) (*DashboardResponse, error) {
+func NewDashboardResponse(response *http.Response) (*DashboardResponse, error) {
 	var dashboardResponse DashboardResponse
 	defer response.Body.Close()
 
@@ -148,6 +143,31 @@ func DashboardFromResponse(response *http.Response) (*DashboardResponse, error) 
 	err = json.Unmarshal(body, &dashboardResponse)
 
 	return &dashboardResponse, err
+}
+
+func NewDashboard(authConfig auth.AuthConfig, uuid string) (*Dashboard, error) {
+	url := "http://" + authConfig.AuthString() + "localhost:3000/api/dashboards/uid/" + uuid
+	response, err := http.Get(url)
+
+	if err != nil {
+		log.DefaultLogger.Error("NewDashboard: HTTP Request", err.Error())
+		return nil, err
+	}
+
+	dashboardResponse, err := NewDashboardResponse(response)
+
+	if err != nil {
+		log.DefaultLogger.Error("NewDashboard: NewDashboardResponse", err.Error())
+		return nil, err
+	}
+
+	var panels []TablePanel
+	for _, panel := range dashboardResponse.Dashboard.Panels {
+		newPanel := NewTablePanel(panel.ID, panel.Title, panel.Targets[0].RawSQL, panel.Datasource)
+		panels = append(panels, *newPanel)
+	}
+
+	return &Dashboard{UID: dashboardResponse.Dashboard.UID, Panels: panels}, nil
 }
 
 func (resp *DashboardResponse) GetRawSQL(panelID int) string {
