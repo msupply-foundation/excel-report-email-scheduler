@@ -38,7 +38,7 @@ export const ReportGroupMemberList: FC<Props> = ({ reportGroup }) => {
 
   const onToggleMember = (user: User) => {
     const { id: userID } = user;
-    const exists = groupMembers?.find((reportMember: ReportGroupMember) => reportMember.reportRecipientID === userID);
+    const exists = groupMembers?.find((reportMember: ReportGroupMember) => reportMember.userID === userID);
 
     if (exists) {
       deleteMembership(exists);
@@ -52,7 +52,7 @@ export const ReportGroupMemberList: FC<Props> = ({ reportGroup }) => {
       {users?.map((user: User) => {
         console.log('groupMembers', groupMembers);
         const { name, e_mail, id } = user;
-        const isChecked = groupMembers?.find((groupMember: ReportGroupMember) => groupMember.reportRecipientID === id);
+        const isChecked = groupMembers?.find((groupMember: ReportGroupMember) => groupMember.userID === id);
         return (
           <li className="card-item-wrapper" style={{ cursor: 'pointer' }}>
             <div className={'card-item'} onClick={() => onToggleMember(user)}>

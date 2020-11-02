@@ -23,7 +23,7 @@ export const EditReportGroupForm: FC<Props> = ({ onUpdate, reportGroup }) => (
       <Input
         onChange={({ currentTarget: { value } }) => onUpdate(ReportGroupKey.NAME, value)}
         name={intl.get('name')}
-        defaultValue={reportGroup.name}
+        defaultValue={reportGroup?.name}
         placeholder={intl.get('name')}
         css=""
       />
@@ -33,7 +33,7 @@ export const EditReportGroupForm: FC<Props> = ({ onUpdate, reportGroup }) => (
       <Input
         onChange={({ currentTarget: { value } }) => onUpdate(ReportGroupKey.DESCRIPTION, value)}
         name={intl.get('description')}
-        defaultValue={reportGroup.description}
+        defaultValue={reportGroup?.description}
         placeholder={intl.get('description')}
         css=""
       />

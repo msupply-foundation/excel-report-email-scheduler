@@ -1,14 +1,14 @@
 import React, { FC, useState, useEffect } from 'react';
 import intl from 'react-intl-universal';
-import { Input, Field, Modal, Button, Select, ConfirmModal } from '@grafana/ui';
+import { Modal, Button, ConfirmModal } from '@grafana/ui';
 
-import { queryCache, useMutation, useQuery } from 'react-query';
+import { queryCache, useMutation } from 'react-query';
 import {
   deleteSchedule,
-  deleteReportContent,
-  createReportContent,
-  getPanels,
-  getReportContent,
+  // deleteReportContent,
+  // createReportContent,
+  // getPanels,
+  // getReportContent,
   updateSchedule,
 } from 'api';
 
@@ -16,7 +16,7 @@ import { css } from 'emotion';
 
 import { PanelList } from './PanelList';
 import { useToggle } from 'hooks';
-import { ReportContent, Schedule } from 'common/types';
+import { Schedule } from 'common/types';
 import { EditScheduleForm } from './Schedules/EditScheduleForm';
 import { ScheduleKey } from 'common/enums';
 
@@ -42,48 +42,50 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
   const [schedule, setReportSchedule] = useState<Schedule>(reportSchedule);
   const [deleteAlertIsOpen, setDeleteAlertIsOpen] = useToggle(false);
 
-  const { data: content } = useQuery<ReportContent[] | null[]>({
-    queryKey: ['reportContent', reportSchedule?.id],
-    queryFn: getReportContent,
-    config: { enabled: !!reportSchedule },
-  });
+  // const { data: content } = useQuery<ReportContent[] | null[]>({
+  //   queryKey: ['reportContent', reportSchedule?.id],
+  //   queryFn: getReportContent,
+  //   config: { enabled: !!reportSchedule },
+  // });
 
-  const { data: panels } = useQuery({
-    queryKey: ['panels'],
-    queryFn: getPanels,
-    config: { enabled: !!reportSchedule },
-  });
+  // const { data: panels } = useQuery({
+  //   queryKey: ['panels'],
+  //   queryFn: getPanels,
+  //   config: { enabled: !!reportSchedule },
+  // });
 
   const [updateReportSchedule] = useMutation(updateSchedule, {
     onSuccess: () => queryCache.refetchQueries(['reportSchedules']),
   });
 
-  const [createContent] = useMutation(createReportContent, {
-    onSuccess: () => queryCache.refetchQueries(['reportContent', reportSchedule?.id]),
-  });
+  // const [createContent] = useMutation(createReportContent, {
+  //   onSuccess: () => queryCache.refetchQueries(['reportContent', reportSchedule?.id]),
+  // });
 
-  const [deleteContent] = useMutation(deleteReportContent, {
-    onSuccess: () => queryCache.refetchQueries(['reportContent', reportSchedule?.id]),
-  });
+  // const [deleteContent] = useMutation(deleteReportContent, {
+  //   onSuccess: () => queryCache.refetchQueries(['reportContent', reportSchedule?.id]),
+  // });
 
   const [deleteReportSchedule] = useMutation(deleteSchedule, {
     onSuccess: () => queryCache.refetchQueries(['reportSchedules']),
   });
 
-  const onTogglePanel = async (panel: any) => {
-    // Exists, need to remove.
-    if (!!content?.[panel?.id]) {
-      await deleteContent(panel);
-    } else {
-      if (content) {
-        await createContent({ scheduleID: schedule?.id, panelID: panel?.id });
-      }
-    }
-  };
+  // const onTogglePanel = async (panel: any) => {
+  //   // Exists, need to remove.
+  //   if (!!content?.[panel?.id]) {
+  //     await deleteContent(panel);
+  //   } else {
+  //     if (content) {
+  //       await createContent({ scheduleID: schedule?.id, panelID: panel?.id });
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
-    if (!schedule) setReportSchedule(reportSchedule);
-  }, [reportSchedule]);
+    if (!schedule) {
+      setReportSchedule(reportSchedule);
+    }
+  }, [schedule, reportSchedule]);
 
   // TODO: Handle error cases
   const onUpdateSchedule = (key: ScheduleKey, newValue: string | number) => {
@@ -99,16 +101,16 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
     onClose();
   };
 
-  const onUpdateReportContent = (key: string, newValue: any) => {
-    if (key === 'storeID') {
-      const csv = newValue
-        .map((store: any) => {
-          return store.id;
-        })
-        .join(', ');
-      console.log(csv);
-    }
-  };
+  // const onUpdateReportContent = (key: string, newValue: any) => {
+  //   if (key === 'storeID') {
+  //     const csv = newValue
+  //       .map((store: any) => {
+  //         return store.id;
+  //       })
+  //       .join(', ');
+  //     console.log(csv);
+  //   }
+  // };
 
   return (
     <Modal

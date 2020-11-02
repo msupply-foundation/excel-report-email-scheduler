@@ -60,7 +60,7 @@ export const PanelList: FC<Props> = ({ schedule }) => {
     if (content) {
       await deleteContent(content);
     } else {
-      await createContent({ scheduleID, panelID: panel?.id });
+      await createContent({ scheduleID, panelID: panel?.id, dashboardID: panel?.dashboardID });
     }
   };
 

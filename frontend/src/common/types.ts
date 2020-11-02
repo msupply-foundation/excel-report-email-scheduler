@@ -12,7 +12,7 @@ export type User = {
 
 export type ReportGroupMember = {
   id: string;
-  reportRecipientID: string;
+  userID: string;
   reportGroupID: string;
 };
 
