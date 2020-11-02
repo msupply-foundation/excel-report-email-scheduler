@@ -45,22 +45,7 @@ func sendEmail() {
 	}
 }
 
-// TODO: Handle cases where an email config doesn't exist or invalid etc.
-// Could send an email to somewhere else, sussol support or something
-// if this is the case?
-func getEmailConfig(sqlite *SQLiteDatasource) EmailConfig {
-	return sqlite.getEmailConfig()
-}
-
-func getSchedulesToReportOn(sqlite *SQLiteDatasource) {
-	// const schedules = sqlite.getSchedules()
-	// const timeNow = Date.now()
-	// const schedulesToReportOn = schedules.filter(schedule => schedule.nextReportTime < timeNow)
-
-	// return schedulesToReportOn
-}
-
-func getUsersToReportTo(sqlite *SQLiteDatasource) {
+func getUsersToReportTo() {
 
 	// const schedules = getSchedulesToReportOn()
 
@@ -78,7 +63,7 @@ func getUsersToReportTo(sqlite *SQLiteDatasource) {
 	// return users
 }
 
-func getPanelsForSchedules(sqlite *SQLiteDatasource) {
+func getPanelsForSchedules() {
 	// Get the schedules
 	// const schedules = getSchedulesToReportOn()
 
@@ -117,7 +102,7 @@ func createReports() {
 		// return nil, err
 	}
 
-	qr, err := api.QueryFromResponse(response)
+	qr, err := api.NewQueryResponse(response)
 
 	// Open the template
 	f, e := excelize.OpenFile("./data/template.xlsx")
@@ -181,33 +166,33 @@ func createReports() {
 	}
 }
 
-func sendEmails(sqlite *SQLiteDatasource) {
-	// const attachments = createReports()
-	// const recipients = getUsersToReportTo()
+// func sendEmails(sqlite *SQLiteDatasource) {
+// const attachments = createReports()
+// const recipients = getUsersToReportTo()
 
-	// We could do some intersection and send a single
-	// email with multiple attachments to some users
-	// or combine the attachments or something like
-	// that.. but seems too hard basket
+// We could do some intersection and send a single
+// email with multiple attachments to some users
+// or combine the attachments or something like
+// that.. but seems too hard basket
 
-	// for each key, value in attachments
-	// user the key to lookup in the recipients
-	// lookup to get the recipient emails.
-	// and call sendEmail(config, recipients, attachment)
-}
+// for each key, value in attachments
+// user the key to lookup in the recipients
+// lookup to get the recipient emails.
+// and call sendEmail(config, recipients, attachment)
+// }
 
-func cleanup() {
-	// Not sure exactly but need to:
-	// 1. Delete all temp attachment files?
-	// 2. Set the new times on all of the schedules
-}
+// func cleanup() {
+// 	// Not sure exactly but need to:
+// 	// 1. Delete all temp attachment files?
+// 	// 2. Set the new times on all of the schedules
+// }
 
-func getScheduler(sqlite *SQLiteDatasource) func() {
-	return func() {
-		log.DefaultLogger.Info("Scheduler!")
-		createReports()
-		sendEmail()
-		log.DefaultLogger.Info("Scheduler2!")
+// func getScheduler(sqlite *SQLiteDatasource) func() {
+// 	return func() {
+// 		log.DefaultLogger.Info("Scheduler!")
+// 		createReports()
+// 		sendEmail()
+// 		log.DefaultLogger.Info("Scheduler2!")
 
-	}
-}
+// 	}
+// }
