@@ -9,26 +9,6 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
 
-type QueryResponse struct {
-	Results struct {
-		A struct {
-			RefID string `json:"refId"`
-			Meta  struct {
-				ExecutedQueryString string `json:"executedQueryString"`
-				RowCount            int    `json:"rowCount"`
-			} `json:"meta"`
-			Series interface{} `json:"series"`
-			Tables []struct {
-				Columns []struct {
-					Text string `json:"text"`
-				} `json:"columns"`
-				Rows [][]interface{} `json:"rows"`
-			} `json:"tables"`
-			Dataframes interface{} `json:"dataframes"`
-		} `json:"A"`
-	} `json:"results"`
-}
-
 type Query struct {
 	RefID         string `json:"refId"`
 	IntervalMs    int    `json:"intervalMs"`
@@ -44,12 +24,16 @@ type QueryRequest struct {
 	Queries []Query `json:"queries"`
 }
 
+func NewQuery(rawSql string, datasource int) *Query {
+	return &Query{RawSQL: rawSql, DatasourceID: datasource, Format: "table", RefID: "A"}
+}
+
 // TODO: Need to get datasourceID from somewhere
 func NewQueryRequest(rawSql string) *QueryRequest {
-	query := Query{RawSQL: rawSql, DatasourceID: 1, Format: "table", RefID: "A"}
-	queryRequest := QueryRequest{From: "0", To: "0", Queries: []Query{query}}
+	query := NewQuery(rawSql, 1)
+	queryRequest := &QueryRequest{From: "0", To: "0", Queries: []Query{*query}}
 
-	return &queryRequest
+	return queryRequest
 }
 
 func (qr *QueryRequest) ToRequestBody() (*strings.Reader, error) {
@@ -65,7 +49,25 @@ func (qr *QueryRequest) ToRequestBody() (*strings.Reader, error) {
 	return body, nil
 }
 
-func QueryFromResponse(response *http.Response) (*QueryResponse, error) {
+type QueryResponse struct {
+	Results struct {
+		A struct {
+			RefID string `json:"refId"`
+			Meta  struct {
+				ExecutedQueryString string `json:"executedQueryString"`
+				RowCount            int    `json:"rowCount"`
+			} `json:"meta"`
+			Series interface{} `json:"series"`
+			Tables []struct {
+				Columns []Column        `json:"columns"`
+				Rows    [][]interface{} `json:"rows"`
+			} `json:"tables"`
+			Dataframes interface{} `json:"dataframes"`
+		} `json:"A"`
+	} `json:"results"`
+}
+
+func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
@@ -83,4 +85,12 @@ func QueryFromResponse(response *http.Response) (*QueryResponse, error) {
 	}
 
 	return &qr, nil
+}
+
+func (qr *QueryResponse) Rows() [][]interface{} {
+	return qr.Results.A.Tables[0].Rows
+}
+
+func (qr *QueryResponse) Columns() []Column {
+	return qr.Results.A.Tables[0].Columns
 }
