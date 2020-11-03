@@ -31,4 +31,5 @@ export type ReportContent = {
   panelID: number;
   storeID: string;
   lookback: number;
+  dashboardID: string;
 };
