@@ -13,15 +13,6 @@ type EmailConfig struct {
 	password string
 }
 
-type SmtpServer struct {
-	host string
-	port string
-}
-
-func (smtpServer *SmtpServer) Address() string {
-	return smtpServer.host + ":" + smtpServer.port
-}
-
 // Possibly take the email config, an attachment and some array of recipients?
 func sendEmail() {
 
@@ -33,7 +24,7 @@ func sendEmail() {
 	// // TODO: Subject, message to be added to datasource config? Or schedule config?
 	m.SetHeader("Subject", "Hello!")
 	m.SetBody("text/html", "Hello")
-	// m.Attach("lolcat.jpg")
+	m.Attach("./data/Book1.xlsx")
 
 	// // I don't really know what I'm doing with this auth.
 	// // PlainAuth works and reading the docs it seems to fail
@@ -102,7 +93,7 @@ func createReports() {
 	// { {scheduleID}: excelFilePath }
 
 	// f := excelize.NewFile()
-	f, e := excelize.OpenFile("test.xlsx")
+	f, e := excelize.OpenFile("./data/test.xlsx")
 
 	if e != nil {
 		log.DefaultLogger.Error("erorr opening", e.Error())
@@ -149,6 +140,7 @@ func cleanup() {
 func getScheduler(sqlite *SQLiteDatasource) func() {
 	return func() {
 		log.DefaultLogger.Info("Scheduler!")
+		createReports()
 		sendEmail()
 		log.DefaultLogger.Info("Scheduler2!")
 
