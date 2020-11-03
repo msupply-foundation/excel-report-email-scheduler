@@ -141,9 +141,13 @@ export const getPanels = async () => {
     )
   )
     .map((det: any) => det.dashboard)
-    .map((dashboard: any) => dashboard?.panels?.filter((panel: any) => panel?.targets?.[0].format === 'table') ?? [])
-    .flat()
-    .map(panel => ({ ...panel, dashboardID: '1' }));
+    .map(
+      (dashboard: any) =>
+        dashboard?.panels
+          ?.filter((panel: any) => panel?.targets?.[0].format === 'table')
+          .map((panel: any) => ({ ...panel, dashboardID: dashboard.uid })) ?? []
+    )
+    .flat();
 };
 
 export const updateSchedule = async (schedule: Schedule) => {
