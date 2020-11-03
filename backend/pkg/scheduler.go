@@ -1,6 +1,12 @@
 package main
 
-import "github.com/grafana/grafana-plugin-sdk-go/backend/log"
+import (
+	"fmt"
+
+	"github.com/360EntSecGroup-Skylar/excelize"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"gopkg.in/gomail.v2"
+)
 
 type EmailConfig struct {
 	email    string
@@ -8,7 +14,32 @@ type EmailConfig struct {
 }
 
 // Possibly take the email config, an attachment and some array of recipients?
-func sendEmail() {}
+func sendEmail() {
+
+	// // TODO: Password and email from params. Leave hard coded for now
+	m := gomail.NewMessage()
+	m.SetHeader("From", "testemailsussol@gmail.com")
+	m.SetHeader("To", "griffinjoshua5@gmail.com")
+
+	// // TODO: Subject, message to be added to datasource config? Or schedule config?
+	m.SetHeader("Subject", "Hello!")
+	m.SetBody("text/html", "Hello")
+	m.Attach("./data/Book1.xlsx")
+
+	// // I don't really know what I'm doing with this auth.
+	// // PlainAuth works and reading the docs it seems to fail
+	// // if not using TLS. So I guess it's probably OK.
+	// // TODO: Host and port need to be added to datasource config?
+	// // This password is an app-specific password. The real password
+	// // to the account is kathmandu312. Seems to require me to generate
+	// // and use an app-specific password. :shrug:
+	d := gomail.NewDialer("smtp.gmail.com", 587, "testemailsussol@gmail.com", "ybtkmpesjptowmru")
+
+	// Send the email to Bob, Cora and Dan.
+	if err := d.DialAndSend(m); err != nil {
+		// log.DefaultLogger.Error(err.Error())
+	}
+}
 
 // TODO: Handle cases where an email config doesn't exist or invalid etc.
 // Could send an email to somewhere else, sussol support or something
@@ -52,15 +83,37 @@ func getPanelsForSchedules(sqlite *SQLiteDatasource) {
 	// const lookup = schedules.reduce((acc, value) => ({...acc, [value.id]: sqlite.getPanels(scheduleID)}) , {})
 }
 
-func createReports(sqlite *SQLiteDatasource) {
-
+func createReports() {
 	// Get the panels for each schedule
 	// const panelLookup = getPanelsForSchedules()
 
-	// for each schedule, for each panel, query for the panel data
+	// For each schedule, for each panel, query for the panel data
 	// and create an excel file where each tab is a panel table.
 	// save in a new lookup the shape:
 	// { {scheduleID}: excelFilePath }
+
+	// f := excelize.NewFile()
+	f, e := excelize.OpenFile("./data/test.xlsx")
+
+	if e != nil {
+		log.DefaultLogger.Error("erorr opening", e.Error())
+
+	}
+
+	// Create a new sheet.
+	index := f.NewSheet("Sheet2")
+	// Set value of a cell.
+	f.SetCellValue("Sheet1", "B2", 100)
+	f.SetCellValue("Sheet2", "A2", "Hello Tony.")
+
+	// Set active sheet of the workbook.
+	f.SetActiveSheet(index)
+
+	// Save xlsx file by the given path. Should use something like
+	// the schedule ID.
+	if err := f.SaveAs("./data/Book1.xlsx"); err != nil {
+		fmt.Println(err)
+	}
 }
 
 func sendEmails(sqlite *SQLiteDatasource) {
@@ -87,5 +140,9 @@ func cleanup() {
 func getScheduler(sqlite *SQLiteDatasource) func() {
 	return func() {
 		log.DefaultLogger.Info("Scheduler!")
+		createReports()
+		sendEmail()
+		log.DefaultLogger.Info("Scheduler2!")
+
 	}
 }
