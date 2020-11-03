@@ -19,11 +19,14 @@ import (
 // }
 func main() {
 
-	serveOptions, _ := getServeOptions()
+	serveOptions, sql := getServeOptions()
 
 	// c := cron.New()
 	// c.AddFunc("@every 30s", getScheduler(sqliteDatasource))
 	// c.Start()
+
+	re := NewReportEmailer(sql)
+	re.createReports()
 
 	// Start listening to requests sent from Grafana. This call is blocking and
 	// and waits until Grafana shutsdown or the plugin exits.
