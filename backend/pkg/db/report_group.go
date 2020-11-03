@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
 
 type ReportGroup struct {
@@ -20,7 +21,7 @@ func (datasource *SQLiteDatasource) ReportGroupFromSchedule(schedule Schedule) *
 	db, _ := sql.Open("sqlite3", datasource.Path)
 	defer db.Close()
 
-	row := db.QueryRow("SELECT * FROM ReportGroup WHERE scheduleID = ?", schedule.ID)
+	row := db.QueryRow("SELECT * FROM ReportGroup WHERE ID = ?", schedule.ReportGroupID)
 
 	var ID, name, description string
 	row.Scan(&ID, &name, &description)
@@ -49,10 +50,16 @@ func (datasource *SQLiteDatasource) GetReportGroups() []ReportGroup {
 func (datasource *SQLiteDatasource) CreateReportGroup() (ReportGroup, error) {
 	db, _ := sql.Open("sqlite3", datasource.Path)
 	defer db.Close()
-
+	log.DefaultLogger.Info("Report group db")
 	reportGroup := ReportGroup{ID: uuid.New().String(), Name: "New report group", Description: ""}
-	stmt, _ := db.Prepare("INSERT INTO ReportGroup (id, name, description) VALUES (?,?,?)")
-	stmt.Exec(reportGroup.ID, reportGroup.Name, reportGroup.Description)
+	stmt, e := db.Prepare("INSERT INTO ReportGroup (id, name, description) VALUES (?,?,?)")
+	if e != nil {
+		log.DefaultLogger.Error(e.Error())
+	}
+	_, e = stmt.Exec(reportGroup.ID, reportGroup.Name, reportGroup.Description)
+	if e != nil {
+		log.DefaultLogger.Error(e.Error())
+	}
 	defer stmt.Close()
 
 	return reportGroup, nil

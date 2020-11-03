@@ -7,8 +7,8 @@ import (
 )
 
 type EmailConfig struct {
-	email    string
-	password string
+	Email    string
+	Password string
 }
 
 // TODO: Handle error cases and also might need to add additional
@@ -22,5 +22,5 @@ func NewEmailConfig(datasource *dbstore.SQLiteDatasource) EmailConfig {
 	row := db.QueryRow("SELECT email, emailPassword as password FROM Config")
 	row.Scan(&email, &password)
 
-	return EmailConfig{email: email, password: password}
+	return EmailConfig{Email: email, Password: password}
 }
