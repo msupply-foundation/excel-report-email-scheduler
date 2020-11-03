@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	dbstore "github.com/grafana/simple-datasource-backend/pkg/db"
+	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
 )
 
 func (server *HttpServer) updateSettings(rw http.ResponseWriter, request *http.Request) {

@@ -7,8 +7,8 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/api"
 	"github.com/grafana/simple-datasource-backend/pkg/auth"
-	dbstore "github.com/grafana/simple-datasource-backend/pkg/db"
-	emailer "github.com/grafana/simple-datasource-backend/pkg/email"
+	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
+	"github.com/grafana/simple-datasource-backend/pkg/emailer"
 	"github.com/grafana/simple-datasource-backend/pkg/reporter"
 )
 

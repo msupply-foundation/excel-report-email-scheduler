@@ -5,7 +5,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 
-	dbstore "github.com/grafana/simple-datasource-backend/pkg/db"
+	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
 )
 
 type HttpServer struct {

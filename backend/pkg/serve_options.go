@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
-	dbstore "github.com/grafana/simple-datasource-backend/pkg/db"
+	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
 	"github.com/grafana/simple-datasource-backend/pkg/server"
 )
 

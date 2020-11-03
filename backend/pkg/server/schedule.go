@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	dbstore "github.com/grafana/simple-datasource-backend/pkg/db"
+	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
 )
 
 func (server *HttpServer) createSchedule(rw http.ResponseWriter, request *http.Request) {
