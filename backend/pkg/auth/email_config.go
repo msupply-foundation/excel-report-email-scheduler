@@ -13,7 +13,7 @@ type EmailConfig struct {
 
 // TODO: Handle error cases and also might need to add additional
 // fields i.e. SMTP etc
-func NewEmailConfig(datasource *dbstore.SQLiteDatasource) EmailConfig {
+func NewEmailConfig(datasource *dbstore.SQLiteDatasource) *EmailConfig {
 	db, _ := sql.Open("sqlite3", datasource.Path)
 	defer db.Close()
 
@@ -22,5 +22,5 @@ func NewEmailConfig(datasource *dbstore.SQLiteDatasource) EmailConfig {
 	row := db.QueryRow("SELECT email, emailPassword as password FROM Config")
 	row.Scan(&email, &password)
 
-	return EmailConfig{Email: email, Password: password}
+	return &EmailConfig{Email: email, Password: password}
 }
