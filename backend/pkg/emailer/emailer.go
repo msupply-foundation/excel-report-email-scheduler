@@ -1,6 +1,7 @@
 package emailer
 
 import (
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/auth"
 	"gopkg.in/gomail.v2"
 )
@@ -33,9 +34,9 @@ func (e *Emailer) CreateAndSend(attachmentPath string, email string) {
 	// // and use an app-specific password. :shrug: // "ybtkmpesjptowmru"
 	// d := gomail.NewDialer("smtp.gmail.com", 587, e.email, "ybtkmpesjptowmru")
 
-	// if err := d.DialAndSend(m); err != nil {
-	// 	log.DefaultLogger.Error(err.Error())
-	// }
+	if err := d.DialAndSend(m); err != nil {
+		log.DefaultLogger.Error(err.Error())
+	}
 }
 
 func (e *Emailer) BulkCreateAndSend(attachmentPath string, emails []string) {
