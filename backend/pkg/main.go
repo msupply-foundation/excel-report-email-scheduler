@@ -5,6 +5,7 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/robfig/cron"
 )
 
 // Main entry point of the backend plugin.
@@ -19,9 +20,14 @@ import (
 // }
 func main() {
 
+	serveOptions, sqliteDatasource := getServeOptions()
+
+	c := cron.New()
+	c.AddFunc("@every 30s", getScheduler(sqliteDatasource))
+	c.Start()
+
 	// Start listening to requests sent from Grafana. This call is blocking and
 	// and waits until Grafana shutsdown or the plugin exits.
-	serveOptions := getServeOptions()
 	err := datasource.Serve(serveOptions)
 
 	// TODO: Defer a Close() ?
