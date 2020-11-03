@@ -32,7 +32,7 @@ func (e *Emailer) CreateAndSend(attachmentPath string, email string) {
 	// // This password is an app-specific password. The real password
 	// // to the account is kathmandu312. Seems to require me to generate
 	// // and use an app-specific password. :shrug: // "ybtkmpesjptowmru"
-	// d := gomail.NewDialer("smtp.gmail.com", 587, e.email, "ybtkmpesjptowmru")
+	d := gomail.NewDialer("smtp.gmail.com", 587, e.email, e.password)
 
 	if err := d.DialAndSend(m); err != nil {
 		log.DefaultLogger.Error(err.Error())
