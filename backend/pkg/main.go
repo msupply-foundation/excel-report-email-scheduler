@@ -23,7 +23,7 @@ func main() {
 	serveOptions, sqliteDatasource := getServeOptions()
 
 	c := cron.New()
-	c.AddFunc("@every 1m", getScheduler(sqliteDatasource))
+	c.AddFunc("@every 30s", getScheduler(sqliteDatasource))
 	c.Start()
 
 	// Start listening to requests sent from Grafana. This call is blocking and

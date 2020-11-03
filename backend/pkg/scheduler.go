@@ -13,15 +13,6 @@ type EmailConfig struct {
 	password string
 }
 
-type SmtpServer struct {
-	host string
-	port string
-}
-
-func (smtpServer *SmtpServer) Address() string {
-	return smtpServer.host + ":" + smtpServer.port
-}
-
 // Possibly take the email config, an attachment and some array of recipients?
 func sendEmail() {
 
@@ -33,7 +24,7 @@ func sendEmail() {
 	// // TODO: Subject, message to be added to datasource config? Or schedule config?
 	m.SetHeader("Subject", "Hello!")
 	m.SetBody("text/html", "Hello")
-	// m.Attach("lolcat.jpg")
+	m.Attach("./data/Book1.xlsx")
 
 	// // I don't really know what I'm doing with this auth.
 	// // PlainAuth works and reading the docs it seems to fail
@@ -46,7 +37,7 @@ func sendEmail() {
 
 	// Send the email to Bob, Cora and Dan.
 	if err := d.DialAndSend(m); err != nil {
-		log.DefaultLogger.Error(err.Error())
+		// log.DefaultLogger.Error(err.Error())
 	}
 }
 
@@ -92,15 +83,37 @@ func getPanelsForSchedules(sqlite *SQLiteDatasource) {
 	// const lookup = schedules.reduce((acc, value) => ({...acc, [value.id]: sqlite.getPanels(scheduleID)}) , {})
 }
 
-func createReports(sqlite *SQLiteDatasource) {
-
+func createReports() {
 	// Get the panels for each schedule
 	// const panelLookup = getPanelsForSchedules()
 
-	// for each schedule, for each panel, query for the panel data
+	// For each schedule, for each panel, query for the panel data
 	// and create an excel file where each tab is a panel table.
 	// save in a new lookup the shape:
 	// { {scheduleID}: excelFilePath }
+
+	// f := excelize.NewFile()
+	f, e := excelize.OpenFile("./data/test.xlsx")
+
+	if e != nil {
+		log.DefaultLogger.Error("erorr opening", e.Error())
+
+	}
+
+	// Create a new sheet.
+	index := f.NewSheet("Sheet2")
+	// Set value of a cell.
+	f.SetCellValue("Sheet1", "B2", 100)
+	f.SetCellValue("Sheet2", "A2", "Hello Tony.")
+
+	// Set active sheet of the workbook.
+	f.SetActiveSheet(index)
+
+	// Save xlsx file by the given path. Should use something like
+	// the schedule ID.
+	if err := f.SaveAs("./data/Book1.xlsx"); err != nil {
+		fmt.Println(err)
+	}
 }
 
 func sendEmails(sqlite *SQLiteDatasource) {
@@ -127,6 +140,7 @@ func cleanup() {
 func getScheduler(sqlite *SQLiteDatasource) func() {
 	return func() {
 		log.DefaultLogger.Info("Scheduler!")
+		createReports()
 		sendEmail()
 		log.DefaultLogger.Info("Scheduler2!")
 
