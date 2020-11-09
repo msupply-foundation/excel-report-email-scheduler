@@ -24,7 +24,7 @@ func GetEmails(authConfig auth.AuthConfig, userIDs []string) []string {
 	}
 	queryString += "'" + userIDs[i] + "')"
 
-	body, e := NewQueryRequest("SELECT * FROM \"user\" WHERE id IN " + queryString).ToRequestBody()
+	body, e := NewQueryRequest("SELECT * FROM \"user\" WHERE id IN "+queryString, "0", "0").ToRequestBody()
 
 	if e != nil {
 		log.DefaultLogger.Error(e.Error())

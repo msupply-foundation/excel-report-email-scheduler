@@ -10,6 +10,15 @@ import (
 	"github.com/grafana/simple-datasource-backend/pkg/auth"
 )
 
+type TemplateVariable struct {
+	Definition string `json:"definition"`
+	Name       string `json:"name"`
+}
+
+type TemplateList struct {
+	List []TemplateVariable `json:"list"`
+}
+
 type DashboardResponse struct {
 	Meta struct {
 		Type                  string    `json:"type"`
@@ -109,10 +118,8 @@ type DashboardResponse struct {
 		SchemaVersion int           `json:"schemaVersion"`
 		Style         string        `json:"style"`
 		Tags          []interface{} `json:"tags"`
-		Templating    struct {
-			List []interface{} `json:"list"`
-		} `json:"templating"`
-		Time struct {
+		Templating    TemplateList  `json:"templating"`
+		Time          struct {
 			From string `json:"from"`
 			To   string `json:"to"`
 		} `json:"time"`
@@ -126,8 +133,9 @@ type DashboardResponse struct {
 }
 
 type Dashboard struct {
-	Panels []TablePanel `json:"panels"`
-	UID    string       `json:"uid"`
+	Panels    []TablePanel `json:"panels"`
+	UID       string       `json:"uid"`
+	Variables TemplateList `json:"templating"`
 }
 
 func NewDashboardResponse(response *http.Response) (*DashboardResponse, error) {
@@ -145,7 +153,7 @@ func NewDashboardResponse(response *http.Response) (*DashboardResponse, error) {
 	return &dashboardResponse, err
 }
 
-func NewDashboard(authConfig *auth.AuthConfig, uuid string) (*Dashboard, error) {
+func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to string) (*Dashboard, error) {
 	url := "http://" + authConfig.AuthString() + "localhost:3000/api/dashboards/uid/" + uuid
 	response, err := http.Get(url)
 
@@ -163,11 +171,11 @@ func NewDashboard(authConfig *auth.AuthConfig, uuid string) (*Dashboard, error) 
 
 	var panels []TablePanel
 	for _, panel := range dashboardResponse.Dashboard.Panels {
-		newPanel := NewTablePanel(panel.ID, panel.Title, panel.Targets[0].RawSQL, panel.Datasource)
+		newPanel := NewTablePanel(panel.ID, panel.Title, panel.Targets[0].RawSQL, panel.Datasource, from, to)
 		panels = append(panels, *newPanel)
 	}
 
-	return &Dashboard{UID: dashboardResponse.Dashboard.UID, Panels: panels}, nil
+	return &Dashboard{UID: dashboardResponse.Dashboard.UID, Panels: panels, Variables: dashboardResponse.Dashboard.Templating}, nil
 }
 
 func (dashboard *Dashboard) Panel(panelID int) (*TablePanel, error) {

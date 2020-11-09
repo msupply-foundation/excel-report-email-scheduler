@@ -132,24 +132,39 @@ func (datasource *SQLiteDatasource) Init() {
 	defer stmt.Close()
 
 	if err != nil {
-		log.DefaultLogger.Warn("Could not create table!")
-		log.DefaultLogger.Warn(err.Error())
+		log.DefaultLogger.Error("Could not create Schedule:", err.Error())
+		panic(err)
 	}
+
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS Config (id TEXT PRIMARY KEY, grafanaUsername TEXT, grafanaPassword TEXT, emailPassword TEXT, email TEXT)")
 	stmt.Exec()
 
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportRecipient (id TEXT PRIMARY KEY, userID TEXT)")
-	stmt.Exec()
+	if err != nil {
+		log.DefaultLogger.Error("Could not create Config:", err.Error())
+		panic(err)
+	}
 
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroup (id TEXT PRIMARY KEY, name TEXT, description TEXT)")
 	stmt.Exec()
 
+	if err != nil {
+		log.DefaultLogger.Error("Could not create ReportGroup:", err.Error())
+		panic(err)
+	}
+
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroupMembership (id TEXT PRIMARY KEY, userID TEXT, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
 	stmt.Exec()
 
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS GroupSchedule (id TEXT PRIMARY KEY, scheduleID TEXT, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id), FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
-	stmt.Exec()
+	if err != nil {
+		log.DefaultLogger.Error("Could not create ReportGroupMembership:", err.Error())
+		panic(err)
+	}
 
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, storeID TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
+
+	if err != nil {
+		log.DefaultLogger.Error("Could not create ReportContent:", err.Error())
+		panic(err)
+	}
 }

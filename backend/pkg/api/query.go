@@ -29,9 +29,9 @@ func NewQuery(rawSql string, datasource int) *Query {
 }
 
 // TODO: Need to get datasourceID from somewhere
-func NewQueryRequest(rawSql string) *QueryRequest {
+func NewQueryRequest(rawSql string, from string, to string) *QueryRequest {
 	query := NewQuery(rawSql, 1)
-	queryRequest := &QueryRequest{From: "0", To: "0", Queries: []Query{*query}}
+	queryRequest := &QueryRequest{From: from, To: to, Queries: []Query{*query}}
 
 	return queryRequest
 }

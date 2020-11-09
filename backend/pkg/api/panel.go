@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/grafana/simple-datasource-backend/pkg/auth"
 )
@@ -12,19 +13,55 @@ type Column struct {
 
 type TablePanel struct {
 	ID         int             `json:"id"`
+	From       string          `json:"from"`
+	To         string          `json:"to"`
 	Title      string          `json:"title"`
 	RawSql     string          `json:"rawSql"`
 	Datasource string          `json:"datasource"`
 	Rows       [][]interface{} `json:"rows"`
 	Columns    []Column        `json:"columns"`
+	Variables  TemplateList    `json:"variables"`
 }
 
-func NewTablePanel(id int, title string, rawSql string, datasource string) *TablePanel {
-	return &TablePanel{ID: id, Title: title, RawSql: rawSql, Datasource: datasource}
+func NewTablePanel(id int, title string, rawSql string, datasource string, from string, to string) *TablePanel {
+	return &TablePanel{ID: id, Title: title, RawSql: rawSql, Datasource: datasource, From: from, To: to}
+}
+
+func (panel *TablePanel) usesVariable(variable TemplateVariable) bool {
+	return strings.Contains(panel.RawSql, "${"+variable.Name)
+}
+
+func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs string) {
+
+	if (variable.Name) == "store" {
+		csv := ""
+		split := strings.Split(storeIDs, ",")
+		for i, substr := range split {
+
+			if i == len(split)-1 {
+				csv = csv + "'" + substr + "'"
+			} else {
+				csv = csv + "'" + substr + "'" + ", "
+			}
+		}
+
+		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", csv, -1)
+
+	} else {
+		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", variable.Definition, -1)
+	}
+}
+
+func (panel *TablePanel) PrepSql(variables TemplateList, storeIDs string) {
+	for _, variable := range variables.List {
+		if panel.usesVariable(variable) {
+			panel.injectVariable(variable, storeIDs)
+		}
+	}
 }
 
 func (panel *TablePanel) GetData(authConfig auth.AuthConfig) {
-	body, _ := NewQueryRequest(panel.RawSql).ToRequestBody()
+	body, _ := NewQueryRequest(panel.RawSql, panel.From, panel.To).ToRequestBody()
 
 	url := "http://" + authConfig.AuthString() + "localhost:3000/api/tsdb/query"
 	response, _ := http.Post(url, "application/json", body)

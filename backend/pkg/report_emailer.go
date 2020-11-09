@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
@@ -32,8 +33,7 @@ func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
 	for _, schedule := range schedules {
 		os.Remove("./data/" + schedule.ID + ".xlsx")
 
-		// Unix is in seconds. Story in Milliseconds
-		schedule.NextReportTime = int(time.Now().Unix()*1000) + schedule.Interval
+		schedule.NextReportTime = int(time.Now().Unix()) + schedule.Interval
 		re.sql.UpdateSchedule(schedule.ID, schedule)
 	}
 
@@ -61,8 +61,13 @@ func (re *ReportEmailer) createReports() {
 		panels[schedule.ID] = []api.TablePanel{}
 
 		for _, content := range reportContent {
-			dashboard, _ := api.NewDashboard(authConfig, content.DashboardID)
+			interval := int64(schedule.Interval)
+			to := strconv.FormatInt(time.Now().Unix(), 10)
+			from := strconv.FormatInt(time.Now().Unix()-interval, 10)
+
+			dashboard, _ := api.NewDashboard(authConfig, content.DashboardID, from, to)
 			panel, _ := dashboard.Panel(content.PanelID)
+			panel.PrepSql(dashboard.Variables, content.StoreID)
 			panels[schedule.ID] = append(panels[schedule.ID], *panel)
 		}
 	}

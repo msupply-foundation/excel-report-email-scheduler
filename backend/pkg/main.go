@@ -21,12 +21,11 @@ func main() {
 
 	serveOptions, sql := getServeOptions()
 
-	// c := cron.New()
-	// c.AddFunc("@every 30s", getScheduler(sqliteDatasource))
-	// c.Start()
-
 	re := NewReportEmailer(sql)
 	re.createReports()
+	// c := cron.New()
+	// c.AddFunc("@every 10m", re.createReports)
+	// c.Start()
 
 	// Start listening to requests sent from Grafana. This call is blocking and
 	// and waits until Grafana shutsdown or the plugin exits.
