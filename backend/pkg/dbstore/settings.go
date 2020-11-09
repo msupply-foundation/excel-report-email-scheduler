@@ -12,6 +12,7 @@ type Settings struct {
 	GrafanaPassword string `json:"grafanaPassword"`
 	Email           string `json:"email"`
 	EmailPassword   string `json:"emailPassword"`
+	DatasourceID    int    `json:"datasourceID"`
 }
 
 func (datasource *SQLiteDatasource) settingsExists() bool {
@@ -34,12 +35,12 @@ func (datasource *SQLiteDatasource) CreateOrUpdateSettings(settings Settings) (b
 	defer db.Close()
 
 	if datasource.settingsExists() {
-		stmt, _ := db.Prepare("UPDATE Config set id = ?, grafanaUsername = ?, grafanaPassword = ?, email = ?, emailPassword = ?")
-		stmt.Exec("ID", settings.GrafanaUsername, settings.GrafanaPassword, settings.Email, settings.EmailPassword)
+		stmt, _ := db.Prepare("UPDATE Config set id = ?, grafanaUsername = ?, grafanaPassword = ?, email = ?, emailPassword = ?, datasourceID = ?")
+		stmt.Exec("ID", settings.GrafanaUsername, settings.GrafanaPassword, settings.Email, settings.EmailPassword, settings.DatasourceID)
 		stmt.Close()
 	} else {
-		stmt, _ := db.Prepare("INSERT INTO Config (id, grafanaUsername, grafanaPassword, email, emailPassword) VALUES (?,?,?,?,?)")
-		stmt.Exec("ID", settings.GrafanaUsername, settings.GrafanaPassword, settings.Email, settings.EmailPassword)
+		stmt, _ := db.Prepare("INSERT INTO Config (id, grafanaUsername, grafanaPassword, email, emailPassword, datasourceID) VALUES (?,?,?,?,?,?)")
+		stmt.Exec("ID", settings.GrafanaUsername, settings.GrafanaPassword, settings.Email, settings.EmailPassword, settings.DatasourceID)
 		stmt.Close()
 	}
 	return true, nil

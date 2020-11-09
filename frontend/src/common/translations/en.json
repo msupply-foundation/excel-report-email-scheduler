@@ -49,5 +49,7 @@
   "4weeks": "4 Weeks",
   "3months": "3 Months",
   "6months": "6 Months",
-  "1year": "1 Year"
+  "1year": "1 Year",
+  "datasource": "Datasource",
+  "datasource_details": "Select the datasource where your mSupply data is held."
 }

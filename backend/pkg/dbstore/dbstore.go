@@ -136,7 +136,7 @@ func (datasource *SQLiteDatasource) Init() {
 		panic(err)
 	}
 
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS Config (id TEXT PRIMARY KEY, grafanaUsername TEXT, grafanaPassword TEXT, emailPassword TEXT, email TEXT)")
+	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS Config (id TEXT PRIMARY KEY, grafanaUsername TEXT, grafanaPassword TEXT, emailPassword TEXT, email TEXT, datasourceID INTEGER)")
 	stmt.Exec()
 
 	if err != nil {

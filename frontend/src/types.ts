@@ -3,4 +3,5 @@ export type FormValues = {
   grafanaPassword: string;
   email: string;
   emailPassword: string;
+  datasourceID: number;
 };

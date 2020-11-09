@@ -37,6 +37,7 @@ export const AppConfiguration: FC<Props> = (props: Props) => {
     grafanaUsername: props.plugin.meta.jsonData?.grafanaUsername ?? '',
     email: props.plugin.meta.jsonData?.email ?? '',
     emailPassword: props.plugin.meta.jsonData?.emailPassword ?? '',
+    datasourceID: props.plugin.meta.jsonData?.datasourceID ?? 1,
   };
 
   const isEnabled = props.plugin.meta.enabled;

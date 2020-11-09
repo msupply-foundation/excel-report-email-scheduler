@@ -168,3 +168,7 @@ export const updateReportContent = async (reportContent: any) => {
     reportContent
   );
 };
+
+export const getDatasources = async () => {
+  return getBackendSrv().get(`./api/datasources`);
+};
