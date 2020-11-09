@@ -2,6 +2,7 @@ package reporter
 
 import (
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"time"
@@ -142,7 +143,8 @@ func (r *Report) Write(auth auth.AuthConfig) {
 
 	r.file.DeleteSheet("Sheet1")
 
-	if err := r.file.SaveAs("./data/" + r.id + ".xlsx"); err != nil {
+	savePath := filepath.Join("data", r.id+".xlsx")
+	if err := r.file.SaveAs(savePath); err != nil {
 		fmt.Println(err)
 	}
 }

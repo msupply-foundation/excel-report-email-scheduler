@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
@@ -44,7 +45,7 @@ func GetDataSource() (*SQLiteDatasource, error) {
 
 	sqlDatasource := &SQLiteDatasource{
 		instanceManager: instanceManager,
-		Path:            "./data/msupply.db",
+		Path:            filepath.Join("data", "msupply.db"),
 	}
 
 	sqlDatasource.Init()

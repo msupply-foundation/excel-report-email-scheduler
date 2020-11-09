@@ -153,7 +153,7 @@ func NewDashboardResponse(response *http.Response) (*DashboardResponse, error) {
 	return &dashboardResponse, err
 }
 
-func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to string) (*Dashboard, error) {
+func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to string, datasourceID int) (*Dashboard, error) {
 	url := "http://" + authConfig.AuthString() + "localhost:3000/api/dashboards/uid/" + uuid
 	response, err := http.Get(url)
 
@@ -171,7 +171,7 @@ func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to stri
 
 	var panels []TablePanel
 	for _, panel := range dashboardResponse.Dashboard.Panels {
-		newPanel := NewTablePanel(panel.ID, panel.Title, panel.Targets[0].RawSQL, panel.Datasource, from, to)
+		newPanel := NewTablePanel(panel.ID, panel.Title, panel.Targets[0].RawSQL, from, to, datasourceID)
 		panels = append(panels, *newPanel)
 	}
 

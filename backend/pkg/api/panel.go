@@ -12,19 +12,19 @@ type Column struct {
 }
 
 type TablePanel struct {
-	ID         int             `json:"id"`
-	From       string          `json:"from"`
-	To         string          `json:"to"`
-	Title      string          `json:"title"`
-	RawSql     string          `json:"rawSql"`
-	Datasource string          `json:"datasource"`
-	Rows       [][]interface{} `json:"rows"`
-	Columns    []Column        `json:"columns"`
-	Variables  TemplateList    `json:"variables"`
+	ID           int             `json:"id"`
+	From         string          `json:"from"`
+	To           string          `json:"to"`
+	Title        string          `json:"title"`
+	RawSql       string          `json:"rawSql"`
+	Rows         [][]interface{} `json:"rows"`
+	Columns      []Column        `json:"columns"`
+	Variables    TemplateList    `json:"variables"`
+	DatasourceID int             `json:"DatasourceID"`
 }
 
-func NewTablePanel(id int, title string, rawSql string, datasource string, from string, to string) *TablePanel {
-	return &TablePanel{ID: id, Title: title, RawSql: rawSql, Datasource: datasource, From: from, To: to}
+func NewTablePanel(id int, title string, rawSql string, from string, to string, datasourceID int) *TablePanel {
+	return &TablePanel{ID: id, Title: title, RawSql: rawSql, From: from, To: to, DatasourceID: datasourceID}
 }
 
 func (panel *TablePanel) usesVariable(variable TemplateVariable) bool {

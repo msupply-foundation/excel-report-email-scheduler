@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -22,16 +23,18 @@ func NewReportEmailer(sql *dbstore.SQLiteDatasource) *ReportEmailer {
 	return &ReportEmailer{sql: sql, inProgress: false}
 }
 
-func (re *ReportEmailer) configs() (*auth.AuthConfig, *auth.EmailConfig) {
+func (re *ReportEmailer) configs() (*auth.AuthConfig, *auth.EmailConfig, int) {
 	authConfig := auth.NewAuthConfig(re.sql)
 	emailConfig := auth.NewEmailConfig(re.sql)
+	settings := re.sql.GetSettings()
 
-	return authConfig, emailConfig
+	return authConfig, emailConfig, settings.DatasourceID
 }
 
 func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
 	for _, schedule := range schedules {
-		os.Remove("./data/" + schedule.ID + ".xlsx")
+		path := filepath.Join("data", schedule.ID+".xlsx")
+		os.Remove(path)
 
 		schedule.NextReportTime = int(time.Now().Unix()) + schedule.Interval
 		re.sql.UpdateSchedule(schedule.ID, schedule)
@@ -43,7 +46,7 @@ func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
 func (re *ReportEmailer) createReports() {
 	re.inProgress = true
 
-	authConfig, emailConfig := re.configs()
+	authConfig, emailConfig, datasourceID := re.configs()
 
 	em := emailer.New(emailConfig)
 
@@ -55,7 +58,7 @@ func (re *ReportEmailer) createReports() {
 	for _, schedule := range schedules {
 		reportGroup := re.sql.ReportGroupFromSchedule(schedule)
 		userIDs, _ := re.sql.GroupMemberUserIDs(*reportGroup)
-		emails[schedule.ID] = api.GetEmails(*authConfig, userIDs)
+		emails[schedule.ID] = api.GetEmails(*authConfig, userIDs, datasourceID)
 
 		reportContent, _ := re.sql.GetReportContent(schedule.ID)
 		panels[schedule.ID] = []api.TablePanel{}
@@ -65,14 +68,15 @@ func (re *ReportEmailer) createReports() {
 			to := strconv.FormatInt(time.Now().Unix(), 10)
 			from := strconv.FormatInt(time.Now().Unix()-interval, 10)
 
-			dashboard, _ := api.NewDashboard(authConfig, content.DashboardID, from, to)
+			dashboard, _ := api.NewDashboard(authConfig, content.DashboardID, from, to, datasourceID)
 			panel, _ := dashboard.Panel(content.PanelID)
 			panel.PrepSql(dashboard.Variables, content.StoreID)
 			panels[schedule.ID] = append(panels[schedule.ID], *panel)
 		}
 	}
 
-	reporter := reporter.NewReporter("./data/template.xlsx")
+	templatePath := filepath.Join("data", "template.xlsx")
+	reporter := reporter.NewReporter(templatePath)
 
 	for scheduleID, reportSheetPanels := range panels {
 		report := reporter.CreateNewReport(scheduleID)
@@ -82,7 +86,8 @@ func (re *ReportEmailer) createReports() {
 
 	for scheduleID, recipientEmails := range emails {
 		log.DefaultLogger.Info("Sending Emails!!")
-		em.BulkCreateAndSend("./data/"+scheduleID+".xlsx", recipientEmails)
+		attachmentPath := filepath.Join("data", scheduleID+".xlsx")
+		em.BulkCreateAndSend(attachmentPath, recipientEmails)
 	}
 
 	re.cleanup(schedules)

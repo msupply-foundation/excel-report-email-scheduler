@@ -12,9 +12,9 @@ type User struct {
 	Email string `json:"email"`
 }
 
-func GetEmails(authConfig auth.AuthConfig, userIDs []string) []string {
+func GetEmails(authConfig auth.AuthConfig, userIDs []string, datasourceID int) []string {
 
-	url := "http://" + "admin:admin@" + "localhost:3000/api/tsdb/query"
+	url := "http://" + authConfig.Username + ":" + authConfig.Password + "@" + "localhost:3000/api/tsdb/query"
 
 	queryString := "("
 	i := 0
@@ -24,7 +24,7 @@ func GetEmails(authConfig auth.AuthConfig, userIDs []string) []string {
 	}
 	queryString += "'" + userIDs[i] + "')"
 
-	body, e := NewQueryRequest("SELECT * FROM \"user\" WHERE id IN "+queryString, "0", "0").ToRequestBody()
+	body, e := NewQueryRequest("SELECT * FROM \"user\" WHERE id IN "+queryString, "0", "0", datasourceID).ToRequestBody()
 
 	if e != nil {
 		log.DefaultLogger.Error(e.Error())
