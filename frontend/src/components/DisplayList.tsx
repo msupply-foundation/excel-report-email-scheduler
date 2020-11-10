@@ -1,21 +1,7 @@
 import React, { FC } from 'react';
 import classNames from 'classnames';
 import { css } from 'emotion';
-import { AsyncMultiSelect, Checkbox, MultiSelect, Select } from '@grafana/ui';
-import { getStores } from '../api';
-import { SelectableValue } from '@grafana/data';
-
-const lookback = [
-  { label: '1 Day', value: 24 * 60 * 1000 * 60 },
-  { label: '2 Days', value: 2 * 24 * 60 * 1000 * 60 },
-  { label: '3 Days', value: 3 * 24 * 60 * 1000 * 60 },
-  { label: '1 Week', value: 7 * 24 * 60 * 1000 * 60 },
-  { label: '2 Weeks', value: 14 * 24 * 60 * 1000 * 60 },
-  { label: '4 Weeks', value: 28 * 24 * 60 * 1000 * 60 },
-  { label: '3 Months', value: 28 * 3 * 24 * 60 * 1000 * 60 },
-  { label: '6 Months', value: 28 * 6 * 24 * 60 * 1000 * 60 },
-  { label: '1 Year', value: 356 * 24 * 60 * 1000 * 60 },
-];
+import { Checkbox } from '@grafana/ui';
 
 type Props = {
   onRowPress: (toggle: any) => void;

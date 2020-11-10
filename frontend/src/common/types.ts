@@ -12,7 +12,7 @@ export type User = {
 
 export type ReportGroupMember = {
   id: string;
-  reportRecipientID: string;
+  userID: string;
   reportGroupID: string;
 };
 
@@ -31,4 +31,5 @@ export type ReportContent = {
   panelID: number;
   storeID: string;
   lookback: number;
+  dashboardID: string;
 };

@@ -10,12 +10,12 @@ import { getReportGroups } from 'api';
 import { SelectableValue } from '@grafana/data';
 
 const getIntervals = () => [
-  { label: intl.get('daily'), value: 60 * 1000 * 60 * 24 },
-  { label: intl.get('weekly'), value: 60 * 1000 * 60 * 24 * 7 },
-  { label: intl.get('fortnightly'), value: 60 * 1000 * 60 * 24 * 14 },
-  { label: intl.get('monthly'), value: 60 * 1000 * 60 * 24 * 30 },
-  { label: intl.get('quarterly'), value: 60 * 1000 * 60 * 24 * 30 * 6 },
-  { label: intl.get('yearly'), value: 60 * 1000 * 60 * 24 * 30 * 12 },
+  { label: intl.get('daily'), value: 60 * 60 * 24 },
+  { label: intl.get('weekly'), value: 60 * 60 * 24 * 7 },
+  { label: intl.get('fortnightly'), value: 60 * 60 * 24 * 14 },
+  { label: intl.get('monthly'), value: 60 * 60 * 24 * 30 },
+  { label: intl.get('quarterly'), value: 60 * 60 * 24 * 30 * 6 },
+  { label: intl.get('yearly'), value: 60 * 60 * 24 * 30 * 12 },
 ];
 
 const container = css`

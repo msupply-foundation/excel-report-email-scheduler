@@ -5,7 +5,6 @@ import { Spinner } from '@grafana/ui';
 import { getSchedules } from 'api';
 import { useQuery } from 'react-query';
 import { Schedule } from 'common/types';
-import { ColorScheme } from '@grafana/data';
 
 type Props = {
   onRowPress: (toggle: any) => void;
