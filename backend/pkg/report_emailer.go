@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -32,19 +31,20 @@ func (re *ReportEmailer) configs() (*auth.AuthConfig, *auth.EmailConfig, int) {
 }
 
 func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
-	for _, schedule := range schedules {
-		path := filepath.Join("data", schedule.ID+".xlsx")
-		os.Remove(path)
+	// for _, schedule := range schedules {
+	// 	path := filepath.Join("data", schedule.ID+".xlsx")
+	// 	os.Remove(path)
 
-		schedule.NextReportTime = int(time.Now().Unix()) + schedule.Interval
-		re.sql.UpdateSchedule(schedule.ID, schedule)
-	}
+	// 	schedule.NextReportTime = int(time.Now().Unix()) + schedule.Interval
+	// 	re.sql.UpdateSchedule(schedule.ID, schedule)
+	// }
 
 	re.inProgress = false
 }
 
 func (re *ReportEmailer) createReports() {
 	re.inProgress = true
+	log.DefaultLogger.Info("Creating Reports")
 
 	authConfig, emailConfig, datasourceID := re.configs()
 
@@ -52,13 +52,31 @@ func (re *ReportEmailer) createReports() {
 
 	schedules, _ := re.sql.OverdueSchedules()
 
+	log.DefaultLogger.Info("Found Schedules to create reports for:")
+
+	for _, schedule := range schedules {
+		log.DefaultLogger.Info("- " + schedule.Name)
+	}
+
 	emails := make(map[string][]string)
 	panels := make(map[string][]api.TablePanel)
 
 	for _, schedule := range schedules {
+
+		log.DefaultLogger.Info("Collecting Emails for: " + schedule.Name)
+
 		reportGroup := re.sql.ReportGroupFromSchedule(schedule)
 		userIDs, _ := re.sql.GroupMemberUserIDs(*reportGroup)
 		emails[schedule.ID] = api.GetEmails(*authConfig, userIDs, datasourceID)
+
+		log.DefaultLogger.Info("Sending Emails to:")
+
+		for k, v := range emails {
+			log.DefaultLogger.Info("Emails for :" + k)
+			for _, email := range v {
+				log.DefaultLogger.Info("- " + email)
+			}
+		}
 
 		reportContent, _ := re.sql.GetReportContent(schedule.ID)
 		panels[schedule.ID] = []api.TablePanel{}
@@ -79,6 +97,8 @@ func (re *ReportEmailer) createReports() {
 	reporter := reporter.NewReporter(templatePath)
 
 	for scheduleID, reportSheetPanels := range panels {
+
+		log.DefaultLogger.Info("Creating report for : " + scheduleID)
 		report := reporter.CreateNewReport(scheduleID)
 		report.SetSheets(reportSheetPanels)
 		report.Write(*authConfig)

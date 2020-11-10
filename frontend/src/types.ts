@@ -4,4 +4,6 @@ export type FormValues = {
   email: string;
   emailPassword: string;
   datasourceID: number;
+  emailHost: string;
+  emailPort: number;
 };

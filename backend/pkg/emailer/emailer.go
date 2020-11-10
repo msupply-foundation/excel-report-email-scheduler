@@ -9,10 +9,12 @@ import (
 type Emailer struct {
 	email    string
 	password string
+	host     string
+	port     int
 }
 
 func New(config *auth.EmailConfig) *Emailer {
-	return &Emailer{email: config.Email, password: config.Password}
+	return &Emailer{email: config.Email, password: config.Password, host: config.Host, port: config.Port}
 }
 
 func (e *Emailer) CreateAndSend(attachmentPath string, email string) {
@@ -24,15 +26,7 @@ func (e *Emailer) CreateAndSend(attachmentPath string, email string) {
 	// m.SetHeader("Subject", "Hello!")
 	// m.SetBody("text/html", "Hello")
 	m.Attach(attachmentPath)
-
-	// // I don't really know what I'm doing with this auth.
-	// // PlainAuth works and reading the docs it seems to fail
-	// // if not using TLS. So I guess it's probably OK.
-	// // TODO: Host and port need to be added to datasource config?
-	// // This password is an app-specific password. The real password
-	// // to the account is kathmandu312. Seems to require me to generate
-	// // and use an app-specific password. :shrug: // "ybtkmpesjptowmru"
-	d := gomail.NewDialer("smtp.gmail.com", 587, e.email, e.password)
+	d := gomail.NewDialer(e.host, e.port, e.email, e.password)
 
 	if err := d.DialAndSend(m); err != nil {
 		log.DefaultLogger.Error(err.Error())

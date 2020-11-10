@@ -21,6 +21,7 @@ func main() {
 
 	serveOptions, sql := getServeOptions()
 
+	log.DefaultLogger.Info("Starting up")
 	re := NewReportEmailer(sql)
 	re.createReports()
 	// c := cron.New()

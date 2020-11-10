@@ -25,10 +25,11 @@ export const AppConfiguration: FC<Props> = (props: Props) => {
   };
 
   const onSubmit = (newJsonData: FormValues) => {
-    getBackendSrv().post(`/api/plugins/msupply-datasource/resources/settings`, newJsonData);
+    const mapped = { ...newJsonData, emailPort: Number(newJsonData.emailPort) };
+    getBackendSrv().post(`/api/plugins/msupply-datasource/resources/settings`, mapped);
     getBackendSrv().post(`/api/plugins/${props.plugin.meta.id}/settings`, {
       ...props.plugin.meta,
-      jsonData: newJsonData,
+      jsonData: mapped,
     });
   };
 
@@ -38,6 +39,8 @@ export const AppConfiguration: FC<Props> = (props: Props) => {
     email: props.plugin.meta.jsonData?.email ?? '',
     emailPassword: props.plugin.meta.jsonData?.emailPassword ?? '',
     datasourceID: props.plugin.meta.jsonData?.datasourceID ?? 1,
+    emailHost: props.plugin.meta.jsonData?.emailHost ?? 'smtp.gmail.com',
+    emailPort: props.plugin.meta.jsonData?.emailPort ?? 587,
   };
 
   const isEnabled = props.plugin.meta.enabled;

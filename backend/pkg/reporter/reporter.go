@@ -1,6 +1,7 @@
 package reporter
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -15,9 +16,6 @@ import (
 )
 
 var CELL_REF_REG = regexp.MustCompile("([A-Za-z]+)|([0-9]+)")
-
-// TODO: Write a function to generate column letter given an int
-var COLUMN_LETTERS = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "AA", "AB", "AC", "AD", "AE", "AF", "AG", "AH", "AI", "AJ", "AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AT"}
 
 func intToCol(i int) string {
 	i += 1
@@ -51,35 +49,73 @@ func NewReport(id string, templatePath string) *Report {
 	return &Report{id: id, templatePath: templatePath}
 }
 
-func (r *Report) openTemplate() {
-	f, _ := excelize.OpenFile(r.templatePath)
+func (r *Report) openTemplate() error {
+	f, e := excelize.OpenFile(r.templatePath)
+
+	if e != nil {
+		log.DefaultLogger.Error("openTemplate: ", e.Error())
+		return e
+	}
+
 	r.file = f
+
+	return nil
 }
 
-func (r *Report) placeholderCellRef(sheetName string, placeholder string) []string {
+func (r *Report) placeholderCellRef(sheetName string, placeholder string) ([]string, error) {
 	refs := r.file.SearchSheet(sheetName, placeholder)
-	return refs
+
+	if len(refs) == 0 {
+		err := errors.New("Could not find cell reference for: " + sheetName + " - " + placeholder)
+		log.DefaultLogger.Error("placeholderCellRef", err.Error())
+		return nil, err
+	}
+
+	return refs, nil
 }
 
-func (r *Report) placeholderRowRef(sheetName string, placeholder string) int {
+func (r *Report) placeholderRowRef(sheetName string, placeholder string) (int, error) {
 	refs := r.file.SearchSheet(sheetName, placeholder)
+
+	if len(refs) == 0 {
+		err := errors.New("Could not find cell reference for: " + sheetName + " - " + placeholder)
+		log.DefaultLogger.Error("placeholderRowRef", err.Error())
+		return 0, err
+	}
+
 	split := CELL_REF_REG.FindAllString(refs[0], 2)
 	idx, _ := strconv.Atoi(split[1])
 
-	return idx
+	return idx, nil
 }
 
-func (r *Report) writeTitle(sheetName string) {
-	refs := r.placeholderCellRef(sheetName, "{{title}}")
+func (r *Report) writeTitle(sheetName string) error {
+	refs, err := r.placeholderCellRef(sheetName, "{{title}}")
+
+	if err != nil {
+		return err
+	}
+
 	r.file.SetCellValue(sheetName, refs[0], sheetName)
+
+	return nil
 }
 
-func (r *Report) writeDate(sheetName string) {
-	refs := r.placeholderCellRef(sheetName, "{{date}}")
+func (r *Report) writeDate(sheetName string) error {
+	refs, err := r.placeholderCellRef(sheetName, "{{date}}")
+
+	if err != nil {
+		log.DefaultLogger.Error("writeDate: ", err.Error())
+		return err
+	}
+
 	r.file.SetCellValue(sheetName, refs[0], time.Now().Format("Mon Jan 2 15:04:05"))
+
+	return nil
 }
 
 func (r *Report) writeCell(sheetName string, cellRef string, value interface{}) {
+	log.DefaultLogger.Info("SheetName: "+sheetName+" -- CellRef: "+cellRef, value)
 	r.file.SetCellValue(sheetName, cellRef, value)
 }
 
@@ -87,8 +123,14 @@ func (r *Report) SetSheets(panels []api.TablePanel) {
 	r.sheets = panels
 }
 
-func (r *Report) writeHeaders(sheetName string, columns []api.Column) {
-	idx := r.placeholderRowRef(sheetName, "{{headers}}")
+func (r *Report) writeHeaders(sheetName string, columns []api.Column) error {
+	idx, err := r.placeholderRowRef(sheetName, "{{headers}}")
+
+	if err != nil {
+		log.DefaultLogger.Error("writeHeaders: ", err.Error())
+		return err
+	}
+
 	log.DefaultLogger.Info(strconv.Itoa(idx))
 	for i, column := range columns {
 		log.DefaultLogger.Info(column.Text)
@@ -96,57 +138,131 @@ func (r *Report) writeHeaders(sheetName string, columns []api.Column) {
 		log.DefaultLogger.Info(cellRef)
 		r.writeCell(sheetName, cellRef, column.Text)
 	}
+
+	return nil
+}
+func Min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
 }
 
-func (r *Report) createDuplicateTableRows(sheetName string, numberToDuplicate int) int {
-	idx := r.placeholderRowRef(sheetName, "{{rows}}")
+func (r *Report) createDuplicateTableRows(sheetName string, numberToDuplicate int) (int, error) {
+	idx, err := r.placeholderRowRef(sheetName, "{{rows}}")
+
+	duplicateNumber := Min(numberToDuplicate, 500)
+
+	log.DefaultLogger.Info(strconv.Itoa(numberToDuplicate))
+	if err != nil {
+		log.DefaultLogger.Error("createDuplicateTableRows: ", err.Error())
+		return 0, err
+	}
 
 	i := 0
-	for i < numberToDuplicate {
+	for i < duplicateNumber {
+		log.DefaultLogger.Info(strconv.Itoa(i))
 		r.file.DuplicateRow(sheetName, idx)
 		i += 1
 	}
 
-	return idx
+	return idx, nil
 }
 
 func (r *Report) createCellRef(columnNumber int, rowNumber int) string {
 	return intToCol(columnNumber) + strconv.Itoa(rowNumber)
 }
 
-func (r *Report) writeRows(sheetName string, rows [][]interface{}) {
-	idx := r.createDuplicateTableRows(sheetName, len(rows))
+func (r *Report) writeRows(sheetName string, rows [][]interface{}) error {
+	idx, err := r.createDuplicateTableRows(sheetName, len(rows))
 
+	if err != nil {
+		log.DefaultLogger.Error("writeRows: ", err.Error())
+		return err
+	}
+
+	log.DefaultLogger.Info("Write Rows: " + "Writing Rows")
 	for _, row := range rows {
 		for j, value := range row {
 			cellRef := r.createCellRef(j, idx)
+			log.DefaultLogger.Info("Writing Cell: ", cellRef, value)
 			r.writeCell(sheetName, cellRef, value)
 		}
 		idx += 1
 	}
+
+	return nil
 }
 
-func (r *Report) Write(auth auth.AuthConfig) {
+func (r *Report) Write(auth auth.AuthConfig) error {
 	if r.file == nil {
 		r.openTemplate()
 	}
 
 	for _, s := range r.sheets {
+		log.DefaultLogger.Info("Writing Sheet: " + s.Title)
+
 		sIdx := r.file.NewSheet(s.Title)
-		r.file.CopySheet(1, sIdx)
+		err := r.file.CopySheet(1, sIdx)
+
+		if err != nil {
+			log.DefaultLogger.Error("Write: ", err.Error())
+			return err
+		}
+
+		log.DefaultLogger.Info("Getting Data")
+
 		s.GetData(auth)
-		r.writeTitle(s.Title)
-		r.writeDate(s.Title)
-		r.writeHeaders(s.Title, s.Columns)
-		r.writeRows(s.Title, s.Rows)
+
+		log.DefaultLogger.Info("Writing Title: " + s.Title)
+
+		err = r.writeTitle(s.Title)
+
+		if err != nil {
+			log.DefaultLogger.Error("Write: ", err.Error())
+			return nil
+		}
+
+		log.DefaultLogger.Info("Writing Date:", s.Title)
+
+		err = r.writeDate(s.Title)
+
+		if err != nil {
+			log.DefaultLogger.Error("Write: ", err.Error())
+			return nil
+		}
+
+		log.DefaultLogger.Info("Writing Headers")
+
+		err = r.writeHeaders(s.Title, s.Columns)
+
+		if err != nil {
+			log.DefaultLogger.Error("Write: ", err.Error())
+			return nil
+		}
+
+		log.DefaultLogger.Info("Writing Rows")
+
+		err = r.writeRows(s.Title, s.Rows)
+
+		if err != nil {
+			log.DefaultLogger.Error("Write: ", err.Error())
+			return nil
+		}
+
 	}
 
+	log.DefaultLogger.Info("Deleting Sheet: Sheet1")
 	r.file.DeleteSheet("Sheet1")
+
+	log.DefaultLogger.Info("Saving Report: " + r.id)
 
 	savePath := filepath.Join("data", r.id+".xlsx")
 	if err := r.file.SaveAs(savePath); err != nil {
-		fmt.Println(err)
+		log.DefaultLogger.Error("Write: ", err.Error())
 	}
+
+	return nil
 }
 
 func NewReporter(templatePath string) *Reporter {
