@@ -51,5 +51,9 @@
   "6months": "6 Months",
   "1year": "1 Year",
   "datasource": "Datasource",
-  "datasource_details": "Select the datasource where your mSupply data is held."
+  "datasource_details": "Select the datasource where your mSupply data is held.",
+  "email_port": "Email port",
+  "email_host": "Email host",
+  "email_port_description": "The port of the email address from which to send emails from.",
+  "email_host_description": "The host of the email address from which to send emails from."
 }

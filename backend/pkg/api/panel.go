@@ -61,7 +61,7 @@ func (panel *TablePanel) PrepSql(variables TemplateList, storeIDs string) {
 }
 
 func (panel *TablePanel) GetData(authConfig auth.AuthConfig) {
-	body, _ := NewQueryRequest(panel.RawSql, panel.From, panel.To).ToRequestBody()
+	body, _ := NewQueryRequest(panel.RawSql, panel.From, panel.To, panel.DatasourceID).ToRequestBody()
 
 	url := "http://" + authConfig.AuthString() + "localhost:3000/api/tsdb/query"
 	response, _ := http.Post(url, "application/json", body)

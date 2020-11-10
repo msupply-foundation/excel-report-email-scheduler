@@ -9,18 +9,19 @@ import (
 type EmailConfig struct {
 	Email    string
 	Password string
+	Host     string
+	Port     int
 }
 
-// TODO: Handle error cases and also might need to add additional
-// fields i.e. SMTP etc
 func NewEmailConfig(datasource *dbstore.SQLiteDatasource) *EmailConfig {
 	db, _ := sql.Open("sqlite3", datasource.Path)
 	defer db.Close()
 
-	var email, password string
+	var email, password, host string
+	var port int
 
-	row := db.QueryRow("SELECT email, emailPassword as password FROM Config")
-	row.Scan(&email, &password)
+	row := db.QueryRow("SELECT email, emailPassword, emailHost, emailPort as password FROM Config")
+	row.Scan(&email, &password, &host, &port)
 
-	return &EmailConfig{Email: email, Password: password}
+	return &EmailConfig{Email: email, Password: password, Host: host, Port: port}
 }
