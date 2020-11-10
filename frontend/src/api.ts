@@ -88,7 +88,7 @@ export const getStores = () => {
 export const createReportGroupMembership = async (params: any) => {
   const { user, reportGroupID } = params;
 
-  const membership = { reportRecipientID: user.id, reportGroupID };
+  const membership = { userID: user.id, reportGroupID };
   return getBackendSrv().post('./api/plugins/msupply-datasource/resources/report-group-membership', [membership]);
 };
 
@@ -141,7 +141,12 @@ export const getPanels = async () => {
     )
   )
     .map((det: any) => det.dashboard)
-    .map((dashboard: any) => dashboard?.panels?.filter((panel: any) => panel?.targets?.[0].format === 'table') ?? [])
+    .map(
+      (dashboard: any) =>
+        dashboard?.panels
+          ?.filter((panel: any) => panel?.targets?.[0].format === 'table')
+          .map((panel: any) => ({ ...panel, dashboardID: dashboard.uid })) ?? []
+    )
     .flat();
 };
 
@@ -162,4 +167,8 @@ export const updateReportContent = async (reportContent: any) => {
     `./api/plugins/msupply-datasource/resources/report-content/${reportContent?.id}`,
     reportContent
   );
+};
+
+export const getDatasources = async () => {
+  return getBackendSrv().get(`./api/datasources`);
 };

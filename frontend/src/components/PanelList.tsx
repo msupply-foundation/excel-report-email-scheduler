@@ -60,7 +60,7 @@ export const PanelList: FC<Props> = ({ schedule }) => {
     if (content) {
       await deleteContent(content);
     } else {
-      await createContent({ scheduleID, panelID: panel?.id });
+      await createContent({ scheduleID, panelID: panel?.id, dashboardID: panel?.dashboardID });
     }
   };
 
@@ -79,12 +79,17 @@ export const PanelList: FC<Props> = ({ schedule }) => {
     updateContent(newState);
   };
 
+  console.log(panels);
+
   return (
     <ol className={listStyle}>
       {panels?.map((panel: any) => {
         const { title, description } = panel;
         const matchingContent: ReportContent | null =
-          content?.find((reportContent: ReportContent) => reportContent.panelID === panel.id) ?? null;
+          content?.find(
+            (reportContent: ReportContent) =>
+              reportContent.panelID === panel.id && reportContent.dashboardID === panel.dashboardID
+          ) ?? null;
 
         return (
           <li className="card-item-wrapper" style={{ cursor: 'pointer' }}>
