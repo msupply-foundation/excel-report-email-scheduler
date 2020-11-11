@@ -6,12 +6,59 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
 )
 
+func (server *HttpServer) fetchSchedules(rw http.ResponseWriter, request *http.Request) {
+	var schedules []dbstore.Schedule
+
+	schedules, err := server.db.GetSchedules()
+	if err != nil {
+		log.DefaultLogger.Error("fetchSchedules: db.GetSchedules(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.NewEncoder(rw).Encode(schedules)
+	if err != nil {
+		log.DefaultLogger.Error("fetchSchedules: json.NewEncoder().Encode(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+}
+
 func (server *HttpServer) createSchedule(rw http.ResponseWriter, request *http.Request) {
-	schedule, _ := server.db.CreateSchedule()
-	json.NewEncoder(rw).Encode(schedule)
+	schedule, err := server.db.CreateSchedule()
+	if err != nil {
+		log.DefaultLogger.Error("createSchedule: db.CreateSchedule(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = json.NewEncoder(rw).Encode(schedule)
+	if err != nil {
+		log.DefaultLogger.Error("createSchedule: json.NewEncoder().Encode(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+}
+
+func (server *HttpServer) deleteSchedule(rw http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	id := vars["id"]
+
+	err := server.db.DeleteSchedule(id)
+	if err != nil {
+		log.DefaultLogger.Error("deleteSchedule: db.DeleteSchedule(): " + id + " : " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	rw.WriteHeader(http.StatusOK)
 }
 
@@ -21,32 +68,40 @@ func (server *HttpServer) updateSchedule(rw http.ResponseWriter, request *http.R
 
 	var schedule dbstore.Schedule
 	requestBody, err := request.GetBody()
-	bodyAsBytes, _ := ioutil.ReadAll(requestBody)
-	err = json.Unmarshal(bodyAsBytes, &schedule)
-
 	if err != nil {
-		http.Error(rw, "Invalid Request, received: "+" "+err.Error()+"\n"+"Expecting a JSON body in the shape { grafanaUsername, grafanaPassword, email, emailPassword }", http.StatusBadRequest)
+		log.DefaultLogger.Error("updateSchedule: request.GetBody(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	server.db.UpdateSchedule(id, schedule)
-}
+	bodyAsBytes, err := ioutil.ReadAll(requestBody)
+	if err != nil {
+		log.DefaultLogger.Error("updateSchedule: ioutil.ReadAll(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-func (server *HttpServer) fetchSchedules(rw http.ResponseWriter, request *http.Request) {
-	var schedules []dbstore.Schedule
+	err = json.Unmarshal(bodyAsBytes, &schedule)
+	if err != nil {
+		log.DefaultLogger.Error("updateSchedule: json.Unmarshal: " + err.Error())
+		http.Error(rw, NewRequestBodyError(err, dbstore.ScheduleFields()).Error(), http.StatusBadRequest)
+		return
+	}
 
-	schedules = server.db.GetSchedules()
+	_, err = server.db.UpdateSchedule(id, schedule)
 
-	json.NewEncoder(rw).Encode(schedules)
-	rw.WriteHeader(http.StatusOK)
-}
+	if err != nil {
+		log.DefaultLogger.Error("updateSchedule: db.UpdateSchedule: " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-func (server *HttpServer) deleteSchedule(rw http.ResponseWriter, request *http.Request) {
-	vars := mux.Vars(request)
-	id := vars["id"]
-	// TODO: Handle error
-	success, _ := server.db.DeleteSchedule(id)
+	err = json.NewEncoder(rw).Encode(schedule)
+	if err != nil {
+		log.DefaultLogger.Error("updateSchedule: json.NewEncoder().Encode(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	json.NewEncoder(rw).Encode(success)
 	rw.WriteHeader(http.StatusOK)
 }
