@@ -3,7 +3,8 @@ package dbstore
 import (
 	"context"
 	"database/sql"
-	_ "database/sql/driver"
+	"errors"
+
 	"encoding/json"
 	"net/http"
 	"os"
@@ -40,7 +41,9 @@ type queryModel struct {
 	Format string `json:"format"`
 }
 
-func GetDataSource() (*SQLiteDatasource, error) {
+func GetDataSource() *SQLiteDatasource {
+	log.DefaultLogger.Info("GetDatasource")
+
 	instanceManager := datasource.NewInstanceManager(getDataSourceInstanceSettings)
 
 	sqlDatasource := &SQLiteDatasource{
@@ -50,7 +53,7 @@ func GetDataSource() (*SQLiteDatasource, error) {
 
 	sqlDatasource.Init()
 
-	return sqlDatasource, nil
+	return sqlDatasource
 }
 
 func getDataSourceInstanceSettings(setting backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
@@ -84,7 +87,7 @@ func (datasource *SQLiteDatasource) query(ctx context.Context, query backend.Dat
 
 	response := backend.DataResponse{}
 	response.Error = json.Unmarshal(query.JSON, &queryModel)
-
+	response.Error = errors.New("Queries are not supported!")
 	if response.Error != nil {
 		return response
 	}
@@ -110,8 +113,18 @@ func (datasource *SQLiteDatasource) query(ctx context.Context, query backend.Dat
 // datasource configuration page which allows users to verify that
 // a datasource is working as expected.
 func (datasource *SQLiteDatasource) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
-	var status = backend.HealthStatusOk
-	var message = "Yeah, nah, All good"
+
+	err := datasource.Ping()
+
+	var status backend.HealthStatus
+	var message string
+	if err != nil {
+		status = backend.HealthStatusError
+		message = "Could not ping the database: " + err.Error()
+	} else {
+		status = backend.HealthStatusOk
+		message = "Yeah, nah, All good"
+	}
 
 	return &backend.CheckHealthResult{
 		Status:  status,
@@ -119,13 +132,42 @@ func (datasource *SQLiteDatasource) CheckHealth(ctx context.Context, req *backen
 	}, nil
 }
 
-func (datasource *SQLiteDatasource) Init() {
-	db, _ := sql.Open("sqlite3", datasource.Path)
+func (datasource *SQLiteDatasource) Ping() error {
+	log.DefaultLogger.Info("Pinging Database")
+
+	db, err := sql.Open("sqlite3", datasource.Path)
 	defer db.Close()
 
-	err := db.Ping()
 	if err != nil {
-		log.DefaultLogger.Warn("Could not ping database")
+		log.DefaultLogger.Error("Ping - sql.Open: ", err.Error())
+		return err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		log.DefaultLogger.Warn("Ping - sql.Ping: ", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (datasource *SQLiteDatasource) Init() {
+	log.DefaultLogger.Info("Initializing Database")
+
+	err := datasource.Ping()
+
+	if err != nil {
+		log.DefaultLogger.Error("FATAL. Init - Ping. ", err.Error())
+		panic(err)
+	}
+
+	db, err := sql.Open("sqlite3", datasource.Path)
+	defer db.Close()
+
+	if err != nil {
+		log.DefaultLogger.Error("FATAL. Init - sql.Open : ", err.Error())
+		panic(err)
 	}
 
 	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
@@ -133,7 +175,7 @@ func (datasource *SQLiteDatasource) Init() {
 	defer stmt.Close()
 
 	if err != nil {
-		log.DefaultLogger.Error("Could not create Schedule:", err.Error())
+		log.DefaultLogger.Error("FATAL. Could not create Schedule:", err.Error())
 		panic(err)
 	}
 
@@ -141,7 +183,7 @@ func (datasource *SQLiteDatasource) Init() {
 	stmt.Exec()
 
 	if err != nil {
-		log.DefaultLogger.Error("Could not create Config:", err.Error())
+		log.DefaultLogger.Error("FATAL. Could not create Config:", err.Error())
 		panic(err)
 	}
 
@@ -149,7 +191,7 @@ func (datasource *SQLiteDatasource) Init() {
 	stmt.Exec()
 
 	if err != nil {
-		log.DefaultLogger.Error("Could not create ReportGroup:", err.Error())
+		log.DefaultLogger.Error("FATAL. Could not create ReportGroup:", err.Error())
 		panic(err)
 	}
 
@@ -157,7 +199,7 @@ func (datasource *SQLiteDatasource) Init() {
 	stmt.Exec()
 
 	if err != nil {
-		log.DefaultLogger.Error("Could not create ReportGroupMembership:", err.Error())
+		log.DefaultLogger.Error("FATAL. Could not create ReportGroupMembership:", err.Error())
 		panic(err)
 	}
 
@@ -165,7 +207,7 @@ func (datasource *SQLiteDatasource) Init() {
 	stmt.Exec()
 
 	if err != nil {
-		log.DefaultLogger.Error("Could not create ReportContent:", err.Error())
+		log.DefaultLogger.Error("FATAL. Could not create ReportContent:", err.Error())
 		panic(err)
 	}
 }
