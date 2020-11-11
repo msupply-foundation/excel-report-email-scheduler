@@ -143,27 +143,29 @@ func NewDashboardResponse(response *http.Response) (*DashboardResponse, error) {
 	defer response.Body.Close()
 
 	body, err := ioutil.ReadAll(response.Body)
-
 	if err != nil {
-		return &dashboardResponse, err
+		log.DefaultLogger.Error("NewDashboardResponse: ioutil.ReadAll: " + err.Error())
+		return nil, err
 	}
 
 	err = json.Unmarshal(body, &dashboardResponse)
+	if err != nil {
+		log.DefaultLogger.Error("NewDashboardResponse: json.Unmarshal: " + err.Error())
+		return nil, err
 
+	}
 	return &dashboardResponse, err
 }
 
 func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to string, datasourceID int) (*Dashboard, error) {
 	url := "http://" + authConfig.AuthString() + "localhost:3000/api/dashboards/uid/" + uuid
 	response, err := http.Get(url)
-
 	if err != nil {
 		log.DefaultLogger.Error("NewDashboard: HTTP Request", err.Error())
 		return nil, err
 	}
 
 	dashboardResponse, err := NewDashboardResponse(response)
-
 	if err != nil {
 		log.DefaultLogger.Error("NewDashboard: NewDashboardResponse", err.Error())
 		return nil, err
@@ -178,13 +180,13 @@ func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to stri
 	return &Dashboard{UID: dashboardResponse.Dashboard.UID, Panels: panels, Variables: dashboardResponse.Dashboard.Templating}, nil
 }
 
-func (dashboard *Dashboard) Panel(panelID int) (*TablePanel, error) {
+func (dashboard *Dashboard) Panel(panelID int) *TablePanel {
 	for _, panel := range dashboard.Panels {
 		if panel.ID == panelID {
-			return &panel, nil
+			return &panel
 		}
 	}
-	return nil, nil
+	return nil
 }
 
 func (resp *DashboardResponse) GetRawSQL(panelID int) string {
