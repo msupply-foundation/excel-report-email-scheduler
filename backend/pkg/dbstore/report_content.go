@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
 
 type ReportContent struct {
@@ -13,6 +14,10 @@ type ReportContent struct {
 	DashboardID string `json:"dashboardID"`
 	Lookback    int    `json:"lookback"`
 	StoreID     string `json:"storeID"`
+}
+
+func ReportContentFields() string {
+	return "\n{\n\tID string\n\tScheduleID string\n\tPanelID string\n\tDashboardID string\n\tLookback int\n\tStoreID string\n}"
 }
 
 func (datasource *SQLiteDatasource) GetReportContent(scheduleID string) ([]ReportContent, error) {
@@ -35,15 +40,27 @@ func (datasource *SQLiteDatasource) GetReportContent(scheduleID string) ([]Repor
 	return reportContent, nil
 }
 
-func (datasource *SQLiteDatasource) DeleteReportContent(id string) (bool, error) {
+func (datasource *SQLiteDatasource) DeleteReportContent(id string) error {
 	db, _ := sql.Open("sqlite3", datasource.Path)
 	defer db.Close()
 
-	stmt, _ := db.Prepare("DELETE FROM ReportContent WHERE ID = ?")
-	stmt.Exec(id)
+	stmt, err := db.Prepare("DELETE FROM ReportContent WHERE ID = ?")
+
+	if err != nil {
+		log.DefaultLogger.Error("DeleteReportContent - db.Prepare :" + err.Error())
+		return err
+	}
+
+	_, err = stmt.Exec(id)
+
+	if err != nil {
+		log.DefaultLogger.Error("DeleteReportContent - stmt.Exec :" + err.Error())
+		return err
+	}
+
 	defer stmt.Close()
 
-	return true, nil
+	return nil
 }
 
 func (datasource *SQLiteDatasource) CreateReportContent(newReportContentValues ReportContent) (ReportContent, error) {
@@ -61,13 +78,30 @@ func (datasource *SQLiteDatasource) CreateReportContent(newReportContentValues R
 	return reportContent, nil
 }
 
-func (datasource *SQLiteDatasource) UpdateReportContent(id string, reportGroup ReportContent) ReportContent {
-	db, _ := sql.Open("sqlite3", datasource.Path)
+func (datasource *SQLiteDatasource) UpdateReportContent(id string, reportContent ReportContent) (*ReportContent, error) {
+	db, err := sql.Open("sqlite3", datasource.Path)
 	defer db.Close()
 
-	stmt, _ := db.Prepare("UPDATE ReportContent SET scheduleID = ?, panelID = ?, storeID = ?, lookback = ? where id = ?")
-	stmt.Exec(reportGroup.ScheduleID, reportGroup.PanelID, reportGroup.StoreID, reportGroup.Lookback, id)
+	if err != nil {
+		log.DefaultLogger.Error("UpdateReportContent: sql.Open: ", err.Error())
+		return nil, err
+	}
+
+	stmt, err := db.Prepare("UPDATE ReportContent SET scheduleID = ?, panelID = ?, storeID = ?, lookback = ? where id = ?")
+
+	if err != nil {
+		log.DefaultLogger.Error("UpdateReportContent: db.Prepare: ", err.Error())
+		return nil, err
+	}
+
+	_, err = stmt.Exec(reportContent.ScheduleID, reportContent.PanelID, reportContent.StoreID, reportContent.Lookback, id)
+
+	if err != nil {
+		log.DefaultLogger.Error("UpdateReportContent: db.Exec: ", err.Error())
+		return nil, err
+	}
+
 	defer stmt.Close()
 
-	return reportGroup
+	return &reportContent, nil
 }

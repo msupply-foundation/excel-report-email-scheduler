@@ -17,6 +17,7 @@ func NewServer(sqliteDatasource *dbstore.SQLiteDatasource) *HttpServer {
 }
 
 func (server *HttpServer) ResourceHandler(sqliteDatasource *dbstore.SQLiteDatasource) backend.CallResourceHandler {
+
 	mux := mux.NewRouter()
 
 	mux.HandleFunc("/settings", server.updateSettings).Methods("POST")
