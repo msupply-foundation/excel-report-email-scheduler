@@ -39,6 +39,5 @@ func (e *Emailer) BulkCreateAndSend(attachmentPath string, emails []string) {
 		if err := e.CreateAndSend(attachmentPath, email); err != nil {
 			log.DefaultLogger.Error("BulkCreateAndSend: Could not send to: " + email)
 		}
-
 	}
 }

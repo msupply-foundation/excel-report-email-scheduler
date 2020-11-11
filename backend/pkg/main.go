@@ -20,22 +20,28 @@ import (
 // }
 func main() {
 	log.DefaultLogger.Info("Starting up")
-	serveOptions, sql, _ := getServeOptions()
+	serveOptions, sql, err := getServeOptions()
+	if err != nil {
+		log.DefaultLogger.Error("FATAL. Error when retreiving serveOptions", err.Error())
+		panic(err)
+	}
 
 	re := NewReportEmailer(sql)
-	// re.createReports()
+
+	// Try to send reports on loading
+	re.createReports()
+
+	// Set up scheduler which will try to send reports every 10 minutes
 	c := cron.New()
 	c.AddFunc("@every 10m", re.createReports)
 	c.Start()
 
 	// Start listening to requests sent from Grafana. This call is blocking and
 	// and waits until Grafana shutsdown or the plugin exits.
-	err := datasource.Serve(serveOptions)
-
-	// TODO: Defer a Close() ?
+	err = datasource.Serve(serveOptions)
 
 	if err != nil {
-		log.DefaultLogger.Error(err.Error())
+		log.DefaultLogger.Error("FATAL. Plugin datasource.Serve() returned an error: " + err.Error())
 		os.Exit(1)
 	}
 }
