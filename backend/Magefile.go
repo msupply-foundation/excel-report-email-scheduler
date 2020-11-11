@@ -3,15 +3,30 @@
 package main
 
 import (
-	"fmt"
-	// mage:import
-	build "github.com/grafana/grafana-plugin-sdk-go/build"
+	"runtime"
+
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/grafana/grafana-plugin-sdk-go/build"
 )
 
-// Hello prints a message (shows that you can define custom Mage targets).
-func Hello() {
-	fmt.Println("hello plugin developer!")
+// Callback for setting CGO_ENABLED for building on windows.
+// See https://github.com/grafana/grafana-plugin-sdk-go/blob/002de0b2b925ac930952dc380682100dee27b439/build/common.go#L108.
+var cb build.BeforeBuildCallback = func(cfg build.Config) (build.Config, error) {
+	cfg.EnableCGo = true
+	return cfg, nil
 }
 
-// Default configures the default target.
-var Default = build.BuildAll
+// Main entry-point for building plugin.
+func BuildPlugin() {
+	if runtime.GOOS == "windows" {
+		var err = build.SetBeforeBuildCallback(cb)
+
+		if err != nil {
+			log.DefaultLogger.Error(err.Error())
+		}
+	}
+
+	build.BuildAll()
+}
+
+var Default = BuildPlugin
