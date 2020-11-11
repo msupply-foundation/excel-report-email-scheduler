@@ -1,8 +1,7 @@
 package auth
 
 import (
-	"database/sql"
-
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
 )
 
@@ -13,15 +12,13 @@ type EmailConfig struct {
 	Port     int
 }
 
-func NewEmailConfig(datasource *dbstore.SQLiteDatasource) *EmailConfig {
-	db, _ := sql.Open("sqlite3", datasource.Path)
-	defer db.Close()
+func NewEmailConfig(datasource *dbstore.SQLiteDatasource) (*EmailConfig, error) {
 
-	var email, password, host string
-	var port int
+	settings, err := datasource.GetSettings()
+	if err != nil {
+		log.DefaultLogger.Error("NewAuthConfig: datasource.GetSettings(): ", err.Error())
+		return nil, err
+	}
 
-	row := db.QueryRow("SELECT email, emailPassword, emailHost, emailPort as password FROM Config")
-	row.Scan(&email, &password, &host, &port)
-
-	return &EmailConfig{Email: email, Password: password, Host: host, Port: port}
+	return &EmailConfig{Email: settings.Email, Password: settings.EmailPassword, Host: settings.EmailHost, Port: settings.EmailPort}, nil
 }
