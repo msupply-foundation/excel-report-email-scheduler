@@ -83,9 +83,18 @@ func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 }
 
 func (qr *QueryResponse) Rows() [][]interface{} {
-	return qr.Results.A.Tables[0].Rows
+
+	if len(qr.Results.A.Tables) > 0 {
+		return qr.Results.A.Tables[0].Rows
+	}
+
+	return nil
 }
 
 func (qr *QueryResponse) Columns() []Column {
-	return qr.Results.A.Tables[0].Columns
+	if len(qr.Results.A.Tables) > 0 {
+		return qr.Results.A.Tables[0].Columns
+	}
+
+	return nil
 }

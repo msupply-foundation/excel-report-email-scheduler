@@ -184,6 +184,7 @@ func (r *Report) writeRows(sheetName string, rows [][]interface{}) error {
 }
 
 func (r *Report) Write(auth auth.AuthConfig) error {
+	log.DefaultLogger.Info(fmt.Sprintf("Starting to create report %s...", r.id))
 	if r.file == nil {
 		if err := r.openTemplate(); err != nil {
 			return err
@@ -191,6 +192,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 	}
 
 	for _, s := range r.sheets {
+		log.DefaultLogger.Info(fmt.Sprintf("Creating new sheet %s", s.Title))
 		sIdx := r.file.NewSheet(s.Title)
 
 		if err := r.file.CopySheet(1, sIdx); err != nil {
@@ -226,10 +228,14 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 
 	r.file.DeleteSheet("Sheet1")
 
+	log.DefaultLogger.Info("Saving report...")
+
 	savePath := filepath.Join("data", r.id+".xlsx")
 	if err := r.file.SaveAs(savePath); err != nil {
 		log.DefaultLogger.Error("Write: ", err.Error())
 	}
+
+	log.DefaultLogger.Info(fmt.Sprintf("Report finished! %s :tada", r.id))
 
 	return nil
 }

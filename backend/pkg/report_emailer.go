@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -45,18 +47,27 @@ func (re *ReportEmailer) configs() (*auth.AuthConfig, *auth.EmailConfig, int, er
 }
 
 func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
-	// for _, schedule := range schedules {
-	// 	path := filepath.Join("data", schedule.ID+".xlsx")
-	// 	os.Remove(path)
+	log.DefaultLogger.Info("Starting Clean up...")
+	for _, schedule := range schedules {
 
-	// 	schedule.NextReportTime = int(time.Now().Unix()) + schedule.Interval
-	// 	re.sql.UpdateSchedule(schedule.ID, schedule)
-	// }
+		fileName := schedule.ID + ".xlsx"
+		log.DefaultLogger.Info(fmt.Sprintf("Deleting %s...", fileName))
+		path := filepath.Join("data", fileName)
+		err := os.Remove(path)
+		if err != nil {
+			// Shouldn't be toooo much of a problem since we're using the schedule ID for the report name, at the moment
+			log.DefaultLogger.Error(fmt.Sprintf("Could not delete %s... : %s", fileName, err.Error()))
+		}
+
+		schedule.NextReportTime = int(time.Now().Unix()) + schedule.Interval
+		re.sql.UpdateSchedule(schedule.ID, schedule)
+	}
 
 	re.inProgress = false
 }
 
-func (re *ReportEmailer) createReports()  {
+func (re *ReportEmailer) createReports() {
+	log.DefaultLogger.Info("Creating Reports...")
 	re.inProgress = true
 
 	authConfig, emailConfig, datasourceID, err := re.configs()
@@ -73,9 +84,18 @@ func (re *ReportEmailer) createReports()  {
 		return
 	}
 
+	if len(schedules) > 0 {
+		log.DefaultLogger.Info("Found schedules which are overdue...")
+		for _, schedule := range schedules {
+			log.DefaultLogger.Info(fmt.Sprintf("- %s : %s", schedule.Name, schedule.Description))
+		}
+	} else {
+		log.DefaultLogger.Info("No schedules are overdue...")
+		return
+	}
+
 	emails := make(map[string][]string)
 	panels := make(map[string][]api.TablePanel)
-
 	for _, schedule := range schedules {
 		reportGroup, err := re.sql.ReportGroupFromSchedule(schedule)
 		if err != nil {
@@ -141,5 +161,4 @@ func (re *ReportEmailer) createReports()  {
 
 	re.cleanup(schedules)
 
-	
 }

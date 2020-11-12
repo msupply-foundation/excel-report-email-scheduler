@@ -116,7 +116,7 @@ func (datasource *SQLiteDatasource) GetSettings() (*Settings, error) {
 	}
 
 	if exists {
-		rows, err := db.Query("SELECT * FROM Config")
+		rows, err := db.Query("SELECT id, grafanaUsername, grafanaPassword, email, emailPassword, datasourceID, emailHost, emailPort FROM Config")
 		defer rows.Close()
 		if err != nil {
 			log.DefaultLogger.Error("GetSettings: db.Query(): ", err.Error())

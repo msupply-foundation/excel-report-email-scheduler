@@ -47,10 +47,14 @@ func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs stri
 		}
 
 		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", csv, -1)
+		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", csv, -1)
 
 	} else {
 		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", variable.Definition, -1)
+		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", variable.Definition, -1)
 	}
+
+	log.DefaultLogger.Info(panel.RawSql)
 }
 
 func (panel *TablePanel) PrepSql(variables TemplateList, storeIDs string) {

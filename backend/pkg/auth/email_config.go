@@ -16,7 +16,7 @@ func NewEmailConfig(datasource *dbstore.SQLiteDatasource) (*EmailConfig, error) 
 
 	settings, err := datasource.GetSettings()
 	if err != nil {
-		log.DefaultLogger.Error("NewAuthConfig: datasource.GetSettings(): ", err.Error())
+		log.DefaultLogger.Error("NewEmailConfig: datasource.GetSettings(): ", err.Error())
 		return nil, err
 	}
 

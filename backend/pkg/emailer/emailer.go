@@ -1,6 +1,8 @@
 package emailer
 
 import (
+	"fmt"
+
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/auth"
 	"gopkg.in/gomail.v2"
@@ -18,6 +20,7 @@ func New(config *auth.EmailConfig) *Emailer {
 }
 
 func (e *Emailer) CreateAndSend(attachmentPath string, email string) error {
+	log.DefaultLogger.Info(fmt.Sprintf("Sending email to %s...", email))
 	m := gomail.NewMessage()
 
 	m.SetHeader("From", e.email)
@@ -31,6 +34,7 @@ func (e *Emailer) CreateAndSend(attachmentPath string, email string) error {
 		return err
 	}
 
+	log.DefaultLogger.Info(fmt.Sprintf("Sent email to %s!", email))
 	return nil
 }
 
