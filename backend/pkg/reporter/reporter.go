@@ -226,7 +226,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 		}
 	}
 
-	r.file.DeleteSheet("Sheet1")
+	r.file.DeleteSheet("August")
 
 	log.DefaultLogger.Info("Saving report...")
 

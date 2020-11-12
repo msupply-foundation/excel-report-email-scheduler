@@ -36,6 +36,7 @@ export const AppConfiguration: FC<Props> = (props: Props) => {
   const defaultFormValues = {
     grafanaPassword: props.plugin.meta.jsonData?.grafanaPassword ?? '',
     grafanaUsername: props.plugin.meta.jsonData?.grafanaUsername ?? '',
+    grafanaURL: props.plugin.meta.jsonData?.grafanaURL ?? '',
     email: props.plugin.meta.jsonData?.email ?? '',
     emailPassword: props.plugin.meta.jsonData?.emailPassword ?? '',
     datasourceID: props.plugin.meta.jsonData?.datasourceID ?? 1,

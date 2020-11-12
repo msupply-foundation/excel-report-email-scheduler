@@ -156,7 +156,6 @@ func (datasource *SQLiteDatasource) Init() {
 	log.DefaultLogger.Info("Initializing Database")
 
 	err := datasource.Ping()
-
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Init - Ping. ", err.Error())
 		panic(err)
@@ -164,7 +163,6 @@ func (datasource *SQLiteDatasource) Init() {
 
 	db, err := sql.Open("sqlite3", datasource.Path)
 	defer db.Close()
-
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Init - sql.Open : ", err.Error())
 		panic(err)
@@ -173,15 +171,13 @@ func (datasource *SQLiteDatasource) Init() {
 	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
 	stmt.Exec()
 	defer stmt.Close()
-
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Could not create Schedule:", err.Error())
 		panic(err)
 	}
 
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS Config (id TEXT PRIMARY KEY, grafanaUsername TEXT, grafanaPassword TEXT, emailPassword TEXT, email TEXT, datasourceID INTEGER, emailHost TEXT, emailPort INTEGER)")
+	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS Config (id TEXT PRIMARY KEY, grafanaUsername TEXT, grafanaPassword TEXT, emailPassword TEXT, email TEXT, datasourceID INTEGER, emailHost TEXT, emailPort INTEGER, grafanaURL TEXT)")
 	stmt.Exec()
-
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Could not create Config:", err.Error())
 		panic(err)
@@ -189,7 +185,6 @@ func (datasource *SQLiteDatasource) Init() {
 
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroup (id TEXT PRIMARY KEY, name TEXT, description TEXT)")
 	stmt.Exec()
-
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Could not create ReportGroup:", err.Error())
 		panic(err)
@@ -205,9 +200,10 @@ func (datasource *SQLiteDatasource) Init() {
 
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, storeID TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
-
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Could not create ReportContent:", err.Error())
 		panic(err)
 	}
+
+	log.DefaultLogger.Info("Database initialized!")
 }
