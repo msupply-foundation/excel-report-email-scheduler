@@ -13,12 +13,12 @@ export const getGroupMembers = (key: string, groupId: string) =>
 
 export const getReportGroups = () => getBackendSrv().get('api/plugins/msupply-datasource/resources/report-group');
 
-export const getUsers = () => {
+export const getUsers = (datasourceID: number) => {
   return getBackendSrv()
     .post('/api/tsdb/query', {
       queries: [
         {
-          datasourceId: 1,
+          datasourceId: datasourceID,
           rawSql: 'SELECT id, name, first_name, last_name, e_mail FROM "user"',
           format: 'table',
         },
@@ -49,12 +49,12 @@ export const getUsers = () => {
     });
 };
 
-export const getStores = () => {
+export const getStores = (datasourceID: number) => {
   return getBackendSrv()
     .post('/api/tsdb/query', {
       queries: [
         {
-          datasourceId: 1,
+          datasourceId: datasourceID,
           rawSql: 'SELECT id, name, code FROM "store"',
           format: 'table',
         },

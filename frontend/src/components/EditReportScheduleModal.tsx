@@ -3,14 +3,7 @@ import intl from 'react-intl-universal';
 import { Modal, Button, ConfirmModal } from '@grafana/ui';
 
 import { queryCache, useMutation } from 'react-query';
-import {
-  deleteSchedule,
-  // deleteReportContent,
-  // createReportContent,
-  // getPanels,
-  // getReportContent,
-  updateSchedule,
-} from 'api';
+import { deleteSchedule, updateSchedule } from 'api';
 
 import { css } from 'emotion';
 
@@ -24,6 +17,7 @@ type Props = {
   onClose: () => void;
   isOpen: boolean;
   reportSchedule: Schedule;
+  datasourceID: number;
 };
 
 const modalAdjustments = css`
@@ -38,48 +32,17 @@ const headerAdjustments = css`
   justify-content: flex-end;
 `;
 
-export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, isOpen }) => {
+export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, isOpen, datasourceID }) => {
   const [schedule, setReportSchedule] = useState<Schedule>(reportSchedule);
   const [deleteAlertIsOpen, setDeleteAlertIsOpen] = useToggle(false);
-
-  // const { data: content } = useQuery<ReportContent[] | null[]>({
-  //   queryKey: ['reportContent', reportSchedule?.id],
-  //   queryFn: getReportContent,
-  //   config: { enabled: !!reportSchedule },
-  // });
-
-  // const { data: panels } = useQuery({
-  //   queryKey: ['panels'],
-  //   queryFn: getPanels,
-  //   config: { enabled: !!reportSchedule },
-  // });
 
   const [updateReportSchedule] = useMutation(updateSchedule, {
     onSuccess: () => queryCache.refetchQueries(['reportSchedules']),
   });
 
-  // const [createContent] = useMutation(createReportContent, {
-  //   onSuccess: () => queryCache.refetchQueries(['reportContent', reportSchedule?.id]),
-  // });
-
-  // const [deleteContent] = useMutation(deleteReportContent, {
-  //   onSuccess: () => queryCache.refetchQueries(['reportContent', reportSchedule?.id]),
-  // });
-
   const [deleteReportSchedule] = useMutation(deleteSchedule, {
     onSuccess: () => queryCache.refetchQueries(['reportSchedules']),
   });
-
-  // const onTogglePanel = async (panel: any) => {
-  //   // Exists, need to remove.
-  //   if (!!content?.[panel?.id]) {
-  //     await deleteContent(panel);
-  //   } else {
-  //     if (content) {
-  //       await createContent({ scheduleID: schedule?.id, panelID: panel?.id });
-  //     }
-  //   }
-  // };
 
   useEffect(() => {
     if (!schedule) {
@@ -101,17 +64,6 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
     onClose();
   };
 
-  // const onUpdateReportContent = (key: string, newValue: any) => {
-  //   if (key === 'storeID') {
-  //     const csv = newValue
-  //       .map((store: any) => {
-  //         return store.id;
-  //       })
-  //       .join(', ');
-  //     console.log(csv);
-  //   }
-  // };
-
   return (
     <Modal
       className={modalAdjustments}
@@ -127,7 +79,7 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
         </Button>
       </div>
 
-      <PanelList schedule={reportSchedule} />
+      <PanelList schedule={reportSchedule} datasourceID={datasourceID} />
 
       <ConfirmModal
         isOpen={deleteAlertIsOpen}

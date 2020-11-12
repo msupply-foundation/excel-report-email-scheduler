@@ -8,8 +8,9 @@ import { Button, Legend } from '@grafana/ui';
 import { EditReportScheduleModal } from './EditReportScheduleModal';
 import { Schedule } from 'common/types';
 import { ScheduleList } from './Schedules/ScheduleList';
+import { AppRootProps } from '@grafana/data';
 
-type Props = {};
+interface Props extends AppRootProps {}
 
 export type ReportGroup = {
   id?: string;
@@ -23,7 +24,7 @@ const headerAdjustment = css`
   margin-bottom: 10px;
 `;
 
-export const ReportSchedulesTab: FC<Props> = () => {
+export const ReportSchedulesTab: FC<Props> = ({ meta }) => {
   const [activeGroup, setActiveSchedule] = useState<Schedule | null>(null);
 
   // TODO: Use Grafana internal Toasting for success/failure.
@@ -46,6 +47,7 @@ export const ReportSchedulesTab: FC<Props> = () => {
       <ScheduleList onRowPress={setActiveSchedule} />
       {activeGroup && (
         <EditReportScheduleModal
+          datasourceID={meta?.jsonData?.datasourceID}
           reportSchedule={activeGroup}
           isOpen={!!activeGroup}
           onClose={() => setActiveSchedule(null)}
