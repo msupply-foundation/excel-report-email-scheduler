@@ -3,9 +3,9 @@ import intl from 'react-intl-universal';
 import { ReactQueryDevtools } from 'react-query-devtools';
 import { AppRootProps } from '@grafana/data';
 import { locales } from '../common/translations';
-import { useTabs } from 'hooks';
-import { ReportGroupTab } from './ReportGroupTab';
-import { ReportSchedulesTab } from './ReportSchedulesTab';
+import { useTabs } from '../hooks';
+import { ReportGroupTab } from './Groups/ReportGroupTab';
+import { ReportSchedulesTab } from './Schedules/ReportSchedulesTab';
 
 interface Props extends AppRootProps {}
 

@@ -57,5 +57,13 @@
   "email_port": "Email port",
   "email_host": "Email host",
   "email_port_description": "The port of the email address from which to send emails from.",
-  "email_host_description": "The host of the email address from which to send emails from."
+  "email_host_description": "The host of the email address from which to send emails from.",
+  "new_report_group": "New report group",
+  "variables": "Variables",
+  "variables_tooltip": "These are the variables which are used within this panels query. They are created within the panels dashboard settings - view that for more information.",
+  "edit_details": "Edit details",
+  "edit_details_report_group_tooltip": "Edit the details of this report group here.",
+  "available_panels": "Available Panels",
+  "users": "Users",
+  "users_tooltip": "Select a user who should be a part of this reporting group and receive emails from any report schedule assigned this group. Only users who have an email entered into your mSupply instance can be selected."
 }

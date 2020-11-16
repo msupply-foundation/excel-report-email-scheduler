@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import intl from 'react-intl-universal';
 import { css } from 'emotion';
-import { Field, Input, Select } from '@grafana/ui';
+import { InlineFormLabel, Input, Legend, Select } from '@grafana/ui';
 
 import { ScheduleKey } from 'common/enums';
 import { ReportGroup, Schedule } from 'common/types';
@@ -27,6 +27,9 @@ const container = css`
 `;
 
 const flexWrapping = css`
+  display: flex;
+  flex-direction: row;
+  flex: 1;
   flex-basis: calc(50% - 20px);
 `;
 
@@ -40,7 +43,10 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
 
   return (
     <div className={container}>
-      <Field className={flexWrapping} label={intl.get('name')} description={intl.get('group_name')}>
+      <Legend>{intl.get('edit_details')}</Legend>
+      <div className={flexWrapping}>
+        <InlineFormLabel tooltip={intl.get('group_name')}>{intl.get('name')}</InlineFormLabel>
+
         <Input
           onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.NAME, value)}
           name={intl.get('name')}
@@ -48,9 +54,11 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
           placeholder={intl.get('name')}
           css=""
         />
-      </Field>
+      </div>
 
-      <Field className={flexWrapping} label={intl.get('description')} description={intl.get('group_description')}>
+      <div className={flexWrapping}>
+        <InlineFormLabel tooltip={intl.get('group_description')}>{intl.get('description')}</InlineFormLabel>
+
         <Input
           onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.DESCRIPTION, value)}
           name={intl.get('description')}
@@ -58,12 +66,13 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
           placeholder={intl.get('description')}
           css=""
         />
-      </Field>
-      <Field
-        className={flexWrapping}
-        label={intl.get('report_interval')}
-        description={intl.get('report_interval_description')}
-      >
+      </div>
+
+      <div className={flexWrapping}>
+        <InlineFormLabel tooltip={intl.get('report_interval_description')}>
+          {intl.get('report_interval')}
+        </InlineFormLabel>
+
         <Select
           value={getIntervals().filter((interval: any) => interval.value === schedule?.interval)}
           options={getIntervals()}
@@ -71,12 +80,11 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
             onUpdate(ScheduleKey.INTERVAL, selected.value);
           }}
         />
-      </Field>
-      <Field
-        className={flexWrapping}
-        label={intl.get('report_group')}
-        description={intl.get('report_group_description')}
-      >
+      </div>
+
+      <div className={flexWrapping}>
+        <InlineFormLabel tooltip={intl.get('report_group_description')}>{intl.get('report_group')}</InlineFormLabel>
+
         <Select
           value={reportGroups
             ?.filter((reportGroup: ReportGroup) => reportGroup.id === schedule.reportGroupID)
@@ -94,7 +102,7 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
             onUpdate(ScheduleKey.REPORT_GROUP_ID, selected?.value?.id ?? '');
           }}
         />
-      </Field>
+      </div>
     </div>
   );
 };

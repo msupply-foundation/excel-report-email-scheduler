@@ -1,8 +1,8 @@
 import React, { FC } from 'react';
 import intl from 'react-intl-universal';
 import { css } from 'emotion';
-import { Field, Input } from '@grafana/ui';
-import { ReportGroup } from './ReportSchedulesTab';
+import { Icon, InlineFormLabel, Input, Legend, Tooltip } from '@grafana/ui';
+import { ReportGroup } from '../Schedules/ReportSchedulesTab';
 import { ReportGroupKey } from 'common/enums';
 
 const container = css`
@@ -17,9 +17,24 @@ type Props = {
   reportGroup: ReportGroup | null;
 };
 
+const flexWrapping = css`
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  flex-basis: calc(50% - 20px);
+`;
+
 export const EditReportGroupForm: FC<Props> = ({ onUpdate, reportGroup }) => (
   <div className={container}>
-    <Field label={intl.get('name')} description={intl.get('group_name')}>
+    <div style={{ marginTop: '25px', display: 'flex', alignItems: 'center' }}>
+      <Tooltip placement="top" content={intl.get('edit_details_report_group_tooltip')} theme={'info'}>
+        <Icon name="info-circle" size="sm" style={{ marginLeft: '10px', marginRight: '10px', marginBottom: '16px' }} />
+      </Tooltip>
+      <Legend>{intl.get('edit_details')}</Legend>
+    </div>
+    <div className={flexWrapping}>
+      <InlineFormLabel tooltip={intl.get('group_name')}>{intl.get('name')}</InlineFormLabel>
+
       <Input
         onChange={({ currentTarget: { value } }) => onUpdate(ReportGroupKey.NAME, value)}
         name={intl.get('name')}
@@ -27,9 +42,11 @@ export const EditReportGroupForm: FC<Props> = ({ onUpdate, reportGroup }) => (
         placeholder={intl.get('name')}
         css=""
       />
-    </Field>
+    </div>
 
-    <Field label={intl.get('description')} description={intl.get('group_description')}>
+    <div className={flexWrapping}>
+      <InlineFormLabel tooltip={intl.get('description')}>{intl.get('group_description')}</InlineFormLabel>
+
       <Input
         onChange={({ currentTarget: { value } }) => onUpdate(ReportGroupKey.DESCRIPTION, value)}
         name={intl.get('description')}
@@ -37,6 +54,6 @@ export const EditReportGroupForm: FC<Props> = ({ onUpdate, reportGroup }) => (
         placeholder={intl.get('description')}
         css=""
       />
-    </Field>
+    </div>
   </div>
 );

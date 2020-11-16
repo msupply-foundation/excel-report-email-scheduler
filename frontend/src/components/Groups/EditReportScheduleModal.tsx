@@ -7,10 +7,10 @@ import { deleteSchedule, updateSchedule } from 'api';
 
 import { css } from 'emotion';
 
-import { PanelList } from './PanelList';
+import { PanelList } from '../Schedules/PanelList';
 import { useToggle } from 'hooks';
 import { Schedule } from 'common/types';
-import { EditScheduleForm } from './Schedules/EditScheduleForm';
+import { EditScheduleForm } from '../Schedules/EditScheduleForm';
 import { ScheduleKey } from 'common/enums';
 
 type Props = {
@@ -50,10 +50,8 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
     }
   }, [schedule, reportSchedule]);
 
-  // TODO: Handle error cases
   const onUpdateSchedule = (key: ScheduleKey, newValue: string | number) => {
     const newState: Schedule = { ...schedule, [key]: newValue };
-    // Optimistically update state to reflect changes immediately in UI.
     setReportSchedule(newState);
     updateReportSchedule(newState);
   };

@@ -6,7 +6,7 @@ import { css } from 'emotion';
 import { Button } from '@grafana/ui';
 import { DisabledState } from './DisabledState';
 
-import { FormValues } from '../types';
+import { FormValues } from '../../types';
 import { ConfigurationForm } from './ConfigurationForm';
 
 interface Props extends PluginConfigPageProps<AppPluginMeta> {}

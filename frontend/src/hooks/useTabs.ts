@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { TAB_ID_REPORT_GROUP, TAB_ID_REPORT_SCHEDULE } from 'components/RootPage';
 import { NavModel } from '@grafana/data';
 import intl from 'react-intl-universal';
@@ -32,14 +32,4 @@ export const useTabs = (activeTab: string, logo: string, path: string, onNavChan
       main: node,
     });
   }, [activeTab, path, logo, onNavChanged]);
-};
-
-export const useToggle: (initial: boolean) => [boolean, () => void] = (initial: boolean) => {
-  const [toggle, setToggle] = useState(initial);
-
-  const onToggle = useCallback(() => {
-    setToggle(state => !state);
-  }, [setToggle]);
-
-  return [toggle, onToggle];
 };

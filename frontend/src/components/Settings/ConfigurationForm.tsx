@@ -3,7 +3,7 @@ import intl from 'react-intl-universal';
 import { Field, FieldSet, Form, Input, Select } from '@grafana/ui';
 import { FC } from 'react';
 
-import { FormValues } from '../types';
+import { FormValues } from '../../types';
 import { useQuery } from 'react-query';
 import { getDatasources } from 'api';
 import { SelectableValue } from '@grafana/data';
