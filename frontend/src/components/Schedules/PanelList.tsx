@@ -9,7 +9,7 @@ import { Schedule, ReportContent, Panel, Store, CreateContentVars } from 'common
 
 import { useOptimisticMutation } from 'hooks/useOptimisticMutation';
 import { PanelItem } from './PanelItem';
-import { Legend } from '@grafana/ui';
+import { Icon, Legend, Tooltip } from '@grafana/ui';
 
 const listStyle = classNames({
   'card-section': true,
@@ -92,7 +92,16 @@ export const PanelList: FC<Props> = ({ schedule, datasourceID }) => {
 
   return (
     <div style={{ marginTop: '25px' }}>
-      <Legend>{intl.get('available_panels')}</Legend>
+      <div style={{ display: 'flex', flex: 1, alignItems: 'center' }}>
+        <Tooltip placement="top" content={intl.get('available_panels_tooltip')} theme={'info'}>
+          <Icon
+            name="info-circle"
+            size="sm"
+            style={{ marginLeft: '10px', marginRight: '10px', marginBottom: '16px' }}
+          />
+        </Tooltip>
+        <Legend>{intl.get('available_panels')}</Legend>
+      </div>
       <ol className={listStyle}>
         {panels?.map((panel: any) => {
           const matchingContent = getMatchingContent(panel);

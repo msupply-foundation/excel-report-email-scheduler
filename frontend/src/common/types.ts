@@ -89,6 +89,7 @@ export type Variable = {
   label: string;
   type: string;
   name: string;
+  datasource: string;
   options: VariableOption[];
   multi: boolean;
 };

@@ -142,13 +142,48 @@ export const searchForDashboards = async (): Promise<DashboardMeta[]> => {
   return getBackendSrv().get('./api/search');
 };
 
-export const getPanels = async (): Promise<Panel[]> => {
+export const getDatasource = async (id: number) => {
+  return getBackendSrv().get(`./api/datasources/${id}`);
+};
+
+export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
   const dashboards = (await getDashboards()) ?? [];
+  const datasource = await getDatasource(datasourceID);
+  const { name: datasourceName = '' } = datasource ?? {};
+
   const panels: Panel[] = dashboards
     .filter(({ panels }) => panels?.length > 0)
     .map<Panel[]>(({ panels, templating, uid }) => {
       const mappedPanels = panels
         .filter(({ type }) => type === 'table')
+        .filter(({ targets, title }) => {
+          const [target] = targets;
+          const { rawSql } = target;
+
+          const { list } = templating;
+
+          // Want to filter out any panel which uses variables which aren't supported
+          // Supported variables are custom and query types where the query type must
+          // use the datasource specified in mSupply App Configuration.
+          const unusableVariables = list.filter((variable: Variable) => {
+            const { datasource, type } = variable;
+            if (type !== 'custom' && type !== 'query') {
+              return true;
+            } else if (type === 'query') {
+              return datasourceName !== datasource;
+            } else {
+              return false;
+            }
+          });
+
+          const usesUnusableVariables = unusableVariables.some(variable => {
+            const { name: variableName } = variable;
+            return panelUsesVariable(rawSql, variableName);
+          });
+
+          console.log(title, usesUnusableVariables, unusableVariables);
+          return !usesUnusableVariables;
+        })
         .map(rawPanel => {
           const { targets, description, title, id, type } = rawPanel;
 

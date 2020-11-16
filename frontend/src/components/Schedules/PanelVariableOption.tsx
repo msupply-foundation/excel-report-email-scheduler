@@ -18,21 +18,25 @@ export const PanelVariableOptions: FC<Props> = ({
   selectedOptions,
   selectableOptions,
 }) => {
+  console.log(name, selectedOptions, selectableOptions);
   return (
     <div style={{ display: 'flex', flexDirection: 'row', marginTop: '5px' }}>
       <InlineFormLabel>{name}</InlineFormLabel>
       {!multiSelectable ? (
         <Select
           value={selectableOptions.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
-          onChange={(selectedLookback: SelectableValue) => onUpdate([selectedLookback])}
+          onChange={(selected: SelectableValue<SelectableVariable>) => onUpdate([selected])}
           options={selectableOptions}
         />
       ) : (
         <MultiSelect
-          onChange={(selectedLookback: SelectableValue) => onUpdate(selectedLookback)}
-          value={selectableOptions.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
-          filterOption={(option: SelectableValue, searchQuery: string) =>
-            !!option?.text?.startsWith(searchQuery.toLowerCase())
+          onChange={(selected: SelectableValue<SelectableVariable>) => onUpdate(selected)}
+          value={selectableOptions.filter(
+            (option: SelectableValue<SelectableVariable>) =>
+              !!selectedOptions?.find((selected: string) => selected === option?.value?.value)
+          )}
+          filterOption={(option: SelectableValue<SelectableVariable>, searchQuery: string) =>
+            !!option?.label?.toLowerCase().includes(searchQuery.toLowerCase())
           }
           closeMenuOnSelect={false}
           options={selectableOptions}

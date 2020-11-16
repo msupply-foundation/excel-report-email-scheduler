@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import intl from 'react-intl-universal';
 import { css } from 'emotion';
-import { InlineFormLabel, Input, Legend, Select } from '@grafana/ui';
+import { Icon, InlineFormLabel, Input, Legend, Select, Tooltip } from '@grafana/ui';
 
 import { ScheduleKey } from 'common/enums';
 import { ReportGroup, Schedule } from 'common/types';
@@ -24,6 +24,7 @@ const container = css`
   flex-wrap: wrap;
   flex: 1;
   padding-right: 30px;
+  flex-direction: column;
 `;
 
 const flexWrapping = css`
@@ -43,7 +44,17 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
 
   return (
     <div className={container}>
-      <Legend>{intl.get('edit_details')}</Legend>
+      <div style={{ display: 'flex', flex: 1, alignItems: 'center' }}>
+        <Tooltip placement="top" content={intl.get('edit_details_schedule_tooltip')} theme={'info'}>
+          <Icon
+            name="info-circle"
+            size="sm"
+            style={{ marginLeft: '10px', marginRight: '10px', marginBottom: '16px' }}
+          />
+        </Tooltip>
+        <Legend>{intl.get('edit_details')}</Legend>
+      </div>
+
       <div className={flexWrapping}>
         <InlineFormLabel tooltip={intl.get('group_name')}>{intl.get('name')}</InlineFormLabel>
 

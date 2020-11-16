@@ -19,13 +19,10 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
   const { data: datasources } = useQuery('datasources', getDatasources);
   const [selectedDatasource, selectDatasource] = useState<SelectableValue | null>(null);
 
-  const wrappedSubmit = (params: any) => {
-    onSubmit({ ...params, datasourceID: selectedDatasource?.value?.id });
-  };
+  const wrappedSubmit = (params: any) => onSubmit({ ...params, datasourceID: selectedDatasource?.value?.id });
 
   useEffect(() => {
     const found = datasources?.find((ds: any) => ds.id === formValues.datasourceID);
-
     if (found) {
       selectDatasource({ label: found.name, value: found });
     }
