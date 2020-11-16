@@ -72,16 +72,18 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
     >
       <div className={headerAdjustments}>
         <EditScheduleForm schedule={schedule} onUpdate={onUpdateSchedule} />
-        <Button size="md" variant="destructive" onClick={setDeleteAlertIsOpen}>
-          {intl.get('delete')}
-        </Button>
-        {isLoading ? (
-          <Spinner />
-        ) : (
-          <Button size="md" variant="primary" onClick={() => testEmails(schedule.id)}>
-            {intl.get('send_test_emails')}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <Button size="md" variant="destructive" onClick={setDeleteAlertIsOpen}>
+            {intl.get('delete')}
           </Button>
-        )}
+          {isLoading ? (
+            <Spinner />
+          ) : (
+            <Button size="md" variant="primary" style={{ marginTop: '10px' }} onClick={() => testEmails(schedule.id)}>
+              {intl.get('send_test_emails')}
+            </Button>
+          )}
+        </div>
       </div>
 
       <PanelList schedule={reportSchedule} datasourceID={datasourceID} />

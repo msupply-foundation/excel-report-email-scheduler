@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import intl from 'react-intl-universal';
-import { Field, FieldSet, Form, Input, Select } from '@grafana/ui';
+import { Field, FieldSet, FieldValidationMessage, Form, InlineFormLabel, Input, Select } from '@grafana/ui';
 import { FC } from 'react';
 
 import { FormValues } from '../../types';
 import { useQuery } from 'react-query';
 import { getDatasources } from 'api';
 import { SelectableValue } from '@grafana/data';
+import { FieldInput } from 'components/FieldInput';
+import { mapInternalLinkToExplore } from '@grafana/data/utils/dataLinks';
 
 type OnSubmit<FormValues> = (data: FormValues) => void;
 
@@ -40,121 +42,90 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
           emailHost,
           emailPort,
         } = getValues();
-
+        console.log(errors);
         return (
           <>
-            <FieldSet label="Grafana Details">
-              <Field
-                label={intl.get('grafanaUsername')}
-                description={intl.get('grafanaDescription')}
+            <FieldSet label={intl.get('grafana_details')}>
+              <FieldInput
+                tooltip={intl.get('grafana_username_tooltip')}
+                label={intl.get('grafana_username')}
+                defaultValue={grafanaUsername}
+                placeholder={intl.get('grafana_username')}
+                inputName="grafanaUsername"
                 invalid={!!errors.grafanaUsername}
-                error={errors.grafanaUsername?.message}
-              >
-                <Input
-                  defaultValue={grafanaUsername}
-                  placeholder={intl.get('grafanaUsername')}
-                  name="grafanaUsername"
-                  ref={register({ required: 'required!' })}
-                  css=""
-                  loading
-                />
-              </Field>
-              <Field
-                label={intl.get('grafanaPassword')}
+                errorMessage={errors.grafanaUsername?.message ?? ''}
+                register={() => register({ required: intl.get('required') })}
+              />
+              <FieldInput
+                type="password"
+                tooltip={intl.get('grafana_password_tooltip')}
+                label={intl.get('grafana_password')}
+                defaultValue={grafanaPassword}
+                placeholder={intl.get('grafana_password')}
+                inputName="grafanaPassword"
                 invalid={!!errors.grafanaPassword}
-                error={errors.grafanaPassword?.message}
-              >
-                <Input
-                  type="password"
-                  defaultValue={grafanaPassword}
-                  placeholder={intl.get('grafanaPassword')}
-                  name="grafanaPassword"
-                  ref={register({ required: intl.get('required') })}
-                  css=""
-                  loading
-                />
-              </Field>
-              <Field
+                errorMessage={errors.grafanaPassword?.message ?? ''}
+                register={() => register({ required: intl.get('required') })}
+              />
+              <FieldInput
+                tooltip={intl.get('grafana_url_tooltip')}
                 label={intl.get('grafana_url')}
-                description={intl.get('grafana_url_description')}
+                defaultValue={grafanaURL}
+                placeholder={intl.get('grafana_url')}
+                inputName="grafanaURL"
                 invalid={!!errors.grafanaURL}
-                error={errors.grafanaURL?.message}
-              >
-                <Input
-                  defaultValue={grafanaURL}
-                  placeholder={intl.get('grafana_url')}
-                  name="grafanaURL"
-                  ref={register({ required: intl.get('required') })}
-                  css=""
-                  loading
-                />
-              </Field>
-            </FieldSet>
-            <FieldSet label="Email Details">
-              <Field
-                label={intl.get('emailUsername')}
-                description={intl.get('emailDescription')}
-                invalid={!!errors.email}
-                error={errors.email?.message}
-              >
-                <Input
-                  defaultValue={email}
-                  placeholder={intl.get('email')}
-                  name="email"
-                  ref={register({ required: intl.get('required') })}
-                  css=""
-                  loading
-                />
-              </Field>
-              <Field
-                label={intl.get('emailPassword')}
-                invalid={!!errors.emailPassword}
-                error={errors.emailPassword?.message}
-              >
-                <Input
-                  type="password"
-                  defaultValue={emailPassword}
-                  placeholder={intl.get('emailPassword')}
-                  name="emailPassword"
-                  ref={register({ required: intl.get('required') })}
-                  css=""
-                  loading
-                />
-              </Field>
-              <Field
-                label={intl.get('email_host')}
-                description={intl.get('email_host_description')}
-                invalid={!!errors.emailHost}
-                error={errors.emailHost?.message}
-              >
-                <Input
-                  defaultValue={emailHost}
-                  placeholder={intl.get('email_host')}
-                  name="emailHost"
-                  ref={register({ required: intl.get('required') })}
-                  css=""
-                  loading
-                />
-              </Field>
-              <Field
-                label={intl.get('email_port')}
-                description={intl.get('email_port')}
-                invalid={!!errors.emailPort}
-                error={errors.emailPort?.message}
-              >
-                <Input
-                  defaultValue={emailPort}
-                  placeholder={intl.get('email_port')}
-                  name="emailPort"
-                  ref={register({ required: intl.get('required') })}
-                  css=""
-                  loading
-                />
-              </Field>
+                errorMessage={errors.grafanaURL?.message ?? ''}
+                register={() => register({ required: intl.get('required') })}
+              />
             </FieldSet>
 
-            <FieldSet label="Datasource details">
-              <Field label={intl.get('datasource')} description={intl.get('datasource_details')}>
+            <FieldSet label={intl.get('email_details')}>
+              <FieldInput
+                tooltip={intl.get('email_tooltip')}
+                label={intl.get('email_address')}
+                defaultValue={email}
+                placeholder={intl.get('email_address')}
+                inputName="email"
+                invalid={!!errors.email}
+                errorMessage={errors.email?.message ?? ''}
+                register={() => register({ required: intl.get('required') })}
+              />
+              <FieldInput
+                type="password"
+                tooltip={intl.get('email_password_tooltip')}
+                label={intl.get('email_password')}
+                defaultValue={emailPassword}
+                placeholder={intl.get('email_password')}
+                inputName="emailPassword"
+                invalid={!!errors.emailPassword}
+                errorMessage={errors.emailPassword?.message ?? ''}
+                register={() => register({ required: intl.get('required') })}
+              />
+              <FieldInput
+                tooltip={intl.get('email_host_tooltip')}
+                label={intl.get('email_host')}
+                defaultValue={emailHost}
+                placeholder={intl.get('email_host')}
+                inputName="emailHost"
+                invalid={!!errors.emailHost}
+                errorMessage={errors.emailHost?.message ?? ''}
+                register={() => register({ required: intl.get('required') })}
+              />
+
+              <FieldInput
+                tooltip={intl.get('email_port_tooltip')}
+                label={intl.get('email_port')}
+                defaultValue={emailPort}
+                placeholder={intl.get('email_port')}
+                inputName="emailPort"
+                invalid={!!errors.emailPort}
+                errorMessage={errors.emailPort?.message ?? ''}
+                register={() => register({ required: intl.get('required') })}
+              />
+            </FieldSet>
+
+            <FieldSet label={intl.get('datasource_details')}>
+              <Field label={intl.get('datasource')} description={intl.get('datasource_details_tooltip')}>
                 <Select
                   value={selectedDatasource}
                   options={datasources?.map((datasource: any) => ({ label: datasource.name, value: datasource })) ?? []}
@@ -165,15 +136,15 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
               </Field>
             </FieldSet>
 
-            <Field label={intl.get('saveDetails')} description={intl.get('saveDetailsDescription')}>
+            <Field label={intl.get('save_details')} description={intl.get('save_details_description')}>
               <Input
                 value={intl.get('submit')}
                 type="submit"
-                placeholder="Submit"
+                placeholder={intl.get('submit')}
                 name="submit"
                 css=""
                 disabled={formState.dirty}
-              ></Input>
+              />
             </Field>
           </>
         );
