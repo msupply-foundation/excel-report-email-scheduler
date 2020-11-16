@@ -1,9 +1,9 @@
+import { panelUsesVariable } from './common/utils/checkers';
+import { DashboardResponse, DashboardMeta, CreateContentVars } from './common/types';
 import { getBackendSrv } from '@grafana/runtime';
-import { ReportGroupMember, Schedule } from 'common/types';
+import { Variable, Panel, ReportGroupMember, Schedule, Store } from 'common/types';
 
 export const getRecipients = () => getBackendSrv().get('api/plugins/msupply-datasource/resources/report-recipient');
-
-export const getDashboards = () => getBackendSrv().get('/api/search');
 
 export const getGroupAssignments = (key: string, groupId: string) =>
   getBackendSrv().get(`api/plugins/msupply-datasource/resources/report-group-membership/?group-id=${groupId}`);
@@ -49,7 +49,7 @@ export const getUsers = (datasourceID: number) => {
     });
 };
 
-export const getStores = (datasourceID: number) => {
+export const getStores = (datasourceID: number): Promise<Store[]> => {
   return getBackendSrv()
     .post('/api/tsdb/query', {
       queries: [
@@ -126,35 +126,63 @@ export const getReportContent = async (_: string, scheduleID: string) => {
     `./api/plugins/msupply-datasource/resources/report-content?schedule-id=${scheduleID}`
   );
   return content;
-  return content.reduce((acc: any, value: any) => ({ ...acc, [value.panelID]: value }), {});
 };
 
-// TODO: Make this not terrible!
-// Searches for all dashboards, then does a query for each dashboard and maps each
-// dashboards panel if it is a table format panel.
-export const getPanels = async () => {
-  return (
-    await Promise.all(
-      (await getBackendSrv().get('./api/search')).map((dash: any) => {
-        return getBackendSrv().get(`./api/dashboards/uid/${dash.uid}`);
-      })
-    )
-  )
-    .map((det: any) => det.dashboard)
-    .map(
-      (dashboard: any) =>
-        dashboard?.panels
-          ?.filter((panel: any) => panel?.targets?.[0].format === 'table')
-          .map((panel: any) => ({ ...panel, dashboardID: dashboard.uid })) ?? []
-    )
+export const getDashboards = async () => {
+  const dashboardMeta = await searchForDashboards();
+  const dashboardResponses = await Promise.all<DashboardResponse>(dashboardMeta.map(({ uid }) => getDashboard(uid)));
+  return dashboardResponses.map(({ dashboard }) => dashboard);
+};
+
+export const getDashboard = async (uuid: string): Promise<DashboardResponse> => {
+  return getBackendSrv().get(`./api/dashboards/uid/${uuid}`);
+};
+
+export const searchForDashboards = async (): Promise<DashboardMeta[]> => {
+  return getBackendSrv().get('./api/search');
+};
+
+export const getPanels = async (): Promise<Panel[]> => {
+  const dashboards = (await getDashboards()) ?? [];
+  const panels: Panel[] = dashboards
+    .filter(({ panels }) => panels?.length > 0)
+    .map<Panel[]>(({ panels, templating, uid }) => {
+      const mappedPanels = panels
+        .filter(({ type }) => type === 'table')
+        .map(rawPanel => {
+          const { targets, description, title, id, type } = rawPanel;
+
+          const [target] = targets;
+          const { rawSql } = target;
+
+          const dashboardID = uid;
+
+          const { list } = templating;
+
+          const variables =
+            list?.reduce((acc: any, variable: Variable) => {
+              if (panelUsesVariable(rawSql, variable.name)) {
+                return [...acc, variable];
+              } else {
+                return acc;
+              }
+            }, []) ?? [];
+
+          const mappedPanel = { rawSql, description, title, id, variables, dashboardID, type };
+          return mappedPanel;
+        });
+      return mappedPanels;
+    })
     .flat();
+
+  return panels;
 };
 
 export const updateSchedule = async (schedule: Schedule) => {
   return getBackendSrv().put(`./api/plugins/msupply-datasource/resources/schedule/${schedule?.id}`, schedule);
 };
 
-export const createReportContent = async (contents: any) => {
+export const createReportContent = async (contents: CreateContentVars) => {
   return getBackendSrv().post(`./api/plugins/msupply-datasource/resources/report-content`, contents);
 };
 
