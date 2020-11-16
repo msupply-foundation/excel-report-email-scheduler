@@ -14,30 +14,38 @@ type Props = {
   type?: string;
 };
 
-export const FieldInput = React.forwardRef<HTMLInputElement, Props>(
-  ({ tooltip, type = 'text', label, register, defaultValue, placeholder, inputName, invalid, errorMessage }, ref) => {
-    return (
-      <div className="gf-form">
-        <InlineFormLabel className="width-14" tooltip={tooltip}>
-          {label}
-        </InlineFormLabel>
-        <div style={{ display: 'flex', flex: 1, flexDirection: 'column' }}>
-          <Input
-            type={type}
-            defaultValue={defaultValue}
-            placeholder={placeholder}
-            name={inputName}
-            ref={register()}
-            css=""
-          />
+export const FieldInput: FC<Props> = ({
+  tooltip,
+  type = 'text',
+  label,
+  register,
+  defaultValue,
+  placeholder,
+  inputName,
+  invalid,
+  errorMessage,
+}) => {
+  return (
+    <div className="gf-form">
+      <InlineFormLabel className="width-14" tooltip={tooltip}>
+        {label}
+      </InlineFormLabel>
+      <div style={{ display: 'flex', flex: 1, flexDirection: 'column' }}>
+        <Input
+          type={type}
+          defaultValue={defaultValue}
+          placeholder={placeholder}
+          name={inputName}
+          ref={register()}
+          css=""
+        />
 
-          {invalid && (
-            <div>
-              <FieldValidationMessage>{errorMessage}</FieldValidationMessage>
-            </div>
-          )}
-        </div>
+        {invalid && (
+          <div>
+            <FieldValidationMessage>{errorMessage}</FieldValidationMessage>
+          </div>
+        )}
       </div>
-    );
-  }
-);
+    </div>
+  );
+};

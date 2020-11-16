@@ -9,6 +9,7 @@ import { getDatasources } from 'api';
 import { SelectableValue } from '@grafana/data';
 import { FieldInput } from 'components/FieldInput';
 import { mapInternalLinkToExplore } from '@grafana/data/utils/dataLinks';
+import { FieldSelect } from 'components/FieldSelect';
 
 type OnSubmit<FormValues> = (data: FormValues) => void;
 
@@ -125,15 +126,15 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
             </FieldSet>
 
             <FieldSet label={intl.get('datasource_details')}>
-              <Field label={intl.get('datasource')} description={intl.get('datasource_details_tooltip')}>
-                <Select
-                  value={selectedDatasource}
-                  options={datasources?.map((datasource: any) => ({ label: datasource.name, value: datasource })) ?? []}
-                  onChange={(selectedDatasource: SelectableValue) => {
-                    selectDatasource(selectedDatasource);
-                  }}
-                />
-              </Field>
+              <FieldSelect
+                label={intl.get('datasource')}
+                tooltip={intl.get('datasource_tooltip')}
+                value={selectedDatasource}
+                options={datasources?.map((datasource: any) => ({ label: datasource.name, value: datasource })) ?? []}
+                onChange={(selectedDatasource: SelectableValue) => {
+                  selectDatasource(selectedDatasource);
+                }}
+              />
             </FieldSet>
 
             <Field label={intl.get('save_details')} description={intl.get('save_details_description')}>
