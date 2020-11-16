@@ -44,13 +44,6 @@
       "role": "Viewer",
       "addToNav": true,
       "defaultNav": false
-    },
-    {
-      "type": "page",
-      "name": "App configuration",
-      "path": "/plugins/msupply/?page=page1",
-      "role": "Viewer",
-      "addToNav": true
     }
   ],
   "dependencies": {
