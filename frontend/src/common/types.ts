@@ -17,7 +17,7 @@ export type ReportGroupMember = {
 };
 
 export type Schedule = {
-  id?: string;
+  id: string;
   name?: string;
   description?: string;
   interval?: number;
@@ -32,4 +32,90 @@ export type ReportContent = {
   storeID: string;
   lookback: number;
   dashboardID: string;
+  variables: string;
+};
+
+export type RawPanelTarget = {
+  rawSql: string;
+};
+
+export type RawPanel = {
+  targets: RawPanelTarget[];
+  title: string;
+  description: string;
+  id: number;
+  dashboardID: string;
+  type: string;
+};
+
+export type Panel = {
+  id: number;
+  dashboardID: string;
+  variables: Variable[];
+  description: string;
+  title: string;
+  rawSql: string;
+  type: string;
+};
+
+export type Store = {
+  name: string;
+  id: string;
+};
+
+export interface CreateContentVars {
+  scheduleID: string;
+  panelID: number;
+  dashboardID: string;
+  variables: string;
+}
+export interface CreateGroupMemberVariables {
+  user: User;
+  reportGroupID: string;
+}
+
+export interface CreateReportGroupVariables {}
+
+export type AppData = {
+  datasourceID: number;
+};
+
+export type VariableOption = {
+  text: string;
+  value: string;
+};
+
+export type Variable = {
+  label: string;
+  type: string;
+  name: string;
+  options: VariableOption[];
+  multi: boolean;
+};
+
+export type Templating = {
+  list: Variable[];
+};
+
+export type Dashboard = {
+  uid: string;
+  panels: RawPanel[];
+  templating: Templating;
+};
+
+export type DashboardResponse = {
+  dashboard: Dashboard;
+};
+
+export type DashboardMeta = {
+  uid: string;
+};
+
+export type ContentVariables = {
+  [key: string]: string[];
+};
+
+export type SelectableVariable = {
+  name: string;
+  value: string;
 };
