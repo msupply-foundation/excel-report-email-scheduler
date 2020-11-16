@@ -14,6 +14,7 @@ type ReportContent struct {
 	DashboardID string `json:"dashboardID"`
 	Lookback    int    `json:"lookback"`
 	StoreID     string `json:"storeID"`
+	Variables   string `json:"variables"`
 }
 
 func ReportContentFields() string {
@@ -38,15 +39,15 @@ func (datasource *SQLiteDatasource) GetReportContent(scheduleID string) ([]Repor
 	}
 
 	for rows.Next() {
-		var ID, ScheduleID, StoreID, DashboardID string
+		var ID, ScheduleID, StoreID, DashboardID, Variables string
 		var Lookback, PanelID int
-		err = rows.Scan(&ID, &ScheduleID, &PanelID, &DashboardID, &Lookback, &StoreID)
+		err = rows.Scan(&ID, &ScheduleID, &PanelID, &DashboardID, &Lookback, &StoreID, &Variables)
 		if err != nil {
 			log.DefaultLogger.Error("GetReportContent: rows.Scan() ", err.Error())
 			return nil, err
 		}
 
-		content := ReportContent{ID, ScheduleID, PanelID, DashboardID, Lookback, StoreID}
+		content := ReportContent{ID, ScheduleID, PanelID, DashboardID, Lookback, StoreID, Variables}
 		reportContent = append(reportContent, content)
 	}
 
@@ -85,16 +86,16 @@ func (datasource *SQLiteDatasource) CreateReportContent(newReportContentValues R
 		return nil, err
 	}
 
-	reportContent := ReportContent{ID: uuid.New().String(), ScheduleID: newReportContentValues.ScheduleID, PanelID: newReportContentValues.PanelID, DashboardID: newReportContentValues.DashboardID, Lookback: 0, StoreID: ""}
+	reportContent := ReportContent{ID: uuid.New().String(), ScheduleID: newReportContentValues.ScheduleID, PanelID: newReportContentValues.PanelID, DashboardID: newReportContentValues.DashboardID, Lookback: 0, StoreID: "", Variables: ""}
 
-	stmt, err := db.Prepare("INSERT INTO ReportContent (id, scheduleID, panelID, dashboardID, lookback, storeID) VALUES (?,?,?,?,?,?)")
+	stmt, err := db.Prepare("INSERT INTO ReportContent (id, scheduleID, panelID, dashboardID, lookback, storeID, variables) VALUES (?,?,?,?,?,?,?)")
 	defer stmt.Close()
 	if err != nil {
 		log.DefaultLogger.Error("CreateReportContent: ", err.Error())
 		return nil, err
 	}
 
-	_, err = stmt.Exec(reportContent.ID, reportContent.ScheduleID, reportContent.PanelID, reportContent.DashboardID, reportContent.Lookback, reportContent.StoreID)
+	_, err = stmt.Exec(reportContent.ID, reportContent.ScheduleID, reportContent.PanelID, reportContent.DashboardID, reportContent.Lookback, reportContent.StoreID, reportContent.Variables)
 	if err != nil {
 		log.DefaultLogger.Error("CreateReportContent: ", err.Error())
 		return nil, err
@@ -111,14 +112,14 @@ func (datasource *SQLiteDatasource) UpdateReportContent(id string, reportContent
 		return nil, err
 	}
 
-	stmt, err := db.Prepare("UPDATE ReportContent SET scheduleID = ?, panelID = ?, storeID = ?, lookback = ? where id = ?")
+	stmt, err := db.Prepare("UPDATE ReportContent SET scheduleID = ?, panelID = ?, storeID = ?, lookback = ?, variables = ? where id = ?")
 	defer stmt.Close()
 	if err != nil {
 		log.DefaultLogger.Error("UpdateReportContent: db.Prepare: ", err.Error())
 		return nil, err
 	}
 
-	_, err = stmt.Exec(reportContent.ScheduleID, reportContent.PanelID, reportContent.StoreID, reportContent.Lookback, id)
+	_, err = stmt.Exec(reportContent.ScheduleID, reportContent.PanelID, reportContent.StoreID, reportContent.Lookback, reportContent.Variables, id)
 	if err != nil {
 		log.DefaultLogger.Error("UpdateReportContent: db.Exec: ", err.Error())
 		return nil, err

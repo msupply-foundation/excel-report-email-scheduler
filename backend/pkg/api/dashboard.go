@@ -13,6 +13,7 @@ import (
 type TemplateVariable struct {
 	Definition string `json:"definition"`
 	Name       string `json:"name"`
+	Type       string `json:"type"`
 }
 
 type TemplateList struct {
@@ -152,8 +153,8 @@ func NewDashboardResponse(response *http.Response) (*DashboardResponse, error) {
 	if err != nil {
 		log.DefaultLogger.Error("NewDashboardResponse: json.Unmarshal: " + err.Error())
 		return nil, err
-
 	}
+
 	return &dashboardResponse, err
 }
 
@@ -173,14 +174,18 @@ func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to stri
 
 	var panels []TablePanel
 	for _, panel := range dashboardResponse.Dashboard.Panels {
-		newPanel := NewTablePanel(panel.ID, panel.Title, panel.Targets[0].RawSQL, from, to, datasourceID)
-		panels = append(panels, *newPanel)
+		if panel.Type == "table" {
+			newPanel := NewTablePanel(panel.ID, panel.Title, panel.Targets[0].RawSQL, from, to, datasourceID)
+			panels = append(panels, *newPanel)
+		}
+
 	}
 
 	return &Dashboard{UID: dashboardResponse.Dashboard.UID, Panels: panels, Variables: dashboardResponse.Dashboard.Templating}, nil
 }
 
 func (dashboard *Dashboard) Panel(panelID int) *TablePanel {
+
 	for _, panel := range dashboard.Panels {
 		if panel.ID == panelID {
 			return &panel

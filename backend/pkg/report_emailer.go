@@ -52,10 +52,11 @@ func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
 
 		fileName := schedule.ID + ".xlsx"
 		log.DefaultLogger.Info(fmt.Sprintf("Deleting %s...", fileName))
-		path := filepath.Join("data", fileName)
+		path := filepath.Join("..", "data", fileName)
 		err := os.Remove(path)
 		if err != nil {
-			// Shouldn't be toooo much of a problem since we're using the schedule ID for the report name, at the moment
+			// Failure case shouldn't be much of a problem since we're using the schedule ID for the report name, at the moment
+			// as it will just write to the same file and not create infinitely many if deleting always fails.
 			log.DefaultLogger.Error(fmt.Sprintf("Could not delete %s... : %s", fileName, err.Error()))
 		}
 
@@ -114,6 +115,7 @@ func (re *ReportEmailer) createReports() {
 			log.DefaultLogger.Error("ReportEmailer.createReports: emailsFromUsers: " + err.Error())
 			return
 		}
+
 		emails[schedule.ID] = emailsFromUsers
 
 		reportContent, err := re.sql.GetReportContent(schedule.ID)
@@ -130,22 +132,29 @@ func (re *ReportEmailer) createReports() {
 			from := strconv.FormatInt(time.Now().Unix()-interval, 10)
 
 			dashboard, err := api.NewDashboard(authConfig, content.DashboardID, from, to, datasourceID)
+
 			if err != nil {
 				log.DefaultLogger.Error("ReportEmailer.createReports: NewDashboard: " + err.Error())
 				return
 			}
 
 			panel := dashboard.Panel(content.PanelID)
-			panel.PrepSql(dashboard.Variables, content.StoreID)
-			panels[schedule.ID] = append(panels[schedule.ID], *panel)
+
+			if panel != nil {
+				panel.PrepSql(dashboard.Variables, content.StoreID, content.Variables)
+				panels[schedule.ID] = append(panels[schedule.ID], *panel)
+			}
+
 		}
 	}
 
-	templatePath := filepath.Join("data", "template.xlsx")
+	templatePath := filepath.Join("..", "data", "template.xlsx")
+
 	reporter := reporter.NewReporter(templatePath)
 
 	for scheduleID, reportSheetPanels := range panels {
 		report := reporter.CreateNewReport(scheduleID)
+
 		report.SetSheets(reportSheetPanels)
 		err := report.Write(*authConfig)
 		if err != nil {
@@ -155,7 +164,7 @@ func (re *ReportEmailer) createReports() {
 	}
 
 	for scheduleID, recipientEmails := range emails {
-		attachmentPath := filepath.Join("data", scheduleID+".xlsx")
+		attachmentPath := filepath.Join("..", "data", scheduleID+".xlsx")
 		em.BulkCreateAndSend(attachmentPath, recipientEmails)
 	}
 

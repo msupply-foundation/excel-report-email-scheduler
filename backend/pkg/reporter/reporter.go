@@ -131,10 +131,16 @@ func (r *Report) writeHeaders(sheetName string, columns []api.Column) error {
 		return err
 	}
 
-	for i, column := range columns {
-		cellRef := r.createCellRef(i, idx)
-		r.writeCell(sheetName, cellRef, column.Text)
+	if len(columns) > 0 {
+		for i, column := range columns {
+			cellRef := r.createCellRef(i, idx)
+			r.writeCell(sheetName, cellRef, column.Text)
+		}
+	} else {
+		cellRef := r.createCellRef(0, idx)
+		r.writeCell(sheetName, cellRef, "")
 	}
+
 	return nil
 }
 
@@ -173,13 +179,19 @@ func (r *Report) writeRows(sheetName string, rows [][]interface{}) error {
 		return err
 	}
 
-	for _, row := range rows {
-		for j, value := range row {
-			cellRef := r.createCellRef(j, idx)
-			r.writeCell(sheetName, cellRef, value)
+	if len(rows) > 0 {
+		for _, row := range rows {
+			for j, value := range row {
+				cellRef := r.createCellRef(j, idx)
+				r.writeCell(sheetName, cellRef, value)
+			}
+			idx += 1
 		}
-		idx += 1
+	} else {
+		cellRef := r.createCellRef(0, idx)
+		r.writeCell(sheetName, cellRef, "No data")
 	}
+
 	return nil
 }
 
@@ -230,7 +242,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 
 	log.DefaultLogger.Info("Saving report...")
 
-	savePath := filepath.Join("data", r.id+".xlsx")
+	savePath := filepath.Join("..", "data", r.id+".xlsx")
 	if err := r.file.SaveAs(savePath); err != nil {
 		log.DefaultLogger.Error("Write: ", err.Error())
 	}
