@@ -69,7 +69,7 @@ export interface CreateContentVars {
   dashboardID: string;
   variables: string;
 }
-export interface CreateGroupMemberVariables {
+export interface CreateGroupMemberVars {
   user: User;
   reportGroupID: string;
 }
