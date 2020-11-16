@@ -3,6 +3,7 @@ package reporter
 import (
 	"errors"
 	"fmt"
+	_ "image/png"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -126,6 +127,9 @@ func (r *Report) SetSheets(panels []api.TablePanel) {
 
 func (r *Report) writeHeaders(sheetName string, columns []api.Column) error {
 	idx, err := r.placeholderRowRef(sheetName, "{{headers}}")
+
+	style := r.file.GetCellStyle(sheetName, r.createCellRef(0, idx))
+
 	if err != nil {
 		log.DefaultLogger.Error("writeHeaders: ", err.Error())
 		return err
@@ -134,6 +138,7 @@ func (r *Report) writeHeaders(sheetName string, columns []api.Column) error {
 	if len(columns) > 0 {
 		for i, column := range columns {
 			cellRef := r.createCellRef(i, idx)
+			r.file.SetCellStyle(sheetName, cellRef, cellRef, style)
 			r.writeCell(sheetName, cellRef, column.Text)
 		}
 	} else {
@@ -173,17 +178,24 @@ func (r *Report) createCellRef(columnNumber int, rowNumber int) string {
 }
 
 func (r *Report) writeRows(sheetName string, rows [][]interface{}) error {
-	idx, err := r.createDuplicateTableRows(sheetName, len(rows))
+	idx, err := r.placeholderRowRef(sheetName, "{{rows}}")
 	if err != nil {
-		log.DefaultLogger.Error("writeRows: createDuplicateTableRows: " + err.Error())
+		log.DefaultLogger.Error("writeRows: placeholderRowRef: " + err.Error())
 		return err
 	}
 
+	style := r.file.GetCellStyle(sheetName, r.createCellRef(0, idx))
 	if len(rows) > 0 {
 		for _, row := range rows {
 			for j, value := range row {
 				cellRef := r.createCellRef(j, idx)
-				r.writeCell(sheetName, cellRef, value)
+				r.file.SetCellStyle(sheetName, cellRef, cellRef, style)
+				if value == nil {
+					r.writeCell(sheetName, cellRef, "\n")
+				} else {
+					r.writeCell(sheetName, cellRef, value)
+				}
+
 			}
 			idx += 1
 		}
@@ -238,7 +250,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 		}
 	}
 
-	r.file.DeleteSheet("August")
+	r.file.DeleteSheet("templateSheet")
 
 	log.DefaultLogger.Info("Saving report...")
 

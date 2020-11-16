@@ -62,7 +62,7 @@
   "6months": "6 Months",
   "1year": "1 Year",
   "datasource": "Datasource",
-  "datasource_details_tooltip": "Select the datasource where your mSupply data is held.",
+  "datasource_tooltip": "Select the datasource where your mSupply data is held.",
 
   "new_report_group": "New report group",
   "variables": "Variables",
