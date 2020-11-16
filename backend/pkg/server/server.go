@@ -42,5 +42,7 @@ func (server *HttpServer) ResourceHandler(sqliteDatasource *dbstore.SQLiteDataso
 	mux.HandleFunc("/report-content/{id}", server.updateReportContent).Methods("PUT")
 	mux.HandleFunc("/report-content/{id}", server.deleteReportContent).Methods("DELETE")
 
+	mux.HandleFunc("/test-email", server.testEmail).Queries("schedule-id", "{schedule-id}").Methods("GET")
+
 	return httpadapter.New(mux)
 }

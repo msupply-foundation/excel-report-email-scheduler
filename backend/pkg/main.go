@@ -5,6 +5,7 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/grafana/simple-datasource-backend/pkg/reportEmailer"
 	"github.com/robfig/cron"
 )
 
@@ -26,14 +27,14 @@ func main() {
 		panic(err)
 	}
 
-	re := NewReportEmailer(sql)
+	re := reportEmailer.NewReportEmailer(sql)
 
 	// Try to send reports on loading
-	re.createReports()
+	re.CreateReports()
 
 	// Set up scheduler which will try to send reports every 10 minutes
 	c := cron.New()
-	c.AddFunc("@every 10m", re.createReports)
+	c.AddFunc("@every 10m", re.CreateReports)
 	c.Start()
 
 	// Start listening to requests sent from Grafana. This call is blocking and

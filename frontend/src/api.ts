@@ -5,6 +5,9 @@ import { Variable, Panel, ReportGroupMember, Schedule, Store } from 'common/type
 
 export const getRecipients = () => getBackendSrv().get('api/plugins/msupply-datasource/resources/report-recipient');
 
+export const sendTestEmail = (scheduleID: string) =>
+  getBackendSrv().get(`api/plugins/msupply-datasource/resources/test-email?schedule-id=${scheduleID}`);
+
 export const getGroupAssignments = (key: string, groupId: string) =>
   getBackendSrv().get(`api/plugins/msupply-datasource/resources/report-group-membership/?group-id=${groupId}`);
 

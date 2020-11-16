@@ -2,6 +2,7 @@ package dbstore
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
@@ -145,6 +146,45 @@ func (datasource *SQLiteDatasource) DeleteSchedule(id string) error {
 	}
 
 	return nil
+}
+
+func (datasource *SQLiteDatasource) GetSchedule(id string) (*Schedule, error) {
+	db, err := sql.Open("sqlite3", datasource.Path)
+	defer db.Close()
+	if err != nil {
+		log.DefaultLogger.Error("GetSchedule: sql.Open(): ", err.Error())
+		return nil, err
+	}
+
+	var schedules []Schedule
+
+	rows, err := db.Query("SELECT * FROM Schedule")
+	defer rows.Close()
+	if err != nil {
+		log.DefaultLogger.Error("GetSchedules: db.Query(): ", err.Error())
+		return nil, err
+	}
+
+	for rows.Next() {
+		var ID, Name, Description, ReportGroupID string
+		var Interval, NextReportTime, Lookback int
+
+		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID)
+		if err != nil {
+			log.DefaultLogger.Error("GetSchedules: rows.Scan(): ", err.Error())
+			return nil, err
+		}
+
+		schedule := Schedule{ID, Interval, NextReportTime, Name, Description, Lookback, ReportGroupID}
+		schedules = append(schedules, schedule)
+	}
+
+	if len(schedules) > 0 {
+		return &schedules[0], nil
+	} else {
+		return nil, errors.New("No schedule found")
+	}
+
 }
 
 func (datasource *SQLiteDatasource) GetSchedules() ([]Schedule, error) {

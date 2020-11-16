@@ -1,9 +1,9 @@
 import React, { FC, useState, useEffect } from 'react';
 import intl from 'react-intl-universal';
-import { Modal, Button, ConfirmModal } from '@grafana/ui';
+import { Modal, Button, ConfirmModal, Spinner } from '@grafana/ui';
 
 import { queryCache, useMutation } from 'react-query';
-import { deleteSchedule, updateSchedule } from 'api';
+import { deleteSchedule, sendTestEmail, updateSchedule } from 'api';
 
 import { css } from 'emotion';
 
@@ -35,7 +35,7 @@ const headerAdjustments = css`
 export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, isOpen, datasourceID }) => {
   const [schedule, setReportSchedule] = useState<Schedule>(reportSchedule);
   const [deleteAlertIsOpen, setDeleteAlertIsOpen] = useToggle(false);
-
+  const [testEmails, { isLoading }] = useMutation(sendTestEmail);
   const [updateReportSchedule] = useMutation(updateSchedule, {
     onSuccess: () => queryCache.refetchQueries(['reportSchedules']),
   });
@@ -75,6 +75,13 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
         <Button size="md" variant="destructive" onClick={setDeleteAlertIsOpen}>
           {intl.get('delete')}
         </Button>
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <Button size="md" variant="primary" onClick={() => testEmails(schedule.id)}>
+            {intl.get('send_test_emails')}
+          </Button>
+        )}
       </div>
 
       <PanelList schedule={reportSchedule} datasourceID={datasourceID} />
