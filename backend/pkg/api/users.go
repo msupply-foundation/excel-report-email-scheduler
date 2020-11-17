@@ -13,7 +13,7 @@ type User struct {
 }
 
 func GetEmails(authConfig auth.AuthConfig, userIDs []string, datasourceID int) ([]string, error) {
-	url := "http://" + authConfig.AuthString() + authConfig.URL + "/api/tsdb/query"
+	url := "https://" + authConfig.AuthString() + authConfig.URL + "/api/tsdb/query"
 	queryString := "("
 	i := 0
 	for i < len(userIDs)-1 {
