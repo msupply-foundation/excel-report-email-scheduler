@@ -9,6 +9,7 @@ import (
 type Settings struct {
 	GrafanaUsername string `json:"grafanaUsername"`
 	GrafanaPassword string `json:"grafanaPassword"`
+	GrafanaURL      string `json:"grafanaURL"`
 	Email           string `json:"email"`
 	EmailPassword   string `json:"emailPassword"`
 	EmailPort       int    `json:"emailPort"`
@@ -19,6 +20,7 @@ type Settings struct {
 func SettingsFields() string {
 	return "\n{\n\tgrafanaUsername string" +
 		"\n\tgrafanaPassword string" +
+		"\n\tgrafanaURL string" +
 		"\n\temail string\n}" +
 		"\n\temailPassword string\n}" +
 		"\n\temailPort int\n}" +
@@ -67,28 +69,28 @@ func (datasource *SQLiteDatasource) CreateOrUpdateSettings(settings Settings) er
 	}
 
 	if exists {
-		stmt, err := db.Prepare("UPDATE Config set id = ?, grafanaUsername = ?, grafanaPassword = ?, email = ?, emailPassword = ?, datasourceID = ?, emailHost = ?, emailPort = ?")
+		stmt, err := db.Prepare("UPDATE Config set id = ?, grafanaUsername = ?, grafanaPassword = ?, email = ?, emailPassword = ?, datasourceID = ?, emailHost = ?, emailPort = ?, grafanaURL = ?")
 		defer stmt.Close()
 		if err != nil {
 			log.DefaultLogger.Error("CreateOrUpdateSettings: db.Prepare()1: ", err.Error())
 			return err
 		}
 
-		_, err = stmt.Exec("ID", settings.GrafanaUsername, settings.GrafanaPassword, settings.Email, settings.EmailPassword, settings.DatasourceID, settings.EmailHost, settings.EmailPort)
+		_, err = stmt.Exec("ID", settings.GrafanaUsername, settings.GrafanaPassword, settings.Email, settings.EmailPassword, settings.DatasourceID, settings.EmailHost, settings.EmailPort, settings.GrafanaURL)
 		if err != nil {
 			log.DefaultLogger.Error("CreateOrUpdateSettings: stmt.Exec()2: ", err.Error())
 			return err
 		}
 
 	} else {
-		stmt, err := db.Prepare("INSERT INTO Config (id, grafanaUsername, grafanaPassword, email, emailPassword, datasourceID, emailHost, emailPort) VALUES (?,?,?,?,?,?,?,?)")
+		stmt, err := db.Prepare("INSERT INTO Config (id, grafanaUsername, grafanaPassword, email, emailPassword, datasourceID, emailHost, emailPort, grafanaURL) VALUES (?,?,?,?,?,?,?,?,?)")
 		defer stmt.Close()
 		if err != nil {
 			log.DefaultLogger.Error("CreateOrUpdateSettings: db.Prepare()2: ", err.Error())
 			return err
 		}
 
-		_, err = stmt.Exec("ID", settings.GrafanaUsername, settings.GrafanaPassword, settings.Email, settings.EmailPassword, settings.DatasourceID, settings.EmailHost, settings.EmailPort)
+		_, err = stmt.Exec("ID", settings.GrafanaUsername, settings.GrafanaPassword, settings.Email, settings.EmailPassword, settings.DatasourceID, settings.EmailHost, settings.EmailPort, settings.GrafanaURL)
 		if err != nil {
 			log.DefaultLogger.Error("CreateOrUpdateSettings: stmt.Exec(): ", err.Error())
 			return err
@@ -106,7 +108,7 @@ func (datasource *SQLiteDatasource) GetSettings() (*Settings, error) {
 		return nil, err
 	}
 
-	var id, grafanaUsername, grafanaPassword, email, emailPassword, emailHost string
+	var id, grafanaUsername, grafanaPassword, email, emailPassword, emailHost, grafanaURL string
 	var emailPort, datasourceID int
 
 	exists, err := datasource.settingsExists()
@@ -116,7 +118,7 @@ func (datasource *SQLiteDatasource) GetSettings() (*Settings, error) {
 	}
 
 	if exists {
-		rows, err := db.Query("SELECT id, grafanaUsername, grafanaPassword, email, emailPassword, datasourceID, emailHost, emailPort FROM Config")
+		rows, err := db.Query("SELECT id, grafanaUsername, grafanaPassword, email, emailPassword, datasourceID, emailHost, emailPort, grafanaURL FROM Config")
 		defer rows.Close()
 		if err != nil {
 			log.DefaultLogger.Error("GetSettings: db.Query(): ", err.Error())
@@ -124,14 +126,14 @@ func (datasource *SQLiteDatasource) GetSettings() (*Settings, error) {
 		}
 
 		rows.Next()
-		err = rows.Scan(&id, &grafanaUsername, &grafanaPassword, &email, &emailPassword, &datasourceID, &emailHost, &emailPort)
+		err = rows.Scan(&id, &grafanaUsername, &grafanaPassword, &email, &emailPassword, &datasourceID, &emailHost, &emailPort, &grafanaURL)
 		if err != nil {
 			log.DefaultLogger.Error("GetSettings: rows.Scan(): ", err.Error())
 			return nil, err
 		}
 
-		return &Settings{GrafanaUsername: grafanaUsername, GrafanaPassword: grafanaPassword, Email: email, EmailPassword: emailPassword, DatasourceID: datasourceID, EmailPort: emailPort, EmailHost: emailHost}, nil
+		return &Settings{GrafanaUsername: grafanaUsername, GrafanaPassword: grafanaPassword, Email: email, EmailPassword: emailPassword, DatasourceID: datasourceID, EmailPort: emailPort, EmailHost: emailHost, GrafanaURL: grafanaURL}, nil
 	}
 
-	return &Settings{GrafanaUsername: grafanaUsername, GrafanaPassword: grafanaPassword, Email: email, EmailPassword: emailPassword, DatasourceID: datasourceID, EmailPort: emailPort, EmailHost: emailHost}, nil
+	return &Settings{GrafanaUsername: grafanaUsername, GrafanaPassword: grafanaPassword, Email: email, EmailPassword: emailPassword, DatasourceID: datasourceID, EmailPort: emailPort, EmailHost: emailHost, GrafanaURL: grafanaURL}, nil
 }

@@ -38,10 +38,12 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
           grafanaUsername = '',
           email = '',
           grafanaPassword = '',
+          grafanaURL = '',
           emailPassword = '',
           emailHost,
           emailPort,
         } = getValues();
+
         return (
           <>
             <FieldSet label="Grafana Details">
@@ -70,6 +72,21 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
                   defaultValue={grafanaPassword}
                   placeholder={intl.get('grafanaPassword')}
                   name="grafanaPassword"
+                  ref={register({ required: intl.get('required') })}
+                  css=""
+                  loading
+                />
+              </Field>
+              <Field
+                label={intl.get('grafana_url')}
+                description={intl.get('grafana_url_description')}
+                invalid={!!errors.grafanaURL}
+                error={errors.grafanaURL?.message}
+              >
+                <Input
+                  defaultValue={grafanaURL}
+                  placeholder={intl.get('grafana_url')}
+                  name="grafanaURL"
                   ref={register({ required: intl.get('required') })}
                   css=""
                   loading

@@ -25,10 +25,10 @@ export const RootPage: FC<Props> = ({ path, onNavChanged, query, meta }) => {
     switch (query.tab) {
       default:
       case TAB_ID_REPORT_GROUP: {
-        return <ReportGroupTab />;
+        return <ReportGroupTab meta={meta} path={path} onNavChanged={onNavChanged} query={query} />;
       }
       case TAB_ID_REPORT_SCHEDULE: {
-        return <ReportSchedulesTab />;
+        return <ReportSchedulesTab meta={meta} path={path} onNavChanged={onNavChanged} query={query} />;
       }
     }
   };

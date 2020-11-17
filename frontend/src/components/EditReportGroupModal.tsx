@@ -16,6 +16,7 @@ type Props = {
   onClose: () => void;
   isOpen: boolean;
   reportGroup: ReportGroup | null;
+  datasourceID: number;
 };
 
 const modalAdjustments = css`
@@ -24,7 +25,7 @@ const modalAdjustments = css`
   width: 80%;
 `;
 
-export const EditReportGroupModal: FC<Props> = ({ reportGroup, onClose, isOpen }) => {
+export const EditReportGroupModal: FC<Props> = ({ reportGroup, onClose, isOpen, datasourceID }) => {
   const [group, setReportGroup] = useState<ReportGroup | null>(reportGroup);
   const [deleteAlertIsOpen, setDeleteAlertIsOpen] = useToggle(false);
 
@@ -64,7 +65,7 @@ export const EditReportGroupModal: FC<Props> = ({ reportGroup, onClose, isOpen }
         </div>
       </>
 
-      <ReportGroupMemberList reportGroup={reportGroup} />
+      <ReportGroupMemberList reportGroup={reportGroup} datasourceID={datasourceID} />
       <ConfirmModal
         isOpen={deleteAlertIsOpen}
         title={intl.get('delete_report_group')}

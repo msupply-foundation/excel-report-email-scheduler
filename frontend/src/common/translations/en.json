@@ -4,6 +4,8 @@
   "grafanaDescription": "The username and password of the Grafana user to be able to collect data for reports.",
   "grafanaUsername": "Grafana username",
   "grafanaPassword": "Grafana password",
+  "grafana_url": "Grafana URL",
+  "grafana_url_description": "The URL of the Grafana instance",
   "emailDescription": "The username and password of the email account from which to send emails from.",
   "email": "Email address",
   "emailPassword": "Email password",

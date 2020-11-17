@@ -8,6 +8,7 @@ import (
 type AuthConfig struct {
 	Username string
 	Password string
+	URL      string
 }
 
 func NewAuthConfig(datasource *dbstore.SQLiteDatasource) (*AuthConfig, error) {
@@ -17,7 +18,7 @@ func NewAuthConfig(datasource *dbstore.SQLiteDatasource) (*AuthConfig, error) {
 		return nil, err
 	}
 
-	return &AuthConfig{Username: settings.GrafanaUsername, Password: settings.GrafanaPassword}, nil
+	return &AuthConfig{Username: settings.GrafanaUsername, Password: settings.GrafanaPassword, URL: settings.GrafanaURL}, nil
 }
 
 func (config AuthConfig) AuthString() string {
