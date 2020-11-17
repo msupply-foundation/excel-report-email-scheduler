@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import intl from 'react-intl-universal';
-import { Field, FieldSet, FieldValidationMessage, Form, InlineFormLabel, Input, Select } from '@grafana/ui';
+import { Field, FieldSet, Form, Input } from '@grafana/ui';
 import { FC } from 'react';
 
 import { FormValues } from '../../types';
@@ -8,7 +8,6 @@ import { useQuery } from 'react-query';
 import { getDatasources } from 'api';
 import { SelectableValue } from '@grafana/data';
 import { FieldInput } from 'components/FieldInput';
-import { mapInternalLinkToExplore } from '@grafana/data/utils/dataLinks';
 import { FieldSelect } from 'components/FieldSelect';
 
 type OnSubmit<FormValues> = (data: FormValues) => void;
