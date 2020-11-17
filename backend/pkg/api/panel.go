@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/auth"
 )
 
@@ -46,9 +47,11 @@ func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs stri
 		}
 
 		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", csv, -1)
+		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", csv, -1)
 
 	} else {
 		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", variable.Definition, -1)
+		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", variable.Definition, -1)
 	}
 }
 
@@ -60,15 +63,30 @@ func (panel *TablePanel) PrepSql(variables TemplateList, storeIDs string) {
 	}
 }
 
-func (panel *TablePanel) GetData(authConfig auth.AuthConfig) {
-	body, _ := NewQueryRequest(panel.RawSql, panel.From, panel.To, panel.DatasourceID).ToRequestBody()
+func (panel *TablePanel) GetData(authConfig auth.AuthConfig) error {
+	body, err := NewQueryRequest(panel.RawSql, panel.From, panel.To, panel.DatasourceID).ToRequestBody()
+	if err != nil {
+		log.DefaultLogger.Error("GetData: NewQueryRequest: " + err.Error())
+		return err
+	}
 
-	url := "http://" + authConfig.AuthString() + "localhost:3000/api/tsdb/query"
-	response, _ := http.Post(url, "application/json", body)
-	qr, _ := NewQueryResponse(response)
+	url := "http://" + authConfig.AuthString() + authConfig.URL + "/api/tsdb/query"
+	response, err := http.Post(url, "application/json", body)
+	if err != nil {
+		log.DefaultLogger.Error("GetData: http.Post: " + err.Error())
+		return err
+	}
+
+	qr, err := NewQueryResponse(response)
+	if err != nil {
+		log.DefaultLogger.Error("GetData: NewQueryResponse: " + err.Error())
+		return err
+	}
 
 	panel.SetRows(qr.Rows())
 	panel.SetColumns(qr.Columns())
+
+	return nil
 }
 
 func (panel *TablePanel) SetRows(rows [][]interface{}) {

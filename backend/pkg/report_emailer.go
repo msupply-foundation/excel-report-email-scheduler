@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -22,63 +24,104 @@ func NewReportEmailer(sql *dbstore.SQLiteDatasource) *ReportEmailer {
 	return &ReportEmailer{sql: sql, inProgress: false}
 }
 
-func (re *ReportEmailer) configs() (*auth.AuthConfig, *auth.EmailConfig, int) {
-	authConfig := auth.NewAuthConfig(re.sql)
-	emailConfig := auth.NewEmailConfig(re.sql)
-	settings := re.sql.GetSettings()
+func (re *ReportEmailer) configs() (*auth.AuthConfig, *auth.EmailConfig, int, error) {
+	authConfig, err := auth.NewAuthConfig(re.sql)
+	if err != nil {
+		log.DefaultLogger.Error("ReportEmailer.configs: NewAuthConfig: " + err.Error())
+		return nil, nil, 0, err
+	}
 
-	return authConfig, emailConfig, settings.DatasourceID
+	emailConfig, err := auth.NewEmailConfig(re.sql)
+	if err != nil {
+		log.DefaultLogger.Error("ReportEmailer.configs: NewEmailConfig: " + err.Error())
+		return nil, nil, 0, err
+	}
+
+	settings, err := re.sql.GetSettings()
+	if err != nil {
+		log.DefaultLogger.Error("ReportEmailer.configs: GetSettings: " + err.Error())
+		return nil, nil, 0, err
+	}
+
+	return authConfig, emailConfig, settings.DatasourceID, nil
 }
 
 func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
-	// for _, schedule := range schedules {
-	// 	path := filepath.Join("data", schedule.ID+".xlsx")
-	// 	os.Remove(path)
+	log.DefaultLogger.Info("Starting Clean up...")
+	for _, schedule := range schedules {
 
-	// 	schedule.NextReportTime = int(time.Now().Unix()) + schedule.Interval
-	// 	re.sql.UpdateSchedule(schedule.ID, schedule)
-	// }
+		fileName := schedule.ID + ".xlsx"
+		log.DefaultLogger.Info(fmt.Sprintf("Deleting %s...", fileName))
+		path := filepath.Join("data", fileName)
+		err := os.Remove(path)
+		if err != nil {
+			// Shouldn't be toooo much of a problem since we're using the schedule ID for the report name, at the moment
+			log.DefaultLogger.Error(fmt.Sprintf("Could not delete %s... : %s", fileName, err.Error()))
+		}
+
+		schedule.NextReportTime = int(time.Now().Unix()) + schedule.Interval
+		re.sql.UpdateSchedule(schedule.ID, schedule)
+	}
 
 	re.inProgress = false
 }
 
 func (re *ReportEmailer) createReports() {
+	log.DefaultLogger.Info("Creating Reports...")
 	re.inProgress = true
-	log.DefaultLogger.Info("Creating Reports")
 
-	authConfig, emailConfig, datasourceID := re.configs()
+	authConfig, emailConfig, datasourceID, err := re.configs()
+	if err != nil {
+		log.DefaultLogger.Error("ReportEmailer.createReports: re.configs: " + err.Error())
+		return
+	}
 
 	em := emailer.New(emailConfig)
 
-	schedules, _ := re.sql.OverdueSchedules()
+	schedules, err := re.sql.OverdueSchedules()
+	if err != nil {
+		log.DefaultLogger.Error("ReportEmailer.createReports: OverdueSchedules: " + err.Error())
+		return
+	}
 
-	log.DefaultLogger.Info("Found Schedules to create reports for:")
-
-	for _, schedule := range schedules {
-		log.DefaultLogger.Info("- " + schedule.Name)
+	if len(schedules) > 0 {
+		log.DefaultLogger.Info("Found schedules which are overdue...")
+		for _, schedule := range schedules {
+			log.DefaultLogger.Info(fmt.Sprintf("- %s : %s", schedule.Name, schedule.Description))
+		}
+	} else {
+		log.DefaultLogger.Info("No schedules are overdue...")
+		return
 	}
 
 	emails := make(map[string][]string)
 	panels := make(map[string][]api.TablePanel)
-
 	for _, schedule := range schedules {
-
-		log.DefaultLogger.Info("Collecting Emails for: " + schedule.Name)
-
-		reportGroup := re.sql.ReportGroupFromSchedule(schedule)
-		userIDs, _ := re.sql.GroupMemberUserIDs(*reportGroup)
-		emails[schedule.ID] = api.GetEmails(*authConfig, userIDs, datasourceID)
-
-		log.DefaultLogger.Info("Sending Emails to:")
-
-		for k, v := range emails {
-			log.DefaultLogger.Info("Emails for :" + k)
-			for _, email := range v {
-				log.DefaultLogger.Info("- " + email)
-			}
+		reportGroup, err := re.sql.ReportGroupFromSchedule(schedule)
+		if err != nil {
+			log.DefaultLogger.Error("ReportEmailer.createReports: ReportGroupFromSchedule: " + err.Error())
+			return
 		}
 
-		reportContent, _ := re.sql.GetReportContent(schedule.ID)
+		userIDs, err := re.sql.GroupMemberUserIDs(*reportGroup)
+		if err != nil {
+			log.DefaultLogger.Error("ReportEmailer.createReports: GroupMemberUserIDs: " + err.Error())
+			return
+		}
+
+		emailsFromUsers, err := api.GetEmails(*authConfig, userIDs, datasourceID)
+		if err != nil {
+			log.DefaultLogger.Error("ReportEmailer.createReports: emailsFromUsers: " + err.Error())
+			return
+		}
+		emails[schedule.ID] = emailsFromUsers
+
+		reportContent, err := re.sql.GetReportContent(schedule.ID)
+		if err != nil {
+			log.DefaultLogger.Error("ReportEmailer.createReports: GetReportContent: " + err.Error())
+			return
+		}
+
 		panels[schedule.ID] = []api.TablePanel{}
 
 		for _, content := range reportContent {
@@ -86,8 +129,13 @@ func (re *ReportEmailer) createReports() {
 			to := strconv.FormatInt(time.Now().Unix(), 10)
 			from := strconv.FormatInt(time.Now().Unix()-interval, 10)
 
-			dashboard, _ := api.NewDashboard(authConfig, content.DashboardID, from, to, datasourceID)
-			panel, _ := dashboard.Panel(content.PanelID)
+			dashboard, err := api.NewDashboard(authConfig, content.DashboardID, from, to, datasourceID)
+			if err != nil {
+				log.DefaultLogger.Error("ReportEmailer.createReports: NewDashboard: " + err.Error())
+				return
+			}
+
+			panel := dashboard.Panel(content.PanelID)
 			panel.PrepSql(dashboard.Variables, content.StoreID)
 			panels[schedule.ID] = append(panels[schedule.ID], *panel)
 		}
@@ -97,15 +145,16 @@ func (re *ReportEmailer) createReports() {
 	reporter := reporter.NewReporter(templatePath)
 
 	for scheduleID, reportSheetPanels := range panels {
-
-		log.DefaultLogger.Info("Creating report for : " + scheduleID)
 		report := reporter.CreateNewReport(scheduleID)
 		report.SetSheets(reportSheetPanels)
-		report.Write(*authConfig)
+		err := report.Write(*authConfig)
+		if err != nil {
+			log.DefaultLogger.Error("ReportEmailer.createReports: report.Write: " + err.Error())
+			return
+		}
 	}
 
 	for scheduleID, recipientEmails := range emails {
-		log.DefaultLogger.Info("Sending Emails!!")
 		attachmentPath := filepath.Join("data", scheduleID+".xlsx")
 		em.BulkCreateAndSend(attachmentPath, recipientEmails)
 	}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/robfig/cron"
 )
 
 // Main entry point of the backend plugin.
@@ -18,24 +19,29 @@ import (
 //  GRPCSettings: Settings..?
 // }
 func main() {
-
-	serveOptions, sql := getServeOptions()
-
 	log.DefaultLogger.Info("Starting up")
+	serveOptions, sql, err := getServeOptions()
+	if err != nil {
+		log.DefaultLogger.Error("FATAL. Error when retreiving serveOptions", err.Error())
+		panic(err)
+	}
+
 	re := NewReportEmailer(sql)
+
+	// Try to send reports on loading
 	re.createReports()
-	// c := cron.New()
-	// c.AddFunc("@every 10m", re.createReports)
-	// c.Start()
+
+	// Set up scheduler which will try to send reports every 10 minutes
+	c := cron.New()
+	c.AddFunc("@every 10m", re.createReports)
+	c.Start()
 
 	// Start listening to requests sent from Grafana. This call is blocking and
 	// and waits until Grafana shutsdown or the plugin exits.
-	err := datasource.Serve(serveOptions)
-
-	// TODO: Defer a Close() ?
+	err = datasource.Serve(serveOptions)
 
 	if err != nil {
-		log.DefaultLogger.Error(err.Error())
+		log.DefaultLogger.Error("FATAL. Plugin datasource.Serve() returned an error: " + err.Error())
 		os.Exit(1)
 	}
 }

@@ -7,6 +7,9 @@ import { createReportGroup } from 'api';
 import { Button, Legend } from '@grafana/ui';
 import { ReportGroupList } from './ReportGroupList';
 import { ReportGroup } from './ReportSchedulesTab';
+import { AppRootProps } from '@grafana/data';
+
+interface Props extends AppRootProps {}
 
 const adjustButtonToRight = css`
   display: flex;
@@ -14,7 +17,7 @@ const adjustButtonToRight = css`
   margin-bottom: 10px;
 `;
 
-export const ReportGroupTab: FC = () => {
+export const ReportGroupTab: FC<Props> = ({ meta }) => {
   const [activeGroup, setActiveGroup] = useState<ReportGroup | null>(null);
   const [newReportGroup] = useMutation(createReportGroup, {
     onSuccess: () => queryCache.refetchQueries(['reportGroup']),
@@ -30,7 +33,12 @@ export const ReportGroupTab: FC = () => {
       </div>
       <ReportGroupList onRowPress={setActiveGroup} />
       {activeGroup && (
-        <EditReportGroupModal reportGroup={activeGroup} isOpen={!!activeGroup} onClose={() => setActiveGroup(null)} />
+        <EditReportGroupModal
+          datasourceID={meta?.jsonData?.datasourceID}
+          reportGroup={activeGroup}
+          isOpen={!!activeGroup}
+          onClose={() => setActiveGroup(null)}
+        />
       )}
     </div>
   );

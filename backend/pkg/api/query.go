@@ -28,24 +28,20 @@ func NewQuery(rawSql string, datasource int) *Query {
 	return &Query{RawSQL: rawSql, DatasourceID: datasource, Format: "table", RefID: "A"}
 }
 
-// TODO: Need to get datasourceID from somewhere
 func NewQueryRequest(rawSql string, from string, to string, datasourceID int) *QueryRequest {
 	query := NewQuery(rawSql, datasourceID)
 	queryRequest := &QueryRequest{From: from, To: to, Queries: []Query{*query}}
-
 	return queryRequest
 }
 
 func (qr *QueryRequest) ToRequestBody() (*strings.Reader, error) {
 	parsed, err := json.Marshal(qr)
-
 	if err != nil {
-		log.DefaultLogger.Error(err.Error())
+		log.DefaultLogger.Error("ToRequestBody: json.Marshal: " + err.Error())
 		return nil, err
 	}
 
 	body := strings.NewReader(string(parsed))
-
 	return body, nil
 }
 
@@ -72,15 +68,14 @@ func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.DefaultLogger.Error(err.Error())
+		log.DefaultLogger.Error("NewQueryResponse: ioutil.ReadAll: " + err.Error())
 		return nil, err
 	}
 
 	var qr QueryResponse
 	err = json.Unmarshal(body, &qr)
-
 	if err != nil {
-		log.DefaultLogger.Error(err.Error())
+		log.DefaultLogger.Error("NewQueryResponse: json.Unmarshal: " + err.Error())
 		return nil, err
 	}
 
@@ -88,9 +83,18 @@ func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 }
 
 func (qr *QueryResponse) Rows() [][]interface{} {
-	return qr.Results.A.Tables[0].Rows
+
+	if len(qr.Results.A.Tables) > 0 {
+		return qr.Results.A.Tables[0].Rows
+	}
+
+	return nil
 }
 
 func (qr *QueryResponse) Columns() []Column {
-	return qr.Results.A.Tables[0].Columns
+	if len(qr.Results.A.Tables) > 0 {
+		return qr.Results.A.Tables[0].Columns
+	}
+
+	return nil
 }
