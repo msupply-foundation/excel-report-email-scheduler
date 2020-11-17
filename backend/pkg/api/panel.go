@@ -92,7 +92,7 @@ func (panel *TablePanel) GetData(authConfig auth.AuthConfig) error {
 		return err
 	}
 
-	url := "http://" + authConfig.AuthString() + authConfig.URL + "/api/tsdb/query"
+	url := "https://" + authConfig.AuthString() + authConfig.URL + "/api/tsdb/query"
 	response, err := http.Post(url, "application/json", body)
 	if err != nil {
 		log.DefaultLogger.Error("GetData: http.Post: " + err.Error())

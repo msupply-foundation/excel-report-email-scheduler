@@ -159,7 +159,7 @@ func NewDashboardResponse(response *http.Response) (*DashboardResponse, error) {
 }
 
 func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to string, datasourceID int) (*Dashboard, error) {
-	url := "http://" + authConfig.AuthString() + authConfig.URL + "/api/dashboards/uid/" + uuid
+	url := "https://" + authConfig.AuthString() + authConfig.URL + "/api/dashboards/uid/" + uuid
 	response, err := http.Get(url)
 	if err != nil {
 		log.DefaultLogger.Error("NewDashboard: HTTP Request", err.Error())
