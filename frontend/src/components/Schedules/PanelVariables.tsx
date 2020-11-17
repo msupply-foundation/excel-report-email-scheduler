@@ -17,14 +17,7 @@ type Props = {
   onUpdateContent: (key: ReportContentKey, selectedValue: SelectableValue<String | Number | Store>) => void;
 };
 
-export const PanelVariables: FC<Props> = ({
-  onUpdateVariable,
-  panel,
-  onUpdateContent,
-
-  lookback,
-  variables,
-}) => {
+export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateContent, lookback, variables }) => {
   const lookbacks = getLookbacks();
 
   const vars = parseOrDefault<ContentVariables>(variables, {});
