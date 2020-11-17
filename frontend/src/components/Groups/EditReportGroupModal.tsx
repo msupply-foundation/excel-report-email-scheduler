@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import intl from 'react-intl-universal';
 import { queryCache, useMutation } from 'react-query';
 import { css } from 'emotion';
@@ -6,16 +6,16 @@ import { Modal, Button, ConfirmModal } from '@grafana/ui';
 
 import { deleteReportGroup, updateReportGroup } from 'api';
 
-import { ReportGroup } from './ReportSchedulesTab';
-import { useToggle } from 'hooks';
-import { ReportGroupKey } from '../common/enums';
+import { ReportGroup } from '../Schedules/ReportSchedulesTab';
+import { useOptimisticMutation, useToggle } from 'hooks';
+import { ReportGroupKey } from '../../common/enums';
 import { ReportGroupMemberList } from './ReportGroupMemberList';
 import { EditReportGroupForm } from './EditReportGroupForm';
 
 type Props = {
   onClose: () => void;
   isOpen: boolean;
-  reportGroup: ReportGroup | null;
+  reportGroup: ReportGroup;
   datasourceID: number;
 };
 
@@ -26,12 +26,25 @@ const modalAdjustments = css`
 `;
 
 export const EditReportGroupModal: FC<Props> = ({ reportGroup, onClose, isOpen, datasourceID }) => {
-  const [group, setReportGroup] = useState<ReportGroup | null>(reportGroup);
   const [deleteAlertIsOpen, setDeleteAlertIsOpen] = useToggle(false);
 
-  const [updateGroup] = useMutation(updateReportGroup, {
-    onSuccess: () => queryCache.refetchQueries(['reportGroup']),
-  });
+  const [updateGroup] = useOptimisticMutation<ReportGroup[], ReportGroup, ReportGroup, ReportGroup[]>(
+    ['reportGroup'],
+    updateReportGroup,
+    group => group,
+    (prevState, optimisticValue) => {
+      if (prevState) {
+        const idx = prevState.findIndex(group => group.id === optimisticValue.id);
+        if (idx >= 0) {
+          prevState[idx] = optimisticValue;
+          return [...prevState];
+        }
+      }
+      return prevState;
+    },
+    []
+  );
+
   const [deleteGroup] = useMutation(deleteReportGroup, {
     onSuccess: () => queryCache.refetchQueries(['reportGroup']),
   });
@@ -42,28 +55,25 @@ export const EditReportGroupModal: FC<Props> = ({ reportGroup, onClose, isOpen, 
     onClose();
   };
 
-  const onUpdateReportGroup = async (key: ReportGroupKey, newValue: string) => {
-    const newState: ReportGroup = { ...group, [key]: newValue };
-    setReportGroup(newState);
-    await updateGroup(newState);
+  const onUpdateReportGroup = (key: ReportGroupKey, newValue: string) => {
+    const newState: ReportGroup = { ...reportGroup, [key]: newValue };
+    updateGroup(newState);
   };
 
   return (
     <Modal className={modalAdjustments} title={intl.get('edit_report_group')} isOpen={isOpen} onDismiss={onClose}>
-      <>
-        <div
-          className={css`
-            display: flex;
-            flex: 1;
-            justify-content: flex-end;
-          `}
-        >
-          <EditReportGroupForm onUpdate={onUpdateReportGroup} reportGroup={reportGroup} />
-          <Button size="md" variant="destructive" onClick={setDeleteAlertIsOpen}>
-            {intl.get('delete')}
-          </Button>
-        </div>
-      </>
+      <div
+        className={css`
+          display: flex;
+          flex: 1;
+          justify-content: flex-end;
+        `}
+      >
+        <EditReportGroupForm onUpdate={onUpdateReportGroup} reportGroup={reportGroup} />
+        <Button size="md" variant="destructive" onClick={setDeleteAlertIsOpen}>
+          {intl.get('delete')}
+        </Button>
+      </div>
 
       <ReportGroupMemberList reportGroup={reportGroup} datasourceID={datasourceID} />
       <ConfirmModal

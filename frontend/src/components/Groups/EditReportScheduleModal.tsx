@@ -1,16 +1,16 @@
 import React, { FC, useState, useEffect } from 'react';
 import intl from 'react-intl-universal';
-import { Modal, Button, ConfirmModal } from '@grafana/ui';
+import { Modal, Button, ConfirmModal, Spinner } from '@grafana/ui';
 
 import { queryCache, useMutation } from 'react-query';
-import { deleteSchedule, updateSchedule } from 'api';
+import { deleteSchedule, sendTestEmail, updateSchedule } from 'api';
 
 import { css } from 'emotion';
 
-import { PanelList } from './PanelList';
+import { PanelList } from '../Schedules/PanelList';
 import { useToggle } from 'hooks';
 import { Schedule } from 'common/types';
-import { EditScheduleForm } from './Schedules/EditScheduleForm';
+import { EditScheduleForm } from '../Schedules/EditScheduleForm';
 import { ScheduleKey } from 'common/enums';
 
 type Props = {
@@ -35,7 +35,7 @@ const headerAdjustments = css`
 export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, isOpen, datasourceID }) => {
   const [schedule, setReportSchedule] = useState<Schedule>(reportSchedule);
   const [deleteAlertIsOpen, setDeleteAlertIsOpen] = useToggle(false);
-
+  const [testEmails, { isLoading }] = useMutation(sendTestEmail);
   const [updateReportSchedule] = useMutation(updateSchedule, {
     onSuccess: () => queryCache.refetchQueries(['reportSchedules']),
   });
@@ -50,10 +50,8 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
     }
   }, [schedule, reportSchedule]);
 
-  // TODO: Handle error cases
   const onUpdateSchedule = (key: ScheduleKey, newValue: string | number) => {
     const newState: Schedule = { ...schedule, [key]: newValue };
-    // Optimistically update state to reflect changes immediately in UI.
     setReportSchedule(newState);
     updateReportSchedule(newState);
   };
@@ -74,9 +72,18 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
     >
       <div className={headerAdjustments}>
         <EditScheduleForm schedule={schedule} onUpdate={onUpdateSchedule} />
-        <Button size="md" variant="destructive" onClick={setDeleteAlertIsOpen}>
-          {intl.get('delete')}
-        </Button>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <Button size="md" variant="destructive" onClick={setDeleteAlertIsOpen}>
+            {intl.get('delete')}
+          </Button>
+          {isLoading ? (
+            <Spinner />
+          ) : (
+            <Button size="md" variant="primary" style={{ marginTop: '10px' }} onClick={() => testEmails(schedule.id)}>
+              {intl.get('send_test_emails')}
+            </Button>
+          )}
+        </div>
       </div>
 
       <PanelList schedule={reportSchedule} datasourceID={datasourceID} />

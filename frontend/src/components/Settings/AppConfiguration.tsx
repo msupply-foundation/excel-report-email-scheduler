@@ -6,7 +6,7 @@ import { css } from 'emotion';
 import { Button } from '@grafana/ui';
 import { DisabledState } from './DisabledState';
 
-import { FormValues } from '../types';
+import { FormValues } from '../../types';
 import { ConfigurationForm } from './ConfigurationForm';
 
 interface Props extends PluginConfigPageProps<AppPluginMeta> {}
@@ -40,9 +40,11 @@ export const AppConfiguration: FC<Props> = (props: Props) => {
     email: props.plugin.meta.jsonData?.email ?? '',
     emailPassword: props.plugin.meta.jsonData?.emailPassword ?? '',
     datasourceID: props.plugin.meta.jsonData?.datasourceID ?? 1,
+    datasourceName: props.plugin.meta.jsonData?.datasourceName ?? '',
     emailHost: props.plugin.meta.jsonData?.emailHost ?? 'smtp.gmail.com',
     emailPort: props.plugin.meta.jsonData?.emailPort ?? 587,
   };
+  console.log(props.plugin.meta.jsonData);
 
   const isEnabled = props.plugin.meta.enabled;
 

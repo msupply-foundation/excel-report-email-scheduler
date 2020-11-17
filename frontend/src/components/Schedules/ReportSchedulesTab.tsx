@@ -5,9 +5,9 @@ import intl from 'react-intl-universal';
 
 import { createSchedule } from 'api';
 import { Button, Legend } from '@grafana/ui';
-import { EditReportScheduleModal } from './EditReportScheduleModal';
+import { EditReportScheduleModal } from '../Groups/EditReportScheduleModal';
 import { Schedule } from 'common/types';
-import { ScheduleList } from './Schedules/ScheduleList';
+import { ScheduleList } from './ScheduleList';
 import { AppRootProps } from '@grafana/data';
 
 interface Props extends AppRootProps {}
@@ -27,7 +27,6 @@ const headerAdjustment = css`
 export const ReportSchedulesTab: FC<Props> = ({ meta }) => {
   const [activeGroup, setActiveSchedule] = useState<Schedule | null>(null);
 
-  // TODO: Use Grafana internal Toasting for success/failure.
   const [newSchedule] = useMutation(createSchedule, {
     onSuccess: () => queryCache.refetchQueries('reportSchedules'),
   });

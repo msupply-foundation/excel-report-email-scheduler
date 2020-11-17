@@ -1,9 +1,9 @@
 import React, { FC } from 'react';
 import classNames from 'classnames';
 import { Spinner } from '@grafana/ui';
-import { getReportGroups } from '../api';
+import { getReportGroups } from '../../api';
 import { useQuery } from 'react-query';
-import { ReportGroup } from './ReportSchedulesTab';
+import { ReportGroup } from '../Schedules/ReportSchedulesTab';
 
 const listStyle = classNames({
   'card-section': true,
@@ -13,7 +13,7 @@ const listStyle = classNames({
 });
 
 type Props = {
-  onRowPress: (reportGroup: ReportGroup) => void;
+  onRowPress: (reportGroup: string | undefined) => void;
 };
 
 export const ReportGroupList: FC<Props> = ({ onRowPress }) => {
@@ -27,7 +27,7 @@ export const ReportGroupList: FC<Props> = ({ onRowPress }) => {
         const { name, description } = reportGroup;
         return (
           <li className="card-item-wrapper" style={{ cursor: 'pointer' }}>
-            <div className="card-item" onClick={() => onRowPress(reportGroup)}>
+            <div className="card-item" onClick={() => onRowPress(reportGroup?.id)}>
               <div className="card-item-name">{name}</div>
               {description && <div className="card-item-type">{description}</div>}
             </div>

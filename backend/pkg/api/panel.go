@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -32,7 +33,12 @@ func (panel *TablePanel) usesVariable(variable TemplateVariable) bool {
 	return strings.Contains(panel.RawSql, "${"+variable.Name)
 }
 
-func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs string) {
+func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs string, contentVariables string) {
+	var vars map[string][]string
+	err := json.Unmarshal([]byte(contentVariables), &vars)
+	if err != nil {
+		log.DefaultLogger.Error("injectVariable: Decoding JSON: "+contentVariables, err.Error())
+	}
 
 	if (variable.Name) == "store" {
 		csv := ""
@@ -50,15 +56,31 @@ func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs stri
 		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", csv, -1)
 
 	} else {
-		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", variable.Definition, -1)
-		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", variable.Definition, -1)
+		if variable.Type == "custom" {
+			var joined string
+			for i, str := range vars[variable.Name] {
+				if i == len(vars[variable.Name])-1 {
+					joined = joined + "'" + str + "'"
+				} else {
+					joined = joined + "'" + str + "'" + ", "
+				}
+			}
+			panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", joined, -1)
+			panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", joined, -1)
+
+		} else {
+			panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", variable.Definition, -1)
+			panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", variable.Definition, -1)
+		}
 	}
+	log.DefaultLogger.Info("panel.RawSql: " + panel.RawSql)
 }
 
-func (panel *TablePanel) PrepSql(variables TemplateList, storeIDs string) {
+func (panel *TablePanel) PrepSql(variables TemplateList, storeIDs string, contentVariables string) {
+	log.DefaultLogger.Info(contentVariables)
 	for _, variable := range variables.List {
 		if panel.usesVariable(variable) {
-			panel.injectVariable(variable, storeIDs)
+			panel.injectVariable(variable, storeIDs, contentVariables)
 		}
 	}
 }

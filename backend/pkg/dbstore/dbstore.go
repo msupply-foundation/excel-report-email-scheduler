@@ -48,7 +48,7 @@ func GetDataSource() *SQLiteDatasource {
 
 	sqlDatasource := &SQLiteDatasource{
 		instanceManager: instanceManager,
-		Path:            filepath.Join("data", "msupply.db"),
+		Path:            filepath.Join("..", "data", "msupply.db"),
 	}
 
 	sqlDatasource.Init()
@@ -198,7 +198,7 @@ func (datasource *SQLiteDatasource) Init() {
 		panic(err)
 	}
 
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, storeID TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
+	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, storeID TEXT, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Could not create ReportContent:", err.Error())

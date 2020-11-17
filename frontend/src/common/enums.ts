@@ -17,4 +17,5 @@ export enum ReportContentKey {
   ID = 'id',
   LOOKBACK = 'lookback',
   PANEL_ID = 'panelID',
+  VARIABLES = 'variables',
 }

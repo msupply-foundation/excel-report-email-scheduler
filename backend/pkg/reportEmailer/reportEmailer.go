@@ -1,4 +1,4 @@
-package main
+package reportEmailer
 
 import (
 	"fmt"
@@ -67,7 +67,81 @@ func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
 	re.inProgress = false
 }
 
-func (re *ReportEmailer) createReports() {
+func (re *ReportEmailer) CreateReport(schedule dbstore.Schedule, authConfig *auth.AuthConfig, datasourceID int, em emailer.Emailer) error {
+	emails := make(map[string][]string)
+	panels := make(map[string][]api.TablePanel)
+
+	reportGroup, err := re.sql.ReportGroupFromSchedule(schedule)
+	if err != nil {
+		log.DefaultLogger.Error("ReportEmailer.createReport: ReportGroupFromSchedule: " + err.Error())
+		return err
+	}
+
+	userIDs, err := re.sql.GroupMemberUserIDs(*reportGroup)
+	if err != nil {
+		log.DefaultLogger.Error("ReportEmailer.createReport: GroupMemberUserIDs: " + err.Error())
+		return err
+	}
+
+	emailsFromUsers, err := api.GetEmails(*authConfig, userIDs, datasourceID)
+	if err != nil {
+		log.DefaultLogger.Error("ReportEmailer.createReport: emailsFromUsers: " + err.Error())
+		return err
+	}
+
+	emails[schedule.ID] = emailsFromUsers
+
+	reportContent, err := re.sql.GetReportContent(schedule.ID)
+	if err != nil {
+		log.DefaultLogger.Error("ReportEmailer.createReport: GetReportContent: " + err.Error())
+		return err
+	}
+
+	panels[schedule.ID] = []api.TablePanel{}
+
+	for _, content := range reportContent {
+		interval := int64(schedule.Interval)
+		to := strconv.FormatInt(time.Now().Unix(), 10)
+		from := strconv.FormatInt(time.Now().Unix()-interval, 10)
+
+		dashboard, err := api.NewDashboard(authConfig, content.DashboardID, from, to, datasourceID)
+
+		if err != nil {
+			log.DefaultLogger.Error("ReportEmailer.createReport: NewDashboard: " + err.Error())
+			return err
+		}
+
+		panel := dashboard.Panel(content.PanelID)
+		if panel != nil {
+			panel.PrepSql(dashboard.Variables, content.StoreID, content.Variables)
+			panels[schedule.ID] = append(panels[schedule.ID], *panel)
+		}
+	}
+
+	templatePath := filepath.Join("..", "data", "template.xlsx")
+	reporter := reporter.NewReporter(templatePath)
+
+	for scheduleID, reportSheetPanels := range panels {
+		report := reporter.CreateNewReport(scheduleID)
+
+		report.SetSheets(reportSheetPanels)
+		err := report.Write(*authConfig)
+		if err != nil {
+			log.DefaultLogger.Error("ReportEmailer.createReports: report.Write: " + err.Error())
+			return err
+		}
+	}
+
+	for scheduleID, recipientEmails := range emails {
+		attachmentPath := filepath.Join("..", "data", scheduleID+".xlsx")
+		em.BulkCreateAndSend(attachmentPath, recipientEmails)
+	}
+
+	return nil
+	// re.cleanup(schedules)
+}
+
+func (re *ReportEmailer) CreateReports() {
 	log.DefaultLogger.Info("Creating Reports...")
 	re.inProgress = true
 
