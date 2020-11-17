@@ -1,13 +1,12 @@
 import React, { FC } from 'react';
-import { Icon, InlineFormLabel, MultiSelect, Select, Tooltip } from '@grafana/ui';
+import { Icon, InlineFormLabel, Select, Tooltip } from '@grafana/ui';
 import intl from 'react-intl-universal';
 import { SelectableValue } from '@grafana/data';
 import { ReportContentKey } from 'common/enums';
 import { ContentVariables, Panel, SelectableVariable, Store, Variable, VariableOption } from 'common/types';
-import { useStores } from 'hooks/useStores';
+
 import { getLookbacks, parseOrDefault } from 'common';
 import { PanelVariableOptions } from './PanelVariableOption';
-import { panelUsesVariable } from 'common/utils/checkers';
 
 type Props = {
   storeIDs: string;
@@ -22,15 +21,13 @@ export const PanelVariables: FC<Props> = ({
   onUpdateVariable,
   panel,
   onUpdateContent,
-  storeIDs,
+
   lookback,
   variables,
 }) => {
   const lookbacks = getLookbacks();
-  const stores = useStores();
-  const vars = parseOrDefault<ContentVariables>(variables, {});
 
-  const usesStores = panelUsesVariable(panel.rawSql, 'store');
+  const vars = parseOrDefault<ContentVariables>(variables, {});
 
   return (
     <>
@@ -38,26 +35,6 @@ export const PanelVariables: FC<Props> = ({
       <Tooltip placement="top" content={intl.get('variables_tooltip')} theme={'info'}>
         <Icon name="info-circle" size="sm" style={{ marginLeft: '10px' }} />
       </Tooltip>
-
-      {usesStores && (
-        <div style={{ display: 'flex', flexDirection: 'row' }}>
-          <InlineFormLabel tooltip={intl.get('selected_stores_description')}>
-            {intl.get('selected_stores')}
-          </InlineFormLabel>
-          <MultiSelect
-            placeholder={intl.get('choose_stores')}
-            closeMenuOnSelect={false}
-            filterOption={(option: SelectableValue<Store>, searchQuery: string) =>
-              !!option.label?.toLowerCase().startsWith(searchQuery.toLowerCase())
-            }
-            value={stores.filter(({ id }) => storeIDs.includes(id))}
-            onChange={(selectedStores: SelectableValue<Store>) =>
-              onUpdateContent(ReportContentKey.STORE_ID, selectedStores)
-            }
-            options={stores.map((store: any) => ({ label: store.name, value: store }))}
-          />
-        </div>
-      )}
 
       <div style={{ display: 'flex', flexDirection: 'row' }}>
         <InlineFormLabel tooltip={intl.get('lookback_period_description')}>

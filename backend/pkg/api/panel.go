@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
@@ -33,6 +34,37 @@ func (panel *TablePanel) usesVariable(variable TemplateVariable) bool {
 	return strings.Contains(panel.RawSql, "${"+variable.Name)
 }
 
+func (panel *TablePanel) injectMacros() {
+	usesFrom := strings.Contains(panel.RawSql, "$__timeFrom()")
+	usesTo := strings.Contains(panel.RawSql, "$__timeTo()")
+	usesTimeFilter := strings.Contains(panel.RawSql, "$__timeFilter(")
+
+	if usesFrom {
+		newSql := "to_timestamp(" + panel.To + ")"
+		panel.RawSql = strings.Replace(panel.RawSql, "$__timeTo()", newSql, -1)
+	}
+
+	if usesTo {
+		newSql := "to_timestamp(" + panel.From + ")"
+		panel.RawSql = strings.Replace(panel.RawSql, "$__timeFrom()", newSql, -1)
+	}
+
+	if usesTimeFilter {
+		timeFilter := regexp.MustCompile(`\$__timeFilter\([a-z]+\)`)
+		column := regexp.MustCompile(`\([a-zA-Z]+\)`)
+		columnName := regexp.MustCompile(`[a-zA-Z]+`)
+
+		timeFilterString := timeFilter.FindString(panel.RawSql)
+		columnString := column.FindString(timeFilterString)
+		columnNameString := columnName.FindString(columnString)
+
+		newSql := columnNameString + " BETWEEN " + "to_timestamp(" + panel.From + ") AND " + "to_timestamp(" + panel.To + ")"
+		panel.RawSql = timeFilter.ReplaceAllString(panel.RawSql, newSql)
+	}
+
+	log.DefaultLogger.Info("RawSQL After Injecting Macros (" + panel.Title + "):" + panel.RawSql)
+}
+
 func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs string, contentVariables string) {
 	var vars map[string][]string
 	err := json.Unmarshal([]byte(contentVariables), &vars)
@@ -40,40 +72,18 @@ func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs stri
 		log.DefaultLogger.Error("injectVariable: Decoding JSON: "+contentVariables, err.Error())
 	}
 
-	if (variable.Name) == "store" {
-		csv := ""
-		split := strings.Split(storeIDs, ",")
-		for i, substr := range split {
-
-			if i == len(split)-1 {
-				csv = csv + "'" + substr + "'"
-			} else {
-				csv = csv + "'" + substr + "'" + ", "
-			}
-		}
-
-		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", csv, -1)
-		panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", csv, -1)
-
-	} else {
-		if variable.Type == "custom" {
-			var joined string
-			for i, str := range vars[variable.Name] {
-				if i == len(vars[variable.Name])-1 {
-					joined = joined + "'" + str + "'"
-				} else {
-					joined = joined + "'" + str + "'" + ", "
-				}
-			}
-			panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", joined, -1)
-			panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", joined, -1)
-
+	var joined string
+	for i, str := range vars[variable.Name] {
+		if i == len(vars[variable.Name])-1 {
+			joined = joined + "'" + str + "'"
 		} else {
-			panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", variable.Definition, -1)
-			panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", variable.Definition, -1)
+			joined = joined + "'" + str + "'" + ", "
 		}
 	}
-	log.DefaultLogger.Info("panel.RawSql: " + panel.RawSql)
+	panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", joined, -1)
+	panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", joined, -1)
+
+	log.DefaultLogger.Info("RawSQL For Panel (" + panel.Title + "):" + panel.RawSql)
 }
 
 func (panel *TablePanel) PrepSql(variables TemplateList, storeIDs string, contentVariables string) {
@@ -81,6 +91,7 @@ func (panel *TablePanel) PrepSql(variables TemplateList, storeIDs string, conten
 	for _, variable := range variables.List {
 		if panel.usesVariable(variable) {
 			panel.injectVariable(variable, storeIDs, contentVariables)
+			panel.injectMacros()
 		}
 	}
 }
@@ -92,7 +103,7 @@ func (panel *TablePanel) GetData(authConfig auth.AuthConfig) error {
 		return err
 	}
 
-	url := "https://" + authConfig.AuthString() + authConfig.URL + "/api/tsdb/query"
+	url := "http://" + authConfig.AuthString() + authConfig.URL + "/api/tsdb/query"
 	response, err := http.Post(url, "application/json", body)
 	if err != nil {
 		log.DefaultLogger.Error("GetData: http.Post: " + err.Error())
