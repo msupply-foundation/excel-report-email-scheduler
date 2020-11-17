@@ -7,6 +7,7 @@ import { ContentVariables, Panel, SelectableVariable, Store, Variable, VariableO
 
 import { getLookbacks, parseOrDefault } from 'common';
 import { PanelVariableOptions } from './PanelVariableOption';
+import { panelUsesMacro } from 'common/utils/checkers';
 
 type Props = {
   storeIDs: string;
@@ -19,26 +20,33 @@ type Props = {
 
 export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateContent, lookback, variables }) => {
   const lookbacks = getLookbacks();
-
   const vars = parseOrDefault<ContentVariables>(variables, {});
 
+  const usesMacro = panelUsesMacro(panel.rawSql);
+  const usesVariables = usesMacro && panel.variables.length > 0;
+  if (!(usesVariables && usesMacro)) {
+    return null;
+  }
+
   return (
-    <>
+    <div style={{ border: '1px solid grey', padding: '20px' }}>
       <div className="card-item-type">{intl.get('variables')}</div>
       <Tooltip placement="top" content={intl.get('variables_tooltip')} theme={'info'}>
         <Icon name="info-circle" size="sm" style={{ marginLeft: '10px' }} />
       </Tooltip>
 
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
-        <InlineFormLabel tooltip={intl.get('lookback_period_description')}>
-          {intl.get('lookback_period')}
-        </InlineFormLabel>
-        <Select
-          options={lookbacks}
-          onChange={(selected: SelectableValue<Number>) => onUpdateContent(ReportContentKey.LOOKBACK, selected)}
-          value={lookbacks.filter((selected: SelectableValue<Number>) => selected.value === lookback)}
-        />
-      </div>
+      {usesMacro && (
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          <InlineFormLabel tooltip={intl.get('lookback_period_description')}>
+            {intl.get('lookback_period')}
+          </InlineFormLabel>
+          <Select
+            options={lookbacks}
+            onChange={(selected: SelectableValue<Number>) => onUpdateContent(ReportContentKey.LOOKBACK, selected)}
+            value={lookbacks.filter((selected: SelectableValue<Number>) => selected.value === lookback)}
+          />
+        </div>
+      )}
 
       {panel.variables.map((variable: Variable) => {
         const { name, options: variableOptions, multi } = variable;
@@ -63,6 +71,6 @@ export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateCon
           />
         );
       })}
-    </>
+    </div>
   );
 };

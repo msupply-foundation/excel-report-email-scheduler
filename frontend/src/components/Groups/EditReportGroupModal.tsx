@@ -6,11 +6,11 @@ import { Modal, Button, ConfirmModal } from '@grafana/ui';
 
 import { deleteReportGroup, updateReportGroup } from 'api';
 
-import { ReportGroup } from '../Schedules/ReportSchedulesTab';
 import { useOptimisticMutation, useToggle } from 'hooks';
 import { ReportGroupKey } from '../../common/enums';
 import { ReportGroupMemberList } from './ReportGroupMemberList';
 import { EditReportGroupForm } from './EditReportGroupForm';
+import { ReportGroup } from 'common/types';
 
 type Props = {
   onClose: () => void;

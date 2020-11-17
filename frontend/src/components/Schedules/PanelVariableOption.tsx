@@ -18,7 +18,6 @@ export const PanelVariableOptions: FC<Props> = ({
   selectedOptions,
   selectableOptions,
 }) => {
-  console.log(name, selectedOptions, selectableOptions);
   return (
     <div style={{ display: 'flex', flexDirection: 'row', marginTop: '5px' }}>
       <InlineFormLabel>{name}</InlineFormLabel>

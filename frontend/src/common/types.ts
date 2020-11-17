@@ -46,6 +46,7 @@ export type RawPanel = {
   id: number;
   dashboardID: string;
   type: string;
+  error?: string;
 };
 
 export type Panel = {
@@ -56,6 +57,7 @@ export type Panel = {
   title: string;
   rawSql: string;
   type: string;
+  error?: string;
 };
 
 export type Store = {
@@ -119,4 +121,15 @@ export type ContentVariables = {
 export type SelectableVariable = {
   name: string;
   value: string;
+};
+
+export type FormValues = {
+  grafanaUsername: string;
+  grafanaPassword: string;
+  email: string;
+  emailPassword: string;
+  datasourceID: number;
+  emailHost: string;
+  emailPort: number;
+  grafanaURL: string;
 };

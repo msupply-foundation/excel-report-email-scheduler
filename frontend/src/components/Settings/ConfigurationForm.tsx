@@ -3,12 +3,12 @@ import intl from 'react-intl-universal';
 import { Field, FieldSet, Form, Input } from '@grafana/ui';
 import { FC } from 'react';
 
-import { FormValues } from '../../types';
 import { useQuery } from 'react-query';
 import { getDatasources } from 'api';
 import { SelectableValue } from '@grafana/data';
 import { FieldInput } from 'components/FieldInput';
 import { FieldSelect } from 'components/FieldSelect';
+import { FormValues } from 'common/types';
 
 type OnSubmit<FormValues> = (data: FormValues) => void;
 
@@ -42,7 +42,7 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
           emailHost,
           emailPort,
         } = getValues();
-        console.log(errors);
+
         return (
           <>
             <FieldSet label={intl.get('grafana_details')}>

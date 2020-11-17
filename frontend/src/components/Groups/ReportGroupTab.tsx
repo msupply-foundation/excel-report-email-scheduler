@@ -5,11 +5,11 @@ import { EditReportGroupModal } from './EditReportGroupModal';
 import { createReportGroup } from 'api';
 import { Button, Legend } from '@grafana/ui';
 import { ReportGroupList } from './ReportGroupList';
-import { ReportGroup } from '../Schedules/ReportSchedulesTab';
+
 import { AppRootProps } from '@grafana/data';
 import { useOptimisticMutation } from 'hooks';
-import { AppData, CreateReportGroupVariables } from 'common/types';
-import { AppDataContext } from 'containers';
+import { AppData, CreateReportGroupVariables, ReportGroup } from 'common/types';
+import { AppDataContext } from '../../containers';
 import { queryCache } from 'react-query';
 
 interface Props extends AppRootProps {}

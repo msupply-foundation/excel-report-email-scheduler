@@ -1,22 +1,18 @@
-import { panelUsesVariable } from './common/utils/checkers';
-import { DashboardResponse, DashboardMeta, CreateContentVars } from './common/types';
+import { panelUsesVariable, panelUsesUnsupportedMacro } from './common/utils/checkers';
+import { DashboardResponse, DashboardMeta, CreateContentVars, ReportContent } from './common/types';
 import { getBackendSrv } from '@grafana/runtime';
-import { Variable, Panel, ReportGroupMember, Schedule, Store } from 'common/types';
-
-export const getRecipients = () => getBackendSrv().get('api/plugins/msupply-datasource/resources/report-recipient');
+import { Variable, Panel, ReportGroupMember, Schedule, Store, ReportGroup, User } from 'common/types';
 
 export const sendTestEmail = (scheduleID: string) =>
   getBackendSrv().get(`api/plugins/msupply-datasource/resources/test-email?schedule-id=${scheduleID}`);
 
-export const getGroupAssignments = (key: string, groupId: string) =>
+export const getGroupMembers = (_: string, groupId: string): Promise<ReportGroupMember[]> =>
   getBackendSrv().get(`api/plugins/msupply-datasource/resources/report-group-membership/?group-id=${groupId}`);
 
-export const getGroupMembers = (key: string, groupId: string) =>
-  getBackendSrv().get(`api/plugins/msupply-datasource/resources/report-group-membership/?group-id=${groupId}`);
+export const getReportGroups = (): Promise<ReportGroup[]> =>
+  getBackendSrv().get('api/plugins/msupply-datasource/resources/report-group');
 
-export const getReportGroups = () => getBackendSrv().get('api/plugins/msupply-datasource/resources/report-group');
-
-export const getUsers = (datasourceID: number) => {
+export const getUsers = (datasourceID: number): Promise<User[]> => {
   return getBackendSrv()
     .post('/api/tsdb/query', {
       queries: [
@@ -104,11 +100,11 @@ export const updateReportGroup = async (reportGroup: any) => {
   return getBackendSrv().put(`./api/plugins/msupply-datasource/resources/report-group/${reportGroup?.id}`, reportGroup);
 };
 
-export const deleteReportGroup = async (reportGroup: any) => {
+export const deleteReportGroup = async (reportGroup: ReportGroup) => {
   return getBackendSrv().delete(`./api/plugins/msupply-datasource/resources/report-group/${reportGroup?.id}`);
 };
 
-export const createReportGroup = async (ReportGroup: any) => {
+export const createReportGroup = async () => {
   return getBackendSrv().post('./api/plugins/msupply-datasource/resources/report-group');
 };
 
@@ -125,7 +121,7 @@ export const deleteSchedule = async (schedule: Schedule) => {
 };
 
 export const getReportContent = async (_: string, scheduleID: string) => {
-  const content: any[] = await getBackendSrv().get(
+  const content: ReportContent[] = await getBackendSrv().get(
     `./api/plugins/msupply-datasource/resources/report-content?schedule-id=${scheduleID}`
   );
   return content;
@@ -156,10 +152,11 @@ export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
 
   const panels: Panel[] = dashboards
     .filter(({ panels }) => panels?.length > 0)
-    .map<Panel[]>(({ panels, templating, uid }) => {
+    .map(({ panels, templating, uid }) => {
       const mappedPanels = panels
         .filter(({ type }) => type === 'table')
-        .filter(({ targets, title }) => {
+        .map(rawPanel => {
+          const { targets } = rawPanel;
           const [target] = targets;
           const { rawSql } = target;
 
@@ -184,12 +181,16 @@ export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
             return panelUsesVariable(rawSql, variableName);
           });
 
-          console.log(title, usesUnusableVariables, unusableVariables);
-          return !usesUnusableVariables;
-        })
-        .map(rawPanel => {
-          const { targets, description, title, id, type } = rawPanel;
+          let error = '';
+          if (usesUnusableVariables) {
+            error = 'This panel uses an unsupported variable.';
+          } else if (panelUsesUnsupportedMacro(rawSql)) {
+            error = 'This panel uses an unsupported macro.';
+          }
 
+          return { ...rawPanel, error };
+        })
+        .map(({ targets, description, title, id, type, error }) => {
           const [target] = targets;
           const { rawSql } = target;
 
@@ -206,7 +207,8 @@ export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
               }
             }, []) ?? [];
 
-          const mappedPanel = { rawSql, description, title, id, variables, dashboardID, type };
+          const mappedPanel = { error, rawSql, description, title, id, variables, dashboardID, type };
+
           return mappedPanel;
         });
       return mappedPanels;

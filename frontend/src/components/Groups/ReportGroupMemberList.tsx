@@ -8,6 +8,7 @@ import { getUsers, getGroupMembers, deleteReportGroupMembership, createReportGro
 import { CreateGroupMemberVars, ReportGroupMember, User } from 'common/types';
 import { ReportGroup } from '../Schedules/ReportSchedulesTab';
 import { useOptimisticMutation } from 'hooks/useOptimisticMutation';
+import { useWindowSize } from 'hooks/useWindowResize';
 
 type Props = {
   reportGroup: ReportGroup | null;
@@ -27,6 +28,7 @@ const marginForCheckbox = css`
 
 export const ReportGroupMemberList: FC<Props> = ({ reportGroup, datasourceID }) => {
   const { id: reportGroupID } = reportGroup ?? {};
+  const { height } = useWindowSize();
 
   const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -106,7 +108,7 @@ export const ReportGroupMemberList: FC<Props> = ({ reportGroup, datasourceID }) 
         />
         <Icon style={{ marginRight: '10px' }} size={'xl'} name="trash-alt" onClick={() => setSearchTerm('')} />
       </div>
-      <ol className={listStyle} style={{ maxHeight: '300px', overflow: 'scroll' }}>
+      <ol className={listStyle} style={{ maxHeight: `${(height ?? 0) / 2}px`, overflow: 'scroll' }}>
         {users ? (
           users
             ?.filter(({ name }) => name.toLowerCase().includes(searchTerm.toLowerCase()))

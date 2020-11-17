@@ -1,5 +1,5 @@
 import { ContentVariables, Panel, ReportContent, Store } from 'common/types';
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 
 import { css } from 'emotion';
 import { Checkbox } from '@grafana/ui';
@@ -24,7 +24,13 @@ const marginForCheckbox = css`
 `;
 
 export const PanelItem: FC<Props> = ({ panel, reportContent, onToggle, scheduleID }) => {
-  const { title, description } = panel;
+  const { title, description, error } = panel;
+
+  useEffect(() => {
+    if (error && reportContent) {
+      onToggle(panel);
+    }
+  }, [error, reportContent, panel, onToggle]);
 
   const [updateContent] = useOptimisticMutation<ReportContent[], ReportContent, ReportContent, ReportContent[]>(
     ['reportContent', scheduleID],
@@ -64,12 +70,18 @@ export const PanelItem: FC<Props> = ({ panel, reportContent, onToggle, scheduleI
   };
 
   return (
-    <li className="card-item-wrapper" style={{ cursor: 'pointer' }}>
+    <li className="card-item-wrapper" style={{ cursor: !error ? 'pointer' : '' }}>
       <div className={'card-item'}>
-        <div className="card-item-body" onClick={() => onToggle(panel)}>
-          <div className={marginForCheckbox}>
-            <Checkbox value={!!reportContent} css="" />
-          </div>
+        <div
+          className="card-item-body"
+          onClick={() => {
+            if (error) {
+              return;
+            }
+            return onToggle(panel);
+          }}
+        >
+          <div className={marginForCheckbox}>{!error ? <Checkbox value={!!reportContent} css="" /> : null}</div>
 
           <div className="card-item-details">
             <div className="card-item-name">{title}</div>
@@ -77,7 +89,7 @@ export const PanelItem: FC<Props> = ({ panel, reportContent, onToggle, scheduleI
           </div>
         </div>
 
-        {reportContent && (
+        {reportContent && !error && (
           <PanelVariables
             storeIDs={reportContent.storeID}
             panel={panel}
@@ -87,6 +99,8 @@ export const PanelItem: FC<Props> = ({ panel, reportContent, onToggle, scheduleI
             onUpdateVariable={onUpdateVariable(reportContent)}
           />
         )}
+
+        {error}
       </div>
     </li>
   );
