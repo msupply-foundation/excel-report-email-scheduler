@@ -5,28 +5,64 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
 )
 
-func (server *HttpServer) updateSettings(rw http.ResponseWriter, request *http.Request) {
-	var settings dbstore.Settings
-	requestBody, err := request.GetBody()
-	bodyAsBytes, _ := ioutil.ReadAll(requestBody)
-	err = json.Unmarshal(bodyAsBytes, &settings)
-
+func (server *HttpServer) fetchSettings(rw http.ResponseWriter, request *http.Request) {
+	settings, err := server.db.GetSettings()
 	if err != nil {
-		http.Error(rw, "Invalid Request, received: "+" "+err.Error()+"\n"+"Expecting a JSON body in the shape { grafanaUsername, grafanaPassword, email, emailPassword }", http.StatusBadRequest)
+		log.DefaultLogger.Error("fetchSettings: db.GetSettings(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	server.db.CreateOrUpdateSettings(settings)
+	err = json.NewEncoder(rw).Encode(settings)
+	if err != nil {
+		log.DefaultLogger.Error("fetchSettings: json.NewEncoder().Encode(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	rw.WriteHeader(http.StatusOK)
 }
 
-func (server *HttpServer) fetchSettings(rw http.ResponseWriter, request *http.Request) {
-	config := server.db.GetSettings()
-	json.NewEncoder(rw).Encode(config)
-	rw.WriteHeader(http.StatusOK)
+func (server *HttpServer) updateSettings(rw http.ResponseWriter, request *http.Request) {
+	var settings dbstore.Settings
+	requestBody, err := request.GetBody()
+	if err != nil {
+		log.DefaultLogger.Error("updateSettings: request.GetBody(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 
+	bodyAsBytes, err := ioutil.ReadAll(requestBody)
+	if err != nil {
+		log.DefaultLogger.Error("updateSettings: ioutil.ReadAll(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = json.Unmarshal(bodyAsBytes, &settings)
+	if err != nil {
+		log.DefaultLogger.Error("updateSettings: json.Unmarshal: " + err.Error())
+		http.Error(rw, NewRequestBodyError(err, dbstore.SettingsFields()).Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = server.db.CreateOrUpdateSettings(settings)
+	if err != nil {
+		log.DefaultLogger.Error("updateSettings: db.CreateOrUpdateSettings: " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = json.NewEncoder(rw).Encode(settings)
+	if err != nil {
+		log.DefaultLogger.Error("updateSettings: json.NewEncoder().Encode(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
 }

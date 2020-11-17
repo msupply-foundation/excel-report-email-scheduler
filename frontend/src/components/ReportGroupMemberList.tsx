@@ -10,6 +10,7 @@ import { ReportGroup } from './ReportSchedulesTab';
 
 type Props = {
   reportGroup: ReportGroup | null;
+  datasourceID: number;
 };
 
 const listStyle = classNames({
@@ -23,10 +24,10 @@ const marginForCheckbox = css`
   margin-right: 10px;
 `;
 
-export const ReportGroupMemberList: FC<Props> = ({ reportGroup }) => {
+export const ReportGroupMemberList: FC<Props> = ({ reportGroup, datasourceID }) => {
   const { id: reportGroupID } = reportGroup ?? {};
 
-  const { data: users } = useQuery<User[]>('users', getUsers);
+  const { data: users } = useQuery<User[]>('users', () => getUsers(datasourceID));
   const { data: groupMembers } = useQuery<ReportGroupMember[]>(['groupMembers', reportGroupID], getGroupMembers);
 
   const [createMembership] = useMutation(createReportGroupMembership, {

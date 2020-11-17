@@ -50,11 +50,10 @@ func NewReport(id string, templatePath string) *Report {
 }
 
 func (r *Report) openTemplate() error {
-	f, e := excelize.OpenFile(r.templatePath)
-
-	if e != nil {
-		log.DefaultLogger.Error("openTemplate: ", e.Error())
-		return e
+	f, err := excelize.OpenFile(r.templatePath)
+	if err != nil {
+		log.DefaultLogger.Error("Could not open template: ", err.Error())
+		return err
 	}
 
 	r.file = f
@@ -84,15 +83,19 @@ func (r *Report) placeholderRowRef(sheetName string, placeholder string) (int, e
 	}
 
 	split := CELL_REF_REG.FindAllString(refs[0], 2)
-	idx, _ := strconv.Atoi(split[1])
+	idx, err := strconv.Atoi(split[1])
+	if err != nil {
+		log.DefaultLogger.Error("placeholderRowRef: Atoi: " + err.Error())
+		return 0, err
+	}
 
 	return idx, nil
 }
 
 func (r *Report) writeTitle(sheetName string) error {
 	refs, err := r.placeholderCellRef(sheetName, "{{title}}")
-
 	if err != nil {
+		log.DefaultLogger.Error("writeTitle: placeholderCellRef: " + err.Error())
 		return err
 	}
 
@@ -103,7 +106,6 @@ func (r *Report) writeTitle(sheetName string) error {
 
 func (r *Report) writeDate(sheetName string) error {
 	refs, err := r.placeholderCellRef(sheetName, "{{date}}")
-
 	if err != nil {
 		log.DefaultLogger.Error("writeDate: ", err.Error())
 		return err
@@ -115,7 +117,6 @@ func (r *Report) writeDate(sheetName string) error {
 }
 
 func (r *Report) writeCell(sheetName string, cellRef string, value interface{}) {
-	log.DefaultLogger.Info("SheetName: "+sheetName+" -- CellRef: "+cellRef, value)
 	r.file.SetCellValue(sheetName, cellRef, value)
 }
 
@@ -125,22 +126,18 @@ func (r *Report) SetSheets(panels []api.TablePanel) {
 
 func (r *Report) writeHeaders(sheetName string, columns []api.Column) error {
 	idx, err := r.placeholderRowRef(sheetName, "{{headers}}")
-
 	if err != nil {
 		log.DefaultLogger.Error("writeHeaders: ", err.Error())
 		return err
 	}
 
-	log.DefaultLogger.Info(strconv.Itoa(idx))
 	for i, column := range columns {
-		log.DefaultLogger.Info(column.Text)
 		cellRef := r.createCellRef(i, idx)
-		log.DefaultLogger.Info(cellRef)
 		r.writeCell(sheetName, cellRef, column.Text)
 	}
-
 	return nil
 }
+
 func Min(x, y int) int {
 	if x > y {
 		return y
@@ -150,18 +147,14 @@ func Min(x, y int) int {
 
 func (r *Report) createDuplicateTableRows(sheetName string, numberToDuplicate int) (int, error) {
 	idx, err := r.placeholderRowRef(sheetName, "{{rows}}")
-
-	duplicateNumber := Min(numberToDuplicate, 500)
-
-	log.DefaultLogger.Info(strconv.Itoa(numberToDuplicate))
 	if err != nil {
-		log.DefaultLogger.Error("createDuplicateTableRows: ", err.Error())
+		log.DefaultLogger.Error("createDuplicateTableRows: " + err.Error())
 		return 0, err
 	}
 
+	duplicateNumber := Min(numberToDuplicate, 500)
 	i := 0
 	for i < duplicateNumber {
-		log.DefaultLogger.Info(strconv.Itoa(i))
 		r.file.DuplicateRow(sheetName, idx)
 		i += 1
 	}
@@ -175,92 +168,74 @@ func (r *Report) createCellRef(columnNumber int, rowNumber int) string {
 
 func (r *Report) writeRows(sheetName string, rows [][]interface{}) error {
 	idx, err := r.createDuplicateTableRows(sheetName, len(rows))
-
 	if err != nil {
-		log.DefaultLogger.Error("writeRows: ", err.Error())
+		log.DefaultLogger.Error("writeRows: createDuplicateTableRows: " + err.Error())
 		return err
 	}
 
-	log.DefaultLogger.Info("Write Rows: " + "Writing Rows")
 	for _, row := range rows {
 		for j, value := range row {
 			cellRef := r.createCellRef(j, idx)
-			log.DefaultLogger.Info("Writing Cell: ", cellRef, value)
 			r.writeCell(sheetName, cellRef, value)
 		}
 		idx += 1
 	}
-
 	return nil
 }
 
 func (r *Report) Write(auth auth.AuthConfig) error {
+	log.DefaultLogger.Info(fmt.Sprintf("Starting to create report %s...", r.id))
 	if r.file == nil {
-		r.openTemplate()
+		if err := r.openTemplate(); err != nil {
+			return err
+		}
 	}
 
 	for _, s := range r.sheets {
-		log.DefaultLogger.Info("Writing Sheet: " + s.Title)
-
+		log.DefaultLogger.Info(fmt.Sprintf("Creating new sheet %s", s.Title))
 		sIdx := r.file.NewSheet(s.Title)
-		err := r.file.CopySheet(1, sIdx)
 
-		if err != nil {
-			log.DefaultLogger.Error("Write: ", err.Error())
+		if err := r.file.CopySheet(1, sIdx); err != nil {
+			log.DefaultLogger.Error("Write: copySheet: " + err.Error())
 			return err
 		}
 
-		log.DefaultLogger.Info("Getting Data")
-
-		s.GetData(auth)
-
-		log.DefaultLogger.Info("Writing Title: " + s.Title)
-
-		err = r.writeTitle(s.Title)
-
-		if err != nil {
-			log.DefaultLogger.Error("Write: ", err.Error())
-			return nil
+		if err := s.GetData(auth); err != nil {
+			log.DefaultLogger.Error("Write: GetData: " + err.Error())
+			return err
 		}
 
-		log.DefaultLogger.Info("Writing Date:", s.Title)
-
-		err = r.writeDate(s.Title)
-
-		if err != nil {
-			log.DefaultLogger.Error("Write: ", err.Error())
-			return nil
+		if err := r.writeTitle(s.Title); err != nil {
+			log.DefaultLogger.Error("Write: writeTitle: " + err.Error())
+			return err
 		}
 
-		log.DefaultLogger.Info("Writing Headers")
-
-		err = r.writeHeaders(s.Title, s.Columns)
-
-		if err != nil {
-			log.DefaultLogger.Error("Write: ", err.Error())
-			return nil
+		if err := r.writeDate(s.Title); err != nil {
+			log.DefaultLogger.Error("Write: writeDate: " + err.Error())
+			return err
 		}
 
-		log.DefaultLogger.Info("Writing Rows")
-
-		err = r.writeRows(s.Title, s.Rows)
-
-		if err != nil {
-			log.DefaultLogger.Error("Write: ", err.Error())
-			return nil
+		if err := r.writeHeaders(s.Title, s.Columns); err != nil {
+			log.DefaultLogger.Error("Write: writeHeaders: " + err.Error())
+			return err
 		}
 
+		if err := r.writeRows(s.Title, s.Rows); err != nil {
+			log.DefaultLogger.Error("Write: writeRows: " + err.Error())
+			return err
+		}
 	}
 
-	log.DefaultLogger.Info("Deleting Sheet: Sheet1")
-	r.file.DeleteSheet("Sheet1")
+	r.file.DeleteSheet("August")
 
-	log.DefaultLogger.Info("Saving Report: " + r.id)
+	log.DefaultLogger.Info("Saving report...")
 
 	savePath := filepath.Join("data", r.id+".xlsx")
 	if err := r.file.SaveAs(savePath); err != nil {
 		log.DefaultLogger.Error("Write: ", err.Error())
 	}
+
+	log.DefaultLogger.Info(fmt.Sprintf("Report finished! %s :tada", r.id))
 
 	return nil
 }

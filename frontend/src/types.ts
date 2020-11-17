@@ -6,4 +6,5 @@ export type FormValues = {
   datasourceID: number;
   emailHost: string;
   emailPort: number;
+  grafanaURL: string;
 };

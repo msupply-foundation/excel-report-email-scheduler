@@ -41,14 +41,15 @@ const marginForCheckbox = css`
 
 type Props = {
   schedule: Schedule;
+  datasourceID: number;
 };
 
 // TODO: Create PanelItem component and extract logic there.
-export const PanelList: FC<Props> = ({ schedule }) => {
+export const PanelList: FC<Props> = ({ schedule, datasourceID }) => {
   const { id: scheduleID } = schedule;
 
   const { data: panels } = useQuery(['panels'], getPanels);
-  const { data: stores } = useQuery(['stores'], getStores);
+  const { data: stores } = useQuery(['stores'], () => getStores(datasourceID));
   const { data: content } = useQuery<ReportContent[]>(['reportContent', scheduleID], getReportContent);
 
   const refetchContent = () => queryCache.refetchQueries(['reportContent', scheduleID]);

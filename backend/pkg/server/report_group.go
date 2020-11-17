@@ -6,22 +6,45 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
 )
 
 func (server *HttpServer) fetchReportGroup(rw http.ResponseWriter, request *http.Request) {
 	var groups []dbstore.ReportGroup
 
-	groups = server.db.GetReportGroups()
+	groups, err := server.db.GetReportGroups()
+	if err != nil {
+		log.DefaultLogger.Error("fetchReportGroup: db.GetReportGroups")
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	json.NewEncoder(rw).Encode(groups)
+	err = json.NewEncoder(rw).Encode(groups)
+	if err != nil {
+		log.DefaultLogger.Error("fetchReportGroup: json.NewEncoder().Encode()", err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	rw.WriteHeader(http.StatusOK)
 }
 
 func (server *HttpServer) createReportGroup(rw http.ResponseWriter, request *http.Request) {
-	result, _ := server.db.CreateReportGroup()
+	result, err := server.db.CreateReportGroup()
+	if err != nil {
+		log.DefaultLogger.Error("createReportGroup: CreateReportGroup(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	json.NewEncoder(rw).Encode(result)
+	err = json.NewEncoder(rw).Encode(result)
+	if err != nil {
+		log.DefaultLogger.Error("createReportGroup: json.NewEncoder().Encode(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	rw.WriteHeader(http.StatusOK)
 }
 
@@ -31,17 +54,40 @@ func (server *HttpServer) updateReportGroup(rw http.ResponseWriter, request *htt
 
 	var group dbstore.ReportGroup
 	requestBody, err := request.GetBody()
-	bodyAsBytes, _ := ioutil.ReadAll(requestBody)
-	err = json.Unmarshal(bodyAsBytes, &group)
-
 	if err != nil {
-		http.Error(rw, "Invalid Request, received: "+" "+err.Error()+"\n"+"Expecting a JSON body in the shape { grafanaUsername, grafanaPassword, email, emailPassword }", http.StatusBadRequest)
+		log.DefaultLogger.Error("updateReportGroup: request.GetBody(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	server.db.UpdateReportGroup(id, group)
+	bodyAsBytes, err := ioutil.ReadAll(requestBody)
+	if err != nil {
+		log.DefaultLogger.Error("updateReportGroup: ioutil.ReadAll(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	json.NewEncoder(rw).Encode(group)
+	err = json.Unmarshal(bodyAsBytes, &group)
+	if err != nil {
+		log.DefaultLogger.Error("updateReportGroup: json.Unmarshal: " + err.Error())
+		http.Error(rw, NewRequestBodyError(err, dbstore.ReportGroupFields()).Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err = server.db.UpdateReportGroup(id, group)
+	if err != nil {
+		log.DefaultLogger.Error("updateReportGroup: db.UpdateReportGroup: " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = json.NewEncoder(rw).Encode(group)
+	if err != nil {
+		log.DefaultLogger.Error("updateReportGroup: json.NewEncoder().Encode(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	rw.WriteHeader(http.StatusOK)
 
 }
@@ -49,10 +95,14 @@ func (server *HttpServer) updateReportGroup(rw http.ResponseWriter, request *htt
 func (server *HttpServer) deleteReportGroup(rw http.ResponseWriter, request *http.Request) {
 	vars := mux.Vars(request)
 	id := vars["id"]
-	// TODO: Handle error
-	success, _ := server.db.DeleteReportGroup(id)
 
-	json.NewEncoder(rw).Encode(success)
+	err := server.db.DeleteReportGroup(id)
+	if err != nil {
+		log.DefaultLogger.Error("deleteReportGroup: db.DeleteReportGroup(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	rw.WriteHeader(http.StatusOK)
 
 }

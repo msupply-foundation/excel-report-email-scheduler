@@ -12,10 +12,8 @@ type User struct {
 	Email string `json:"email"`
 }
 
-func GetEmails(authConfig auth.AuthConfig, userIDs []string, datasourceID int) []string {
-
-	url := "http://" + authConfig.Username + ":" + authConfig.Password + "@" + "localhost:3000/api/tsdb/query"
-
+func GetEmails(authConfig auth.AuthConfig, userIDs []string, datasourceID int) ([]string, error) {
+	url := "http://" + authConfig.AuthString() + authConfig.URL + "/api/tsdb/query"
 	queryString := "("
 	i := 0
 	for i < len(userIDs)-1 {
@@ -23,29 +21,27 @@ func GetEmails(authConfig auth.AuthConfig, userIDs []string, datasourceID int) [
 		i += 1
 	}
 	queryString += "'" + userIDs[i] + "')"
-
-	body, e := NewQueryRequest("SELECT * FROM \"user\" WHERE id IN "+queryString, "0", "0", datasourceID).ToRequestBody()
-
-	if e != nil {
-		log.DefaultLogger.Error(e.Error())
+	body, err := NewQueryRequest("SELECT * FROM \"user\" WHERE id IN "+queryString, "0", "0", datasourceID).ToRequestBody()
+	if err != nil {
+		log.DefaultLogger.Error("GetEmails: NewQueryRequest: " + err.Error())
+		return nil, err
 	}
 
-	response, e := http.Post(url, "application/json", body)
-
-	if e != nil {
-		log.DefaultLogger.Error(e.Error())
+	response, err := http.Post(url, "application/json", body)
+	if err != nil {
+		log.DefaultLogger.Error("GetEmails: http.Post: " + err.Error())
+		return nil, err
 	}
 
-	qr, e := NewQueryResponse(response)
-
-	if e != nil {
-		log.DefaultLogger.Error(e.Error())
+	qr, err := NewQueryResponse(response)
+	if err != nil {
+		log.DefaultLogger.Error("GetEmails: NewQueryResponse: " + err.Error())
+		return nil, err
 	}
 
 	emailColumnIdx := 0
 	i = 0
 	for _, column := range qr.Columns() {
-
 		if column.Text == "e_mail" {
 			emailColumnIdx = i
 		}
@@ -59,6 +55,6 @@ func GetEmails(authConfig auth.AuthConfig, userIDs []string, datasourceID int) [
 		}
 	}
 
-	return ids
+	return ids, nil
 
 }

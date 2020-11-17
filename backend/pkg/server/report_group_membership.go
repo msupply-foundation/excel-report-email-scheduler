@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
 )
 
@@ -15,26 +16,61 @@ func (server *HttpServer) fetchReportGroupMembership(rw http.ResponseWriter, req
 
 	var assignment []dbstore.ReportGroupMembership
 
-	assignment = server.db.GetReportGroupMemberships(id)
+	assignment, err := server.db.GetReportGroupMemberships(id)
+	if err != nil {
+		log.DefaultLogger.Error("fetchReportGroupMembership: db.GetReportGroupMemberships():" + id + ": " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	json.NewEncoder(rw).Encode(assignment)
+	err = json.NewEncoder(rw).Encode(assignment)
+	if err != nil {
+		log.DefaultLogger.Error("fetchReportGroupMembership: json.NewEncoder().Encode()")
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	rw.WriteHeader(http.StatusOK)
 }
 
 func (server *HttpServer) createReportGroupMembership(rw http.ResponseWriter, request *http.Request) {
 	var membership []dbstore.ReportGroupMembership
 	requestBody, err := request.GetBody()
-	bodyAsBytes, _ := ioutil.ReadAll(requestBody)
-	err = json.Unmarshal(bodyAsBytes, &membership)
-
 	if err != nil {
-		http.Error(rw, "Invalid Request, received: "+" "+err.Error()+"\n"+"Expecting a JSON body in the shape { grafanaUsername, grafanaPassword, email, emailPassword }", http.StatusBadRequest)
+		log.DefaultLogger.Error("createReportGroupMembership: request.GetBody(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	result, _ := server.db.CreateReportGroupMembership(membership)
+	bodyAsBytes, err := ioutil.ReadAll(requestBody)
+	if err != nil {
+		log.DefaultLogger.Error("createReportGroupMembership: ioutil.ReadAll(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	json.NewEncoder(rw).Encode(result)
+	err = json.Unmarshal(bodyAsBytes, &membership)
+
+	if err != nil {
+		log.DefaultLogger.Error("createReportGroupMembership: json.Unmarshal: ", err.Error())
+		http.Error(rw, NewRequestBodyError(err, dbstore.ReportGroupMembershipFields()).Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := server.db.CreateReportGroupMembership(membership)
+	if err != nil {
+		log.DefaultLogger.Error("createReportGroupMembership: db.CreateReportGroupMembership: ", err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = json.NewEncoder(rw).Encode(result)
+	if err != nil {
+		log.DefaultLogger.Error("createReportGroupMembership: json.NewEncoder().Encode()", err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	rw.WriteHeader(http.StatusOK)
 }
 
@@ -42,10 +78,13 @@ func (server *HttpServer) deleteReportGroupMembership(rw http.ResponseWriter, re
 	vars := mux.Vars(request)
 	id := vars["id"]
 
-	// TODO: Handle error
-	success, _ := server.db.DeleteReportGroupMembership(id)
+	err := server.db.DeleteReportGroupMembership(id)
+	if err != nil {
+		log.DefaultLogger.Error("deleteReportGroupMembership: db.DeleteReportGroupMembership(): ", err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
-	json.NewEncoder(rw).Encode(success)
 	rw.WriteHeader(http.StatusOK)
 
 }

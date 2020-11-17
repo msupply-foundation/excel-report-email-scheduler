@@ -3,10 +3,8 @@
 package main
 
 import (
-	"runtime"
-
-	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
-	"github.com/grafana/grafana-plugin-sdk-go/build"
+	// mage:import
+	build "github.com/grafana/grafana-plugin-sdk-go/build"
 )
 
 // Callback for setting CGO_ENABLED for building on windows.
@@ -16,17 +14,7 @@ var cb build.BeforeBuildCallback = func(cfg build.Config) (build.Config, error) 
 	return cfg, nil
 }
 
-// Main entry-point for building plugin.
-func BuildPlugin() {
-	if runtime.GOOS == "windows" {
-		var err = build.SetBeforeBuildCallback(cb)
+var err = build.SetBeforeBuildCallback(cb)
 
-		if err != nil {
-			log.DefaultLogger.Error(err.Error())
-		}
-	}
-
-	build.BuildAll()
-}
-
-var Default = BuildPlugin
+// Default configures the default target.
+var Default = build.BuildAll
