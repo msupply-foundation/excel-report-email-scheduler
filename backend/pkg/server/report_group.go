@@ -17,14 +17,14 @@ func (server *HttpServer) fetchReportGroup(rw http.ResponseWriter, request *http
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroup: db.GetReportGroups")
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(groups)
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroup: json.NewEncoder().Encode()", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -35,14 +35,14 @@ func (server *HttpServer) createReportGroup(rw http.ResponseWriter, request *htt
 	if err != nil {
 		log.DefaultLogger.Error("createReportGroup: CreateReportGroup(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(result)
 	if err != nil {
 		log.DefaultLogger.Error("createReportGroup: json.NewEncoder().Encode(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -57,35 +57,35 @@ func (server *HttpServer) updateReportGroup(rw http.ResponseWriter, request *htt
 	if err != nil {
 		log.DefaultLogger.Error("updateReportGroup: request.GetBody(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	bodyAsBytes, err := ioutil.ReadAll(requestBody)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportGroup: ioutil.ReadAll(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.Unmarshal(bodyAsBytes, &group)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportGroup: json.Unmarshal: " + err.Error())
 		http.Error(rw, NewRequestBodyError(err, dbstore.ReportGroupFields()).Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	_, err = server.db.UpdateReportGroup(id, group)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportGroup: db.UpdateReportGroup: " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(group)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportGroup: json.NewEncoder().Encode(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -100,7 +100,7 @@ func (server *HttpServer) deleteReportGroup(rw http.ResponseWriter, request *htt
 	if err != nil {
 		log.DefaultLogger.Error("deleteReportGroup: db.DeleteReportGroup(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)

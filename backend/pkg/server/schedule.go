@@ -17,14 +17,14 @@ func (server *HttpServer) fetchSchedules(rw http.ResponseWriter, request *http.R
 	if err != nil {
 		log.DefaultLogger.Error("fetchSchedules: db.GetSchedules(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(schedules)
 	if err != nil {
 		log.DefaultLogger.Error("fetchSchedules: json.NewEncoder().Encode(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -35,14 +35,14 @@ func (server *HttpServer) createSchedule(rw http.ResponseWriter, request *http.R
 	if err != nil {
 		log.DefaultLogger.Error("createSchedule: db.CreateSchedule(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(schedule)
 	if err != nil {
 		log.DefaultLogger.Error("createSchedule: json.NewEncoder().Encode(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -56,7 +56,7 @@ func (server *HttpServer) deleteSchedule(rw http.ResponseWriter, request *http.R
 	if err != nil {
 		log.DefaultLogger.Error("deleteSchedule: db.DeleteSchedule(): " + id + " : " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -71,21 +71,21 @@ func (server *HttpServer) updateSchedule(rw http.ResponseWriter, request *http.R
 	if err != nil {
 		log.DefaultLogger.Error("updateSchedule: request.GetBody(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	bodyAsBytes, err := ioutil.ReadAll(requestBody)
 	if err != nil {
 		log.DefaultLogger.Error("updateSchedule: ioutil.ReadAll(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.Unmarshal(bodyAsBytes, &schedule)
 	if err != nil {
 		log.DefaultLogger.Error("updateSchedule: json.Unmarshal: " + err.Error())
 		http.Error(rw, NewRequestBodyError(err, dbstore.ScheduleFields()).Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	_, err = server.db.UpdateSchedule(id, schedule)
@@ -93,14 +93,14 @@ func (server *HttpServer) updateSchedule(rw http.ResponseWriter, request *http.R
 	if err != nil {
 		log.DefaultLogger.Error("updateSchedule: db.UpdateSchedule: " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(schedule)
 	if err != nil {
 		log.DefaultLogger.Error("updateSchedule: json.NewEncoder().Encode(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)

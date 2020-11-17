@@ -10,18 +10,19 @@ import (
 )
 
 func (server *HttpServer) fetchSettings(rw http.ResponseWriter, request *http.Request) {
+
 	settings, err := server.db.GetSettings()
 	if err != nil {
 		log.DefaultLogger.Error("fetchSettings: db.GetSettings(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(settings)
 	if err != nil {
 		log.DefaultLogger.Error("fetchSettings: json.NewEncoder().Encode(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -33,35 +34,35 @@ func (server *HttpServer) updateSettings(rw http.ResponseWriter, request *http.R
 	if err != nil {
 		log.DefaultLogger.Error("updateSettings: request.GetBody(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	bodyAsBytes, err := ioutil.ReadAll(requestBody)
 	if err != nil {
 		log.DefaultLogger.Error("updateSettings: ioutil.ReadAll(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.Unmarshal(bodyAsBytes, &settings)
 	if err != nil {
 		log.DefaultLogger.Error("updateSettings: json.Unmarshal: " + err.Error())
 		http.Error(rw, NewRequestBodyError(err, dbstore.SettingsFields()).Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = server.db.CreateOrUpdateSettings(settings)
 	if err != nil {
 		log.DefaultLogger.Error("updateSettings: db.CreateOrUpdateSettings: " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(settings)
 	if err != nil {
 		log.DefaultLogger.Error("updateSettings: json.NewEncoder().Encode(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)

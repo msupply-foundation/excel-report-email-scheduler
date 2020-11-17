@@ -18,14 +18,14 @@ func (server *HttpServer) fetchReportContent(rw http.ResponseWriter, request *ht
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportContent: db.GetReportContent(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(result)
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportContent: json.NewEncoder().Encode(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -38,35 +38,35 @@ func (server *HttpServer) createReportContent(rw http.ResponseWriter, request *h
 	if err != nil {
 		log.DefaultLogger.Error("createReportContent: request.GetBody(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	bodyAsBytes, err := ioutil.ReadAll(requestBody)
 	if err != nil {
 		log.DefaultLogger.Error("createReportContent: ioutil.ReadAll(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.Unmarshal(bodyAsBytes, &reportContent)
 	if err != nil {
 		log.DefaultLogger.Error("createReportContent: json.Unmarshal: " + err.Error())
 		http.Error(rw, NewRequestBodyError(err, dbstore.ReportContentFields()).Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	result, err := server.db.CreateReportContent(reportContent)
 	if err != nil {
 		log.DefaultLogger.Error("createReportContent: db.CreateReportContent: " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(result)
 	if err != nil {
 		log.DefaultLogger.Error("createReportContent: json.NewEncoder().Encode(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -80,7 +80,7 @@ func (server *HttpServer) deleteReportContent(rw http.ResponseWriter, request *h
 	if err != nil {
 		log.DefaultLogger.Error("deleteReportContent: db.DeleteReportContent(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -96,35 +96,35 @@ func (server *HttpServer) updateReportContent(rw http.ResponseWriter, request *h
 	if err != nil {
 		log.DefaultLogger.Error("updateReportContent: request.GetBody(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	bodyAsBytes, err := ioutil.ReadAll(requestBody)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportContent: ioutil.ReadAll(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.Unmarshal(bodyAsBytes, &group)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportContent: json.Unmarshal: " + err.Error())
 		http.Error(rw, NewRequestBodyError(err, dbstore.ReportContentFields()).Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	reportContent, err := server.db.UpdateReportContent(id, group)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportContent: db.UpdateReportContent: " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(reportContent)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportContent: json.NewEncoder().Encode(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)

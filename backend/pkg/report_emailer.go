@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bugsnag/bugsnag-go"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/api"
 	"github.com/grafana/simple-datasource-backend/pkg/auth"
@@ -74,6 +75,7 @@ func (re *ReportEmailer) createReports() {
 	authConfig, emailConfig, datasourceID, err := re.configs()
 	if err != nil {
 		log.DefaultLogger.Error("ReportEmailer.createReports: re.configs: " + err.Error())
+		bugsnag.Notify(err)
 		return
 	}
 
@@ -82,6 +84,7 @@ func (re *ReportEmailer) createReports() {
 	schedules, err := re.sql.OverdueSchedules()
 	if err != nil {
 		log.DefaultLogger.Error("ReportEmailer.createReports: OverdueSchedules: " + err.Error())
+		bugsnag.Notify(err)
 		return
 	}
 
@@ -101,18 +104,21 @@ func (re *ReportEmailer) createReports() {
 		reportGroup, err := re.sql.ReportGroupFromSchedule(schedule)
 		if err != nil {
 			log.DefaultLogger.Error("ReportEmailer.createReports: ReportGroupFromSchedule: " + err.Error())
+			bugsnag.Notify(err)
 			return
 		}
 
 		userIDs, err := re.sql.GroupMemberUserIDs(*reportGroup)
 		if err != nil {
 			log.DefaultLogger.Error("ReportEmailer.createReports: GroupMemberUserIDs: " + err.Error())
+			bugsnag.Notify(err)
 			return
 		}
 
 		emailsFromUsers, err := api.GetEmails(*authConfig, userIDs, datasourceID)
 		if err != nil {
 			log.DefaultLogger.Error("ReportEmailer.createReports: emailsFromUsers: " + err.Error())
+			bugsnag.Notify(err)
 			return
 		}
 
@@ -121,6 +127,7 @@ func (re *ReportEmailer) createReports() {
 		reportContent, err := re.sql.GetReportContent(schedule.ID)
 		if err != nil {
 			log.DefaultLogger.Error("ReportEmailer.createReports: GetReportContent: " + err.Error())
+			bugsnag.Notify(err)
 			return
 		}
 
@@ -135,6 +142,7 @@ func (re *ReportEmailer) createReports() {
 
 			if err != nil {
 				log.DefaultLogger.Error("ReportEmailer.createReports: NewDashboard: " + err.Error())
+				bugsnag.Notify(err)
 				return
 			}
 
@@ -159,6 +167,7 @@ func (re *ReportEmailer) createReports() {
 		err := report.Write(*authConfig)
 		if err != nil {
 			log.DefaultLogger.Error("ReportEmailer.createReports: report.Write: " + err.Error())
+			bugsnag.Notify(err)
 			return
 		}
 	}

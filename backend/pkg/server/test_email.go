@@ -19,28 +19,28 @@ func (server *HttpServer) testEmail(rw http.ResponseWriter, request *http.Reques
 	if err != nil {
 		log.DefaultLogger.Error("testEmail: auth.NewEmailConfig: ", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	authConfig, err := auth.NewAuthConfig(server.db)
 	if err != nil {
 		log.DefaultLogger.Error("textEmail: auth.NewAuthConfig: ", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	settings, err := server.db.GetSettings()
 	if err != nil {
 		log.DefaultLogger.Error("testEmail: db.GetSettings: ", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	schedule, err := server.db.GetSchedule(id)
 	if err != nil {
 		log.DefaultLogger.Error("testData: server.db.GetSchedule: ", err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	em := emailer.New(emailConfig)

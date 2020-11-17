@@ -20,14 +20,14 @@ func (server *HttpServer) fetchReportGroupMembership(rw http.ResponseWriter, req
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupMembership: db.GetReportGroupMemberships():" + id + ": " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(assignment)
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupMembership: json.NewEncoder().Encode()")
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -39,14 +39,14 @@ func (server *HttpServer) createReportGroupMembership(rw http.ResponseWriter, re
 	if err != nil {
 		log.DefaultLogger.Error("createReportGroupMembership: request.GetBody(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	bodyAsBytes, err := ioutil.ReadAll(requestBody)
 	if err != nil {
 		log.DefaultLogger.Error("createReportGroupMembership: ioutil.ReadAll(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	err = json.Unmarshal(bodyAsBytes, &membership)
@@ -54,21 +54,21 @@ func (server *HttpServer) createReportGroupMembership(rw http.ResponseWriter, re
 	if err != nil {
 		log.DefaultLogger.Error("createReportGroupMembership: json.Unmarshal: ", err.Error())
 		http.Error(rw, NewRequestBodyError(err, dbstore.ReportGroupMembershipFields()).Error(), http.StatusBadRequest)
-		return
+		panic(err)
 	}
 
 	result, err := server.db.CreateReportGroupMembership(membership)
 	if err != nil {
 		log.DefaultLogger.Error("createReportGroupMembership: db.CreateReportGroupMembership: ", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	err = json.NewEncoder(rw).Encode(result)
 	if err != nil {
 		log.DefaultLogger.Error("createReportGroupMembership: json.NewEncoder().Encode()", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -82,7 +82,7 @@ func (server *HttpServer) deleteReportGroupMembership(rw http.ResponseWriter, re
 	if err != nil {
 		log.DefaultLogger.Error("deleteReportGroupMembership: db.DeleteReportGroupMembership(): ", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
 	}
 
 	rw.WriteHeader(http.StatusOK)

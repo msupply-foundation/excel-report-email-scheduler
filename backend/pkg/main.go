@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/bugsnag/bugsnag-go"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/reportEmailer"
@@ -20,12 +21,29 @@ import (
 //  GRPCSettings: Settings..?
 // }
 func main() {
+
+	bugsnag.Configure(bugsnag.Configuration{
+		APIKey:       "90618551d4e8d52a45260c61033093df",
+		ReleaseStage: "production",
+	})
+
 	log.DefaultLogger.Info("Starting up")
 	serveOptions, sql, err := getServeOptions()
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Error when retreiving serveOptions", err.Error())
 		panic(err)
 	}
+
+	bugsnag.OnBeforeNotify(func(e *bugsnag.Event, c *bugsnag.Configuration) error {
+		settings, err := sql.GetSettings()
+		if err != nil {
+			e.MetaData.Add("Additional Meta Data", "Settings", "The database is not working - could not extract URL")
+		} else {
+			e.MetaData.Add("Additional Meta Data", "Settings", settings)
+		}
+
+		return nil
+	})
 
 	re := reportEmailer.NewReportEmailer(sql)
 
@@ -43,6 +61,7 @@ func main() {
 
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Plugin datasource.Serve() returned an error: " + err.Error())
+		panic(err)
 		os.Exit(1)
 	}
 }
