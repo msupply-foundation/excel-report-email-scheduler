@@ -23,8 +23,9 @@ export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateCon
   const vars = parseOrDefault<ContentVariables>(variables, {});
 
   const usesMacro = panelUsesMacro(panel.rawSql);
-  const usesVariables = usesMacro && panel.variables.length > 0;
-  if (!(usesVariables && usesMacro)) {
+  const usesVariables = panel.variables.length > 0;
+
+  if (!(usesVariables || usesMacro)) {
     return null;
   }
 
