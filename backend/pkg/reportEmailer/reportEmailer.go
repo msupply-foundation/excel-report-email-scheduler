@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bugsnag/bugsnag-go"
+
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/api"
 	"github.com/grafana/simple-datasource-backend/pkg/auth"
@@ -50,7 +52,7 @@ func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
 	log.DefaultLogger.Info("Starting Clean up...")
 	for _, schedule := range schedules {
 
-		fileName := schedule.ID + ".xlsx"
+		fileName := schedule.Name + ".xlsx"
 		log.DefaultLogger.Info(fmt.Sprintf("Deleting %s...", fileName))
 		path := filepath.Join("..", "data", fileName)
 		err := os.Remove(path)
@@ -133,8 +135,14 @@ func (re *ReportEmailer) CreateReport(schedule dbstore.Schedule, authConfig *aut
 	}
 
 	for scheduleID, recipientEmails := range emails {
-		attachmentPath := filepath.Join("..", "data", scheduleID+".xlsx")
-		em.BulkCreateAndSend(attachmentPath, recipientEmails)
+		schedule, err := re.sql.GetSchedule(scheduleID)
+		if err != nil {
+			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
+			bugsnag.Notify(err)
+		} else {
+			attachmentPath := filepath.Join("..", "data", schedule.Name+".xlsx")
+			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedule.Name, schedule.Description)
+		}
 	}
 
 	return nil
@@ -238,8 +246,14 @@ func (re *ReportEmailer) CreateReports() {
 	}
 
 	for scheduleID, recipientEmails := range emails {
-		attachmentPath := filepath.Join("..", "data", scheduleID+".xlsx")
-		em.BulkCreateAndSend(attachmentPath, recipientEmails)
+		schedule, err := re.sql.GetSchedule(scheduleID)
+		if err != nil {
+			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
+			bugsnag.Notify(err)
+		} else {
+			attachmentPath := filepath.Join("..", "data", schedule.Name+".xlsx")
+			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedule.Name, schedule.Description)
+		}
 	}
 
 	re.cleanup(schedules)

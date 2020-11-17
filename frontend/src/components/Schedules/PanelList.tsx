@@ -33,7 +33,7 @@ const findMatchingContent = (reportContents: ReportContent[], panel: Panel) =>
 export const PanelList: FC<Props> = ({ schedule, datasourceID }) => {
   const { id: scheduleID } = schedule;
 
-  const { data: panels } = useQuery<Panel[], Error>(['panels'], getPanels);
+  const { data: panels } = useQuery<Panel[], Error>(['panels'], () => getPanels(datasourceID));
   const { data: stores } = useQuery<Store[]>(['stores'], () => getStores(datasourceID));
   const { data: reportContents } = useQuery<ReportContent[], Error>(['reportContent', scheduleID], getReportContent);
 
