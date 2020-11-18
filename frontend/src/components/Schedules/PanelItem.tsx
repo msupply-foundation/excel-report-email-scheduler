@@ -87,7 +87,6 @@ export const PanelItem: FC<Props> = ({ panel, reportContent, onToggle, scheduleI
 
         {reportContent && !error && (
           <PanelVariables
-            storeIDs={reportContent.storeID}
             panel={panel}
             lookback={reportContent.lookback}
             variables={reportContent.variables}

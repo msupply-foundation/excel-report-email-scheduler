@@ -100,7 +100,7 @@ func formatVariable(variables []string, format string) string {
 	}
 }
 
-func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs string, contentVariables string) {
+func (panel *TablePanel) injectVariable(variable TemplateVariable, contentVariables string) {
 	var vars map[string][]string
 	err := json.Unmarshal([]byte(contentVariables), &vars)
 	if err != nil {
@@ -120,11 +120,11 @@ func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs stri
 	log.DefaultLogger.Info("RawSQL For Panel (" + panel.Title + "):" + panel.RawSql)
 }
 
-func (panel *TablePanel) PrepSql(variables TemplateList, storeIDs string, contentVariables string) {
+func (panel *TablePanel) PrepSql(variables TemplateList, contentVariables string) {
 	log.DefaultLogger.Info(contentVariables)
 	for _, variable := range variables.List {
 		if panel.usesVariable(variable) {
-			panel.injectVariable(variable, storeIDs, contentVariables)
+			panel.injectVariable(variable, contentVariables)
 			panel.injectMacros()
 		}
 	}

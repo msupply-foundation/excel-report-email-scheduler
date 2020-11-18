@@ -29,7 +29,6 @@ export type Schedule = {
 export type ReportContent = {
   id: string;
   panelID: number;
-  storeID: string;
   lookback: number;
   dashboardID: string;
   variables: string;

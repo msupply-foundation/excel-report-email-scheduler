@@ -13,7 +13,6 @@ export enum ScheduleKey {
 }
 
 export enum ReportContentKey {
-  STORE_ID = 'storeID',
   ID = 'id',
   LOOKBACK = 'lookback',
   PANEL_ID = 'panelID',

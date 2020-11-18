@@ -115,7 +115,7 @@ func (re *ReportEmailer) CreateReport(schedule dbstore.Schedule, authConfig *aut
 
 		panel := dashboard.Panel(content.PanelID)
 		if panel != nil {
-			panel.PrepSql(dashboard.Variables, content.StoreID, content.Variables)
+			panel.PrepSql(dashboard.Variables, content.Variables)
 			panels[schedule.ID] = append(panels[schedule.ID], *panel)
 		}
 	}
@@ -228,7 +228,7 @@ func (re *ReportEmailer) CreateReports() {
 			panel := dashboard.Panel(content.PanelID)
 
 			if panel != nil {
-				panel.PrepSql(dashboard.Variables, content.StoreID, content.Variables)
+				panel.PrepSql(dashboard.Variables, content.Variables)
 				panels[schedule.ID] = append(panels[schedule.ID], *panel)
 			}
 

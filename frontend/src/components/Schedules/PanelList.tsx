@@ -54,7 +54,7 @@ export const PanelList: FC<Props> = ({ schedule }) => {
   const [createContent] = useOptimisticMutation<ReportContent[], ReportContent, CreateContentVars, ReportContent[]>(
     ['reportContent', scheduleID],
     createReportContent,
-    (variables: CreateContentVars): ReportContent => ({ ...variables, lookback: 0, id: '', storeID: '' }),
+    (variables: CreateContentVars): ReportContent => ({ ...variables, lookback: 0, id: '' }),
     (prevData: ReportContent[] | undefined, optimistic: ReportContent): ReportContent[] => {
       if (prevData) {
         return [...prevData, optimistic];

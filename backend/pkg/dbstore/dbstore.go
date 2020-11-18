@@ -198,7 +198,7 @@ func (datasource *SQLiteDatasource) Init() {
 		panic(err)
 	}
 
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, storeID TEXT, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
+	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Could not create ReportContent:", err.Error())
