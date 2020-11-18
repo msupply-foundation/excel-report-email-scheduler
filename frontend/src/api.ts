@@ -167,7 +167,7 @@ export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
           // use the datasource specified in mSupply App Configuration.
           const unusableVariables = list.filter((variable: Variable) => {
             const { datasource, type } = variable;
-            if (type !== 'custom' && type !== 'query') {
+            if (type === 'datasource' || type === 'adhoc') {
               return true;
             } else if (type === 'query') {
               return datasourceName !== datasource;

@@ -31,7 +31,7 @@ func NewTablePanel(id int, title string, rawSql string, from string, to string, 
 }
 
 func (panel *TablePanel) usesVariable(variable TemplateVariable) bool {
-	return strings.Contains(panel.RawSql, "${"+variable.Name)
+	return strings.Contains(panel.RawSql, "${"+variable.Name+"}") || strings.Contains(panel.RawSql, "${"+variable.Name+":sqlstring}")
 }
 
 func (panel *TablePanel) injectMacros() {
@@ -65,6 +65,41 @@ func (panel *TablePanel) injectMacros() {
 	log.DefaultLogger.Info("RawSQL After Injecting Macros (" + panel.Title + "):" + panel.RawSql)
 }
 
+func formatSqlString(vars []string) string {
+	var formatted string
+	for i, str := range vars {
+		if i == len(vars)-1 {
+			formatted = formatted + "'" + str + "'"
+		} else {
+			formatted = formatted + "'" + str + "'" + ", "
+		}
+	}
+
+	return formatted
+}
+
+func formatDefaultString(vars []string) string {
+	var formatted string
+	for i, str := range vars {
+		if i == len(vars)-1 {
+			formatted = formatted + str
+		} else {
+			formatted = formatted + str + ", "
+		}
+	}
+
+	return formatted
+}
+
+func formatVariable(variables []string, format string) string {
+	switch format {
+	case "sqlstring":
+		return formatSqlString(variables)
+	default:
+		return formatDefaultString(variables)
+	}
+}
+
 func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs string, contentVariables string) {
 	var vars map[string][]string
 	err := json.Unmarshal([]byte(contentVariables), &vars)
@@ -72,16 +107,15 @@ func (panel *TablePanel) injectVariable(variable TemplateVariable, storeIDs stri
 		log.DefaultLogger.Error("injectVariable: Decoding JSON: "+contentVariables, err.Error())
 	}
 
-	var joined string
-	for i, str := range vars[variable.Name] {
-		if i == len(vars[variable.Name])-1 {
-			joined = joined + "'" + str + "'"
-		} else {
-			joined = joined + "'" + str + "'" + ", "
-		}
+	variableOptions := vars[variable.Name]
+	format := "default"
+	if strings.Contains(panel.RawSql, "${"+variable.Name+":sqlstring}") {
+		format = "sqlstring"
 	}
-	panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", joined, -1)
-	panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", joined, -1)
+	formatted := formatVariable(variableOptions, format)
+
+	panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+"}", formatted, -1)
+	panel.RawSql = strings.Replace(panel.RawSql, "${"+variable.Name+":sqlstring}", formatted, -1)
 
 	log.DefaultLogger.Info("RawSQL For Panel (" + panel.Title + "):" + panel.RawSql)
 }

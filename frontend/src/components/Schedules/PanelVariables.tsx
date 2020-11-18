@@ -8,6 +8,7 @@ import { ContentVariables, Panel, SelectableVariable, Store, Variable, VariableO
 import { getLookbacks, parseOrDefault } from 'common';
 import { PanelVariableOptions } from './PanelVariableOption';
 import { panelUsesMacro } from 'common/utils/checkers';
+import { PanelVariableTextInput } from './PanelVariableTextInput';
 
 type Props = {
   storeIDs: string;
@@ -61,6 +62,13 @@ export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateCon
         const options: Array<SelectableValue<SelectableVariable>> = variableOptions.map((option: VariableOption) => {
           return { label: option.text, value: { name: variable.name, value: option.value } };
         });
+
+        if (variable.type === 'textbox') {
+          // Pre-fill with either the report content value that has been saved in the msupply sqlite,
+          // or what is currently being used in the dashboard, as a default.
+          const value = selected?.[0] ?? options[0]?.value?.value;
+          return <PanelVariableTextInput onUpdate={onUpdateVariable(name)} name={label ?? name} value={value} />;
+        }
 
         return (
           <PanelVariableOptions
