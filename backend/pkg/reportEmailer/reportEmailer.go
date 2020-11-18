@@ -124,13 +124,18 @@ func (re *ReportEmailer) CreateReport(schedule dbstore.Schedule, authConfig *aut
 	reporter := reporter.NewReporter(templatePath)
 
 	for scheduleID, reportSheetPanels := range panels {
-		report := reporter.CreateNewReport(scheduleID)
-
-		report.SetSheets(reportSheetPanels)
-		err := report.Write(*authConfig)
+		schedule, err := re.sql.GetSchedule(scheduleID)
 		if err != nil {
-			log.DefaultLogger.Error("ReportEmailer.createReports: report.Write: " + err.Error())
-			return err
+			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
+			bugsnag.Notify(err)
+		} else {
+			report := reporter.CreateNewReport(scheduleID, schedule.Name)
+			report.SetSheets(reportSheetPanels)
+			err := report.Write(*authConfig)
+			if err != nil {
+				log.DefaultLogger.Error("ReportEmailer.createReports: report.Write: " + err.Error())
+				return err
+			}
 		}
 	}
 
@@ -235,14 +240,21 @@ func (re *ReportEmailer) CreateReports() {
 	reporter := reporter.NewReporter(templatePath)
 
 	for scheduleID, reportSheetPanels := range panels {
-		report := reporter.CreateNewReport(scheduleID)
-
-		report.SetSheets(reportSheetPanels)
-		err := report.Write(*authConfig)
+		schedule, err := re.sql.GetSchedule(scheduleID)
 		if err != nil {
-			log.DefaultLogger.Error("ReportEmailer.createReports: report.Write: " + err.Error())
-			return
+			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
+			bugsnag.Notify(err)
+		} else {
+			report := reporter.CreateNewReport(scheduleID, schedule.Name)
+
+			report.SetSheets(reportSheetPanels)
+			err := report.Write(*authConfig)
+			if err != nil {
+				log.DefaultLogger.Error("ReportEmailer.createReports: report.Write: " + err.Error())
+				return
+			}
 		}
+
 	}
 
 	for scheduleID, recipientEmails := range emails {

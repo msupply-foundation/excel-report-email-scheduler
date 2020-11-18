@@ -41,13 +41,14 @@ type Reporter struct {
 
 type Report struct {
 	id           string
+	name         string
 	templatePath string
 	file         *excelize.File
 	sheets       []api.TablePanel
 }
 
-func NewReport(id string, templatePath string) *Report {
-	return &Report{id: id, templatePath: templatePath}
+func NewReport(id string, name string, templatePath string) *Report {
+	return &Report{id: id, name: name, templatePath: templatePath}
 }
 
 func (r *Report) openTemplate() error {
@@ -254,7 +255,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 
 	log.DefaultLogger.Info("Saving report...")
 
-	savePath := filepath.Join("..", "data", r.id+".xlsx")
+	savePath := filepath.Join("..", "data", r.name+".xlsx")
 	if err := r.file.SaveAs(savePath); err != nil {
 		log.DefaultLogger.Error("Write: ", err.Error())
 	}
@@ -268,11 +269,7 @@ func NewReporter(templatePath string) *Reporter {
 	return &Reporter{templatePath: templatePath}
 }
 
-func (r *Reporter) createPath(scheduleID string) string {
-	return scheduleID + ".xlsx"
-}
-
-func (r *Reporter) CreateNewReport(scheduleID string) *Report {
-	report := NewReport(scheduleID, r.templatePath)
+func (r *Reporter) CreateNewReport(scheduleID string, scheduleName string) *Report {
+	report := NewReport(scheduleID, scheduleName, r.templatePath)
 	return report
 }
