@@ -1,0 +1,13 @@
+diff --git a/node_modules/@grafana/data/types/datasource.d.ts b/node_modules/@grafana/data/types/datasource.d.ts
+index 245567b..82d0842 100644
+--- a/node_modules/@grafana/data/types/datasource.d.ts
++++ b/node_modules/@grafana/data/types/datasource.d.ts
+@@ -97,7 +97,7 @@ export declare abstract class DataSourceApi<TQuery extends DataQuery = DataQuery
+     /**
+      * Query for data, and optionally stream results
+      */
+-    abstract query(request: DataQueryRequest<TQuery>): Promise<DataQueryResponse> | Observable<DataQueryResponse>;
++    abstract query(request: DataQueryRequest<TQuery>): Promise<DataQueryResponse> | Observable<DataQueryResponse> | any;
+     /**
+      * Test & verify datasource settings & connection details
+      */

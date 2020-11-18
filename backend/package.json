@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "build": "grafana-toolkit plugin:build",
+    "prepare": "patch-package",
     "test": "grafana-toolkit plugin:test",
     "dev": "grafana-toolkit plugin:dev",
     "watch": "grafana-toolkit plugin:dev --watch",
@@ -22,6 +23,7 @@
     "node": ">=12 <13"
   },
   "dependencies": {
+    "patch-package": "^6.2.2",
     "react-intl-universal": "^2.4.1"
   },
   "resolutions": {
