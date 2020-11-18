@@ -100,6 +100,18 @@ func formatVariable(variables []string, format string) string {
 	}
 }
 
+func (panel *TablePanel) GetSelectedVariableOptions(variableName, contentVariables string) []string {
+	var vars map[string][]string
+	err := json.Unmarshal([]byte(contentVariables), &vars)
+	if err != nil {
+		log.DefaultLogger.Error("GetSelectedVariableOptions: Decoding JSON: "+contentVariables, err.Error())
+	}
+
+	variableOptions := vars[variableName]
+
+	return variableOptions
+}
+
 func (panel *TablePanel) injectVariable(variable TemplateVariable, contentVariables string) {
 	var vars map[string][]string
 	err := json.Unmarshal([]byte(contentVariables), &vars)
@@ -107,7 +119,8 @@ func (panel *TablePanel) injectVariable(variable TemplateVariable, contentVariab
 		log.DefaultLogger.Error("injectVariable: Decoding JSON: "+contentVariables, err.Error())
 	}
 
-	variableOptions := vars[variable.Name]
+	variableOptions := panel.GetSelectedVariableOptions(variable.Name, contentVariables)
+
 	format := "default"
 	if strings.Contains(panel.RawSql, "${"+variable.Name+":sqlstring}") {
 		format = "sqlstring"
