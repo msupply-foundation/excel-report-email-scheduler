@@ -1,6 +1,6 @@
 import { SelectableValue } from '@grafana/data';
-import { InlineFormLabel, Input, MultiSelect, Select } from '@grafana/ui';
-import { SelectableVariable } from 'common/types';
+import { InlineFormLabel, Input } from '@grafana/ui';
+
 import React, { FC } from 'react';
 
 type Props = {

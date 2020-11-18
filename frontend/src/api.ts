@@ -8,7 +8,7 @@ export const refreshPanelOptions = async (
   variable: Variable,
   datasourceID: number
 ): Promise<Array<SelectableValue<SelectableVariable>>> => {
-  const { definition, name, label } = variable;
+  const { definition, name } = variable;
   const optionsResponse = await getBackendSrv().post('/api/tsdb/query', {
     queries: [
       {
