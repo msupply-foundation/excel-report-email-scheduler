@@ -79,7 +79,7 @@ export interface CreateGroupMemberVars {
 export interface CreateReportGroupVariables {}
 
 export type AppData = {
-  datasourceID: number;
+  pluginID: number | string | undefined;
 };
 
 export type VariableOption = {

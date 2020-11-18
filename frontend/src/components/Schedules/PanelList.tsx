@@ -10,6 +10,7 @@ import { Schedule, ReportContent, Panel, Store, CreateContentVars } from 'common
 import { useOptimisticMutation } from 'hooks/useOptimisticMutation';
 import { PanelItem } from './PanelItem';
 import { Icon, Legend, Tooltip } from '@grafana/ui';
+import { useDatasourceID } from 'hooks';
 
 const listStyle = classNames({
   'card-section': true,
@@ -20,7 +21,6 @@ const listStyle = classNames({
 
 type Props = {
   schedule: Schedule;
-  datasourceID: number;
 };
 
 const findMatchingContent = (reportContents: ReportContent[], panel: Panel) =>
@@ -30,7 +30,8 @@ const findMatchingContent = (reportContents: ReportContent[], panel: Panel) =>
     return id === panelID && dashboardID === panelDashboardID;
   }) ?? null;
 
-export const PanelList: FC<Props> = ({ schedule, datasourceID }) => {
+export const PanelList: FC<Props> = ({ schedule }) => {
+  const datasourceID = useDatasourceID();
   const { id: scheduleID } = schedule;
 
   const { data: panels } = useQuery<Panel[], Error>(['panels'], () => getPanels(datasourceID));

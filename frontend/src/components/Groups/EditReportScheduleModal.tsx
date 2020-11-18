@@ -17,7 +17,6 @@ type Props = {
   onClose: () => void;
   isOpen: boolean;
   reportSchedule: Schedule;
-  datasourceID: number;
 };
 
 const modalAdjustments = css`
@@ -32,7 +31,7 @@ const headerAdjustments = css`
   justify-content: flex-end;
 `;
 
-export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, isOpen, datasourceID }) => {
+export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, isOpen }) => {
   const [schedule, setReportSchedule] = useState<Schedule>(reportSchedule);
   const [deleteAlertIsOpen, setDeleteAlertIsOpen] = useToggle(false);
   const [testEmails, { isLoading }] = useMutation(sendTestEmail);
@@ -86,7 +85,7 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
         </div>
       </div>
 
-      <PanelList schedule={reportSchedule} datasourceID={datasourceID} />
+      <PanelList schedule={reportSchedule} />
 
       <ConfirmModal
         isOpen={deleteAlertIsOpen}

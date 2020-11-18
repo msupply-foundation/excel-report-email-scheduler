@@ -12,19 +12,13 @@ import { AppRootProps } from '@grafana/data';
 
 interface Props extends AppRootProps {}
 
-export type ReportGroup = {
-  id?: string;
-  name?: string;
-  description?: string;
-};
-
 const headerAdjustment = css`
   display: flex;
   justify-content: flex-end;
   margin-bottom: 10px;
 `;
 
-export const ReportSchedulesTab: FC<Props> = ({ meta }) => {
+export const ReportSchedulesTab: FC<Props> = () => {
   const [activeGroup, setActiveSchedule] = useState<Schedule | null>(null);
 
   const [newSchedule] = useMutation(createSchedule, {
@@ -46,7 +40,6 @@ export const ReportSchedulesTab: FC<Props> = ({ meta }) => {
       <ScheduleList onRowPress={setActiveSchedule} />
       {activeGroup && (
         <EditReportScheduleModal
-          datasourceID={meta?.jsonData?.datasourceID}
           reportSchedule={activeGroup}
           isOpen={!!activeGroup}
           onClose={() => setActiveSchedule(null)}

@@ -2,8 +2,8 @@ import React, { FC } from 'react';
 import intl from 'react-intl-universal';
 import { css } from 'emotion';
 import { Icon, InlineFormLabel, Input, Legend, Tooltip } from '@grafana/ui';
-import { ReportGroup } from '../Schedules/ReportSchedulesTab';
 import { ReportGroupKey } from 'common/enums';
+import { ReportGroup } from 'common/types';
 
 const container = css`
   display: flex;

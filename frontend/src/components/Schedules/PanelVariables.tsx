@@ -50,7 +50,7 @@ export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateCon
       )}
 
       {panel.variables.map((variable: Variable) => {
-        const { name, options: variableOptions, multi } = variable;
+        const { name, options: variableOptions, multi, label } = variable;
         // For a panels variables, find the ones which are selected from the
         // ReportContent.variables field, which is a stringified object consisting
         // of { [variable.name]: [Array of chosen options as strings] }
@@ -66,7 +66,7 @@ export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateCon
           <PanelVariableOptions
             onUpdate={onUpdateVariable(name)}
             multiSelectable={multi}
-            name={name}
+            name={label ?? name}
             selectedOptions={selected}
             selectableOptions={options}
           />

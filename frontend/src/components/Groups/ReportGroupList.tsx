@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { Spinner } from '@grafana/ui';
 import { getReportGroups } from '../../api';
 import { useQuery } from 'react-query';
-import { ReportGroup } from '../Schedules/ReportSchedulesTab';
+import { ReportGroup } from 'common/types';
 
 const listStyle = classNames({
   'card-section': true,

@@ -6,6 +6,8 @@ import { locales } from '../common/translations';
 import { useTabs } from '../hooks';
 import { ReportGroupTab } from './Groups/ReportGroupTab';
 import { ReportSchedulesTab } from './Schedules/ReportSchedulesTab';
+import { AppDataContext } from 'containers';
+import { AppData } from 'common/types';
 
 interface Props extends AppRootProps {}
 
@@ -14,6 +16,7 @@ export const TAB_ID_REPORT_SCHEDULE = 'report-schedule';
 
 export const RootPage: FC<Props> = ({ path, onNavChanged, query, meta }) => {
   const pathWithoutLeadingSlash = path.replace(/^\//, '');
+  const appData = { pluginID: meta?.id } as AppData;
 
   useEffect(() => {
     intl.init({ currentLocale: 'en', locales });
@@ -35,8 +38,10 @@ export const RootPage: FC<Props> = ({ path, onNavChanged, query, meta }) => {
 
   return (
     <div>
-      {getTabContent()}
-      <ReactQueryDevtools />
+      <AppDataContext.Provider value={appData}>
+        {getTabContent()}
+        <ReactQueryDevtools />
+      </AppDataContext.Provider>
     </div>
   );
 };
