@@ -2,7 +2,6 @@ import { SelectableValue } from '@grafana/data';
 import { InlineFormLabel, MultiSelect, Select } from '@grafana/ui';
 import { refreshPanelOptions } from 'api';
 import { SelectableVariable, Variable } from 'common/types';
-import { panelUsesVariable } from 'common/utils/checkers';
 import { useDatasourceID } from 'hooks';
 import React, { FC } from 'react';
 import { useQuery } from 'react-query';
@@ -24,8 +23,11 @@ export const PanelVariableOptions: FC<Props> = ({
   selectedOptions,
   selectableOptions,
 }) => {
-  const { refresh, definition } = variable;
+  const { refresh } = variable;
   const datasourceID = useDatasourceID();
+  console.log(selectedOptions);
+  // When a query variable is set to refresh, it does not by default have `options` pre-populated.
+  // So, when refresh is true, query for the data and map it to the matching array.
   const { data } = useQuery(name, () => refreshPanelOptions(variable, datasourceID), {
     enabled: !!refresh,
   });
@@ -37,7 +39,7 @@ export const PanelVariableOptions: FC<Props> = ({
       <InlineFormLabel>{name}</InlineFormLabel>
       {!multiSelectable ? (
         <Select
-          value={selectableOptions.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
+          value={options?.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
           onChange={(selected: SelectableValue<SelectableVariable>) => {
             if (selected.value?.value === '$__all') {
               return onUpdate(selectableOptions);
@@ -57,7 +59,7 @@ export const PanelVariableOptions: FC<Props> = ({
 
             onUpdate(selected);
           }}
-          value={selectableOptions.filter(
+          value={options?.filter(
             (option: SelectableValue<SelectableVariable>) =>
               !!selectedOptions?.find((selected: string) => selected === option?.value?.value)
           )}

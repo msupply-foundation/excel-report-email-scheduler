@@ -58,6 +58,7 @@ export const PanelItem: FC<Props> = ({ panel, reportContent, onToggle, scheduleI
   const onUpdateVariable = (content: ReportContent) => (variableName: string) => (
     selectableValue: SelectableValue<SelectableVariable[]>
   ) => {
+    console.log(selectableValue);
     const newVariable = selectableValue.map(({ value }: SelectableValue) => value.value);
     const newVariables = parseOrDefault<ContentVariables>(content.variables, {});
     newVariables[variableName] = newVariable;
