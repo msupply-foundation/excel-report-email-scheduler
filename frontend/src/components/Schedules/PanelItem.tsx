@@ -1,4 +1,4 @@
-import { ContentVariables, Panel, ReportContent, Store } from 'common/types';
+import { ContentVariables, Panel, ReportContent, SelectableVariable, Store } from 'common/types';
 import React, { FC, useEffect } from 'react';
 
 import { css } from 'emotion';
@@ -15,7 +15,6 @@ type Props = {
   panel: Panel;
   reportContent: ReportContent | null;
   onToggle: (panel: Panel) => Promise<void>;
-  stores?: Store[];
   scheduleID: string;
 };
 
@@ -53,16 +52,12 @@ export const PanelItem: FC<Props> = ({ panel, reportContent, onToggle, scheduleI
     key: ReportContentKey,
     selectableValue: SelectableValue<String | Number | Store>
   ) => {
-    let newValue = selectableValue.value;
-    if (key === ReportContentKey.STORE_ID && Array.isArray(selectableValue)) {
-      newValue = selectableValue.map((selected: SelectableValue<Store>) => selected.value?.id).join(', ');
-    }
-
-    const newState = { ...content, [key]: newValue };
-    updateContent(newState);
+    updateContent({ ...content, [key]: selectableValue.value });
   };
 
-  const onUpdateVariable = (content: ReportContent) => (variableName: string) => (selectableValue: SelectableValue) => {
+  const onUpdateVariable = (content: ReportContent) => (variableName: string) => (
+    selectableValue: SelectableValue<SelectableVariable[]>
+  ) => {
     const newVariable = selectableValue.map(({ value }: SelectableValue) => value.value);
     const newVariables = parseOrDefault<ContentVariables>(content.variables, {});
     newVariables[variableName] = newVariable;

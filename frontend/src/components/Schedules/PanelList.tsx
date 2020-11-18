@@ -2,15 +2,16 @@ import React, { FC, useCallback } from 'react';
 import intl from 'react-intl-universal';
 import classNames from 'classnames';
 
-import { createReportContent, deleteReportContent, getPanels, getReportContent, getStores } from '../../api';
+import { createReportContent, deleteReportContent, getPanels, getReportContent } from '../../api';
 
 import { useQuery } from 'react-query';
-import { Schedule, ReportContent, Panel, Store, CreateContentVars } from 'common/types';
+import { Schedule, ReportContent, Panel, CreateContentVars } from 'common/types';
 
 import { useOptimisticMutation } from 'hooks/useOptimisticMutation';
 import { PanelItem } from './PanelItem';
 import { Icon, Legend, Tooltip } from '@grafana/ui';
 import { useDatasourceID } from 'hooks';
+import { useWindowSize } from 'hooks/useWindowResize';
 
 const listStyle = classNames({
   'card-section': true,
@@ -31,11 +32,12 @@ const findMatchingContent = (reportContents: ReportContent[], panel: Panel) =>
   }) ?? null;
 
 export const PanelList: FC<Props> = ({ schedule }) => {
+  const { height } = useWindowSize();
   const datasourceID = useDatasourceID();
   const { id: scheduleID } = schedule;
 
   const { data: panels } = useQuery<Panel[], Error>(['panels'], () => getPanels(datasourceID));
-  const { data: stores } = useQuery<Store[]>(['stores'], () => getStores(datasourceID));
+
   const { data: reportContents } = useQuery<ReportContent[], Error>(['reportContent', scheduleID], getReportContent);
 
   const getMatchingContent = useCallback(
@@ -103,18 +105,12 @@ export const PanelList: FC<Props> = ({ schedule }) => {
         </Tooltip>
         <Legend>{intl.get('available_panels')}</Legend>
       </div>
-      <ol className={listStyle}>
+      <ol className={listStyle} style={{ maxHeight: `${(height ?? 0) / 2}px`, overflow: 'scroll' }}>
         {panels?.map((panel: any) => {
           const matchingContent = getMatchingContent(panel);
 
           return (
-            <PanelItem
-              reportContent={matchingContent}
-              panel={panel}
-              scheduleID={scheduleID}
-              stores={stores}
-              onToggle={onTogglePanel}
-            />
+            <PanelItem reportContent={matchingContent} panel={panel} scheduleID={scheduleID} onToggle={onTogglePanel} />
           );
         })}
       </ol>

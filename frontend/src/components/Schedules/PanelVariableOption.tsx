@@ -24,12 +24,25 @@ export const PanelVariableOptions: FC<Props> = ({
       {!multiSelectable ? (
         <Select
           value={selectableOptions.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
-          onChange={(selected: SelectableValue<SelectableVariable>) => onUpdate([selected])}
+          onChange={(selected: SelectableValue<SelectableVariable>) => {
+            if (selected.value?.value === '$__all') {
+              return onUpdate(selectableOptions);
+            }
+
+            onUpdate([selected]);
+          }}
           options={selectableOptions}
         />
       ) : (
         <MultiSelect
-          onChange={(selected: SelectableValue<SelectableVariable>) => onUpdate(selected)}
+          onChange={(selected: SelectableValue<SelectableVariable>) => {
+            const isAll = selected.some(({ value }: SelectableValue<SelectableVariable>) => value?.value === '$__all');
+            if (isAll) {
+              return onUpdate(selectableOptions);
+            }
+
+            onUpdate(selected);
+          }}
           value={selectableOptions.filter(
             (option: SelectableValue<SelectableVariable>) =>
               !!selectedOptions?.find((selected: string) => selected === option?.value?.value)
