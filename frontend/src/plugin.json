@@ -17,11 +17,11 @@
     "links": [
       {
         "name": "Website",
-        "url": "https://www.msupply.org.nz/"
+        "url": "https://github.com/openmsupply/msupply-dashboard-app/tree/master/frontend"
       },
       {
         "name": "License",
-        "url": "https://en.wikipedia.org/wiki/Software_license"
+        "url": "https://github.com/openmsupply/msupply-dashboard-app/blob/master/frontend/LICENSE"
       }
     ],
     "screenshots": [],

@@ -1,6 +1,6 @@
 {
   "type": "datasource",
-  "name": "msupply-datasource",
+  "name": "mSupply Datasource",
   "id": "msupply-datasource",
   "metrics": true,
   "backend": true,
@@ -8,8 +8,8 @@
   "info": {
     "description": "",
     "author": {
-      "name": "josh",
-      "url": ""
+      "name": "mSupply Foundation",
+      "url": "https://msupply.foundation/"
     },
     "keywords": [],
     "logos": {
@@ -19,11 +19,11 @@
     "links": [
       {
         "name": "Website",
-        "url": "https://github.com/grafana/simple-datasource-backend"
+        "url": "https://github.com/openmsupply/msupply-dashboard-app/tree/master/backend"
       },
       {
         "name": "License",
-        "url": "https://github.com/grafana/simple-datasource-backend/blob/master/LICENSE"
+        "url": "https://github.com/openmsupply/msupply-dashboard-app/blob/master/backend/LICENSE"
       }
     ],
     "screenshots": [],
