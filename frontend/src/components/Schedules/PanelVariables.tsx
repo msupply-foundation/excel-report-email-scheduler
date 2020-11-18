@@ -9,6 +9,9 @@ import { getLookbacks, parseOrDefault } from 'common';
 import { PanelVariableOptions } from './PanelVariableOption';
 import { panelUsesMacro } from 'common/utils/checkers';
 import { PanelVariableTextInput } from './PanelVariableTextInput';
+import { useQuery } from 'react-query';
+import { useDatasourceID } from 'hooks';
+import { refreshPanelOptions } from 'api';
 
 type Props = {
   storeIDs: string;
@@ -77,6 +80,7 @@ export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateCon
             name={label ?? name}
             selectedOptions={selected}
             selectableOptions={options}
+            variable={variable}
           />
         );
       })}

@@ -91,6 +91,8 @@ export type Variable = {
   label: string;
   type: string;
   name: string;
+  definition: string;
+  refresh: number;
   datasource: string;
   options: VariableOption[];
   multi: boolean;

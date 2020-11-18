@@ -1,7 +1,33 @@
+import { SelectableValue } from '@grafana/data';
 import { panelUsesVariable, panelUsesUnsupportedMacro } from './common/utils/checkers';
-import { DashboardResponse, DashboardMeta, CreateContentVars, ReportContent } from './common/types';
+import { DashboardResponse, DashboardMeta, CreateContentVars, ReportContent, SelectableVariable } from './common/types';
 import { getBackendSrv } from '@grafana/runtime';
 import { Variable, Panel, ReportGroupMember, Schedule, Store, ReportGroup, User } from 'common/types';
+
+export const refreshPanelOptions = async (
+  variable: Variable,
+  datasourceID: number
+): Promise<Array<SelectableValue<SelectableVariable>>> => {
+  const { definition, name, label } = variable;
+  const optionsResponse = await getBackendSrv().post('/api/tsdb/query', {
+    queries: [
+      {
+        datasourceId: datasourceID,
+        rawSql: definition,
+        format: 'table',
+      },
+    ],
+  });
+
+  const rows = optionsResponse.results?.A?.tables?.[0]?.rows?.flat().map((datum: string) => {
+    const selectableVariable = { name, value: datum } as SelectableVariable;
+    const selectableValue = { label: datum, value: selectableVariable } as SelectableValue;
+
+    return selectableValue;
+  });
+
+  return rows;
+};
 
 export const sendTestEmail = (scheduleID: string) =>
   getBackendSrv().get(`api/plugins/msupply-datasource/resources/test-email?schedule-id=${scheduleID}`);

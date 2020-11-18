@@ -1,7 +1,11 @@
 import { SelectableValue } from '@grafana/data';
 import { InlineFormLabel, MultiSelect, Select } from '@grafana/ui';
-import { SelectableVariable } from 'common/types';
+import { refreshPanelOptions } from 'api';
+import { SelectableVariable, Variable } from 'common/types';
+import { panelUsesVariable } from 'common/utils/checkers';
+import { useDatasourceID } from 'hooks';
 import React, { FC } from 'react';
+import { useQuery } from 'react-query';
 
 type Props = {
   onUpdate: (selected: SelectableValue) => void;
@@ -9,15 +13,25 @@ type Props = {
   multiSelectable: boolean;
   selectedOptions: string[];
   selectableOptions: Array<SelectableValue<SelectableVariable>>;
+  variable: Variable;
 };
 
 export const PanelVariableOptions: FC<Props> = ({
   onUpdate,
   name,
+  variable,
   multiSelectable,
   selectedOptions,
   selectableOptions,
 }) => {
+  const { refresh, definition } = variable;
+  const datasourceID = useDatasourceID();
+  const { data } = useQuery(name, () => refreshPanelOptions(variable, datasourceID), {
+    enabled: !!refresh,
+  });
+
+  const options = selectableOptions?.length > 0 ? selectableOptions : data;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'row', marginTop: '5px' }}>
       <InlineFormLabel>{name}</InlineFormLabel>
@@ -31,7 +45,7 @@ export const PanelVariableOptions: FC<Props> = ({
 
             onUpdate([selected]);
           }}
-          options={selectableOptions}
+          options={options}
         />
       ) : (
         <MultiSelect
@@ -51,7 +65,7 @@ export const PanelVariableOptions: FC<Props> = ({
             !!option?.label?.toLowerCase().includes(searchQuery.toLowerCase())
           }
           closeMenuOnSelect={false}
-          options={selectableOptions}
+          options={options}
         />
       )}
     </div>
