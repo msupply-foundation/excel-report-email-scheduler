@@ -25,7 +25,7 @@ export const PanelVariableOptions: FC<Props> = ({
 }) => {
   const { refresh } = variable;
   const datasourceID = useDatasourceID();
-  console.log(selectedOptions);
+
   // When a query variable is set to refresh, it does not by default have `options` pre-populated.
   // So, when refresh is true, query for the data and map it to the matching array.
   const { data } = useQuery(name, () => refreshPanelOptions(variable, datasourceID), {

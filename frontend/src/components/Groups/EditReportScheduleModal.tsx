@@ -39,6 +39,8 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
     onSuccess: () => queryCache.refetchQueries(['reportSchedules']),
   });
 
+  /* eslint-disable no-console */
+  console.log('**** schedule **** ==>', schedule);
   const [deleteReportSchedule] = useMutation(deleteSchedule, {
     onSuccess: () => queryCache.refetchQueries(['reportSchedules']),
   });

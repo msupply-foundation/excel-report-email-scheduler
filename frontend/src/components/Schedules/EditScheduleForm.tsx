@@ -1,13 +1,13 @@
 import React, { FC } from 'react';
 import intl from 'react-intl-universal';
 import { css } from 'emotion';
-import { Icon, InlineFormLabel, Input, Legend, Select, Tooltip } from '@grafana/ui';
+import { Icon, InlineFormLabel, Input, Legend, Select, Tooltip, TimeOfDayPicker } from '@grafana/ui';
 
 import { ScheduleKey } from 'common/enums';
 import { ReportGroup, Schedule } from 'common/types';
 import { useQuery } from 'react-query';
 import { getReportGroups } from 'api';
-import { SelectableValue } from '@grafana/data';
+import { DateTime, dateTime, SelectableValue } from '@grafana/data';
 
 const getIntervals = () => [
   { label: intl.get('daily'), value: 60 * 60 * 24 },
@@ -17,6 +17,12 @@ const getIntervals = () => [
   { label: intl.get('quarterly'), value: 60 * 60 * 24 * 30 * 6 },
   { label: intl.get('yearly'), value: 60 * 60 * 24 * 30 * 12 },
 ];
+
+const formatTimeToDate = (time?: string) => {
+  const now: DateTime = dateTime(Date.now());
+  const d: DateTime = dateTime(now.format('YYYY-MM-DD') + ' ' + time, 'YYYY-MM-DD HH:mm');
+  return d.isValid() ? d : undefined;
+};
 
 const container = css`
   display: flex;
@@ -90,6 +96,17 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
           onChange={(selected: SelectableValue) => {
             onUpdate(ScheduleKey.INTERVAL, selected.value);
           }}
+        />
+      </div>
+
+      <div className={flexWrapping}>
+        <InlineFormLabel tooltip={intl.get('report_time_description')}>{intl.get('report_time')}</InlineFormLabel>
+
+        <TimeOfDayPicker
+          onChange={(selected: DateTime) => {
+            onUpdate(ScheduleKey.TIME_OF_DAY, selected.format('HH:mm'));
+          }}
+          value={formatTimeToDate(schedule?.time)}
         />
       </div>
 

@@ -16,6 +16,7 @@ type Schedule struct {
 	Description    string `json:"description"`
 	Lookback       int    `json:"lookback"`
 	ReportGroupID  string `json:"reportGroupID"`
+	Time           string `json:"time"`
 }
 
 func ScheduleFields() string {
@@ -25,11 +26,12 @@ func ScheduleFields() string {
 		"\n\tname string\n}" +
 		"\n\tdescription string\n}" +
 		"\n\tlookback int\n}" +
-		"\n\treportGroupID string\n}"
+		"\n\treportGroupID string\n}" +
+		"\n\time string\n}"
 }
 
-func NewSchedule(ID string, interval int, nextReportTime int, name string, description string, lookback int, reportGroupID string) Schedule {
-	schedule := Schedule{ID: ID, Interval: interval, NextReportTime: nextReportTime, Name: name, Description: description, Lookback: lookback, ReportGroupID: reportGroupID}
+func NewSchedule(ID string, interval int, nextReportTime int, name string, description string, lookback int, reportGroupID string, time string) Schedule {
+	schedule := Schedule{ID: ID, Interval: interval, NextReportTime: nextReportTime, Name: name, Description: description, Lookback: lookback, ReportGroupID: reportGroupID, Time: time}
 	return schedule
 }
 
@@ -49,14 +51,14 @@ func (datasource *SQLiteDatasource) OverdueSchedules() ([]Schedule, error) {
 
 	var schedules []Schedule
 	for rows.Next() {
-		var ID, Name, Description, ReportGroupID string
+		var ID, Name, Description, ReportGroupID, Time string
 		var Interval, NextReportTime, Lookback int
-		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID)
+		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time)
 		if err != nil {
 			log.DefaultLogger.Error("OverdueSchedules: sql.Open", err.Error())
 			return nil, err
 		}
-		schedules = append(schedules, NewSchedule(ID, Interval, NextReportTime, Name, Description, Lookback, ReportGroupID))
+		schedules = append(schedules, NewSchedule(ID, Interval, NextReportTime, Name, Description, Lookback, ReportGroupID, Time))
 	}
 
 	return schedules, nil
@@ -71,14 +73,14 @@ func (datasource *SQLiteDatasource) CreateSchedule() (*Schedule, error) {
 	}
 
 	newUuid := uuid.New().String()
-	schedule := Schedule{ID: newUuid, NextReportTime: 0, Interval: 0, Name: "", Description: "", Lookback: 0, ReportGroupID: ""}
-	stmt, err := db.Prepare("INSERT INTO Schedule (ID,  nextReportTime, interval, name, description, lookback, reportGroupID) VALUES (?,?,?,?,?,?,?)")
+	schedule := Schedule{ID: newUuid, NextReportTime: 0, Interval: 0, Name: "", Description: "", Lookback: 0, ReportGroupID: "", Time: ""}
+	stmt, err := db.Prepare("INSERT INTO Schedule (ID,  nextReportTime, interval, name, description, lookback, reportGroupID, time) VALUES (?,?,?,?,?,?,?,?)")
 	if err != nil {
 		log.DefaultLogger.Error("CreateSchedule: db.Prepare()", err.Error())
 		return nil, err
 	}
 
-	_, err = stmt.Exec(newUuid, 0, 60*60*24, "New report schedule", "", 0, "")
+	_, err = stmt.Exec(newUuid, 0, 60*60*24, "New report schedule", "", 0, "", "")
 	defer stmt.Close()
 	if err != nil {
 		log.DefaultLogger.Error("CreateSchedule: stmt.Exec()", err.Error())
@@ -96,13 +98,13 @@ func (datasource *SQLiteDatasource) UpdateSchedule(id string, schedule Schedule)
 		return nil, err
 	}
 
-	stmt, err := db.Prepare("UPDATE Schedule SET nextReportTime = ?, interval = ?, name = ?, description = ?, lookback = ?, reportGroupID = ? where id = ?")
+	stmt, err := db.Prepare("UPDATE Schedule SET nextReportTime = ?, interval = ?, name = ?, description = ?, lookback = ?, reportGroupID = ?, time = ? where id = ?")
 	if err != nil {
 		log.DefaultLogger.Error("UpdateSchedule: db.Prepare()", err.Error())
 		return nil, err
 	}
 
-	_, err = stmt.Exec(schedule.NextReportTime, schedule.Interval, schedule.Name, schedule.Description, schedule.Lookback, schedule.ReportGroupID, id)
+	_, err = stmt.Exec(schedule.NextReportTime, schedule.Interval, schedule.Name, schedule.Description, schedule.Lookback, schedule.ReportGroupID, schedule.Time, id)
 	defer stmt.Close()
 	if err != nil {
 		log.DefaultLogger.Error("UpdateSchedule: stmt.Exec()", err.Error())
@@ -166,16 +168,16 @@ func (datasource *SQLiteDatasource) GetSchedule(id string) (*Schedule, error) {
 	}
 
 	for rows.Next() {
-		var ID, Name, Description, ReportGroupID string
+		var ID, Name, Description, ReportGroupID, Time string
 		var Interval, NextReportTime, Lookback int
 
-		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID)
+		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time)
 		if err != nil {
 			log.DefaultLogger.Error("GetSchedules: rows.Scan(): ", err.Error())
 			return nil, err
 		}
 
-		schedule := Schedule{ID, Interval, NextReportTime, Name, Description, Lookback, ReportGroupID}
+		schedule := Schedule{ID, Interval, NextReportTime, Name, Description, Lookback, ReportGroupID, Time}
 		schedules = append(schedules, schedule)
 	}
 
@@ -205,16 +207,16 @@ func (datasource *SQLiteDatasource) GetSchedules() ([]Schedule, error) {
 	}
 
 	for rows.Next() {
-		var ID, Name, Description, ReportGroupID string
+		var ID, Name, Description, ReportGroupID, Time string
 		var Interval, NextReportTime, Lookback int
 
-		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID)
+		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time)
 		if err != nil {
 			log.DefaultLogger.Error("GetSchedules: rows.Scan(): ", err.Error())
 			return nil, err
 		}
 
-		schedule := Schedule{ID, Interval, NextReportTime, Name, Description, Lookback, ReportGroupID}
+		schedule := Schedule{ID, Interval, NextReportTime, Name, Description, Lookback, ReportGroupID, Time}
 		schedules = append(schedules, schedule)
 	}
 
