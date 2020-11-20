@@ -46,11 +46,13 @@ func GetDataSource() *SQLiteDatasource {
 
 	instanceManager := datasource.NewInstanceManager(getDataSourceInstanceSettings)
 
+	homePath, _ := filepath.Abs(".")
 	sqlDatasource := &SQLiteDatasource{
 		instanceManager: instanceManager,
-		Path:            filepath.Join("..", "data", "msupply.db"),
+		Path:            filepath.Join(homePath, "data", "msupply.db"),
 	}
 
+	log.DefaultLogger.Debug("mSupply App: DataPath=" + filepath.Join(homePath, "data", "msupply.db"))
 	sqlDatasource.Init()
 
 	return sqlDatasource

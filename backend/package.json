@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "copy": "rsync -rP --exclude=node_modules ./ ~/GitHub/msupply-dashboard-app/backend/",
-    "get": "rsync -rP --exclude=node_modules ~/Github/msupply-dashboard-app/backend/ ./",
     "build": "grafana-toolkit plugin:build",
     "prepare": "patch-package",
     "test": "grafana-toolkit plugin:test",
