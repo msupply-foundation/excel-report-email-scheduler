@@ -22,7 +22,7 @@ const container = css`
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-  flex: 1;
+  flex: 10;
   padding-right: 30px;
   flex-direction: column;
 `;
@@ -31,7 +31,12 @@ const flexWrapping = css`
   display: flex;
   flex-direction: row;
   flex: 1;
-  flex-basis: calc(50% - 20px);
+`;
+
+const flexContainer = css`
+  display: flex;
+  flex: 1;
+  min-width: 50%;
 `;
 
 type Props = {
@@ -58,25 +63,29 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
       <div className={flexWrapping}>
         <InlineFormLabel tooltip={intl.get('group_name')}>{intl.get('name')}</InlineFormLabel>
 
-        <Input
-          onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.NAME, value)}
-          name={intl.get('name')}
-          defaultValue={schedule.name}
-          placeholder={intl.get('name')}
-          css=""
-        />
+        <div className={flexContainer}>
+          <Input
+            onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.NAME, value)}
+            name={intl.get('name')}
+            defaultValue={schedule.name}
+            placeholder={intl.get('name')}
+            css=""
+          />
+        </div>
       </div>
 
       <div className={flexWrapping}>
         <InlineFormLabel tooltip={intl.get('group_description')}>{intl.get('description')}</InlineFormLabel>
 
-        <Input
-          onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.DESCRIPTION, value)}
-          name={intl.get('description')}
-          defaultValue={schedule.description}
-          placeholder={intl.get('description')}
-          css=""
-        />
+        <div className={flexContainer}>
+          <Input
+            onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.DESCRIPTION, value)}
+            name={intl.get('description')}
+            defaultValue={schedule.description}
+            placeholder={intl.get('description')}
+            css=""
+          />
+        </div>
       </div>
 
       <div className={flexWrapping}>
@@ -84,35 +93,39 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
           {intl.get('report_interval')}
         </InlineFormLabel>
 
-        <Select
-          value={getIntervals().filter((interval: any) => interval.value === schedule?.interval)}
-          options={getIntervals()}
-          onChange={(selected: SelectableValue) => {
-            onUpdate(ScheduleKey.INTERVAL, selected.value);
-          }}
-        />
+        <div className={flexContainer}>
+          <Select
+            value={getIntervals().filter((interval: any) => interval.value === schedule?.interval)}
+            options={getIntervals()}
+            onChange={(selected: SelectableValue) => {
+              onUpdate(ScheduleKey.INTERVAL, selected.value);
+            }}
+          />
+        </div>
       </div>
 
       <div className={flexWrapping}>
         <InlineFormLabel tooltip={intl.get('report_group_description')}>{intl.get('report_group')}</InlineFormLabel>
 
-        <Select
-          value={reportGroups
-            ?.filter((reportGroup: ReportGroup) => reportGroup.id === schedule.reportGroupID)
-            .map((reportGroup: ReportGroup) => ({
+        <div className={flexContainer}>
+          <Select
+            value={reportGroups
+              ?.filter((reportGroup: ReportGroup) => reportGroup.id === schedule.reportGroupID)
+              .map((reportGroup: ReportGroup) => ({
+                label: reportGroup.name,
+                description: reportGroup.description,
+                value: reportGroup,
+              }))}
+            options={reportGroups?.map((reportGroup: ReportGroup) => ({
               label: reportGroup.name,
               description: reportGroup.description,
               value: reportGroup,
             }))}
-          options={reportGroups?.map((reportGroup: ReportGroup) => ({
-            label: reportGroup.name,
-            description: reportGroup.description,
-            value: reportGroup,
-          }))}
-          onChange={(selected: SelectableValue<ReportGroup>) => {
-            onUpdate(ScheduleKey.REPORT_GROUP_ID, selected?.value?.id ?? '');
-          }}
-        />
+            onChange={(selected: SelectableValue<ReportGroup>) => {
+              onUpdate(ScheduleKey.REPORT_GROUP_ID, selected?.value?.id ?? '');
+            }}
+          />
+        </div>
       </div>
     </div>
   );

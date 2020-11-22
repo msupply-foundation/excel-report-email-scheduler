@@ -1,10 +1,17 @@
 import { SelectableValue } from '@grafana/data';
+import { css } from 'emotion';
 import { InlineFormLabel, MultiSelect, Select } from '@grafana/ui';
 import { refreshPanelOptions } from 'api';
 import { SelectableVariable, Variable } from 'common/types';
 import { useDatasourceID } from 'hooks';
 import React, { FC } from 'react';
 import { useQuery } from 'react-query';
+
+const flexContainer = css`
+  display: flex;
+  flex: 1;
+  flex-basis: 50%;
+`;
 
 type Props = {
   onUpdate: (selected: SelectableValue) => void;
@@ -35,41 +42,45 @@ export const PanelVariableOptions: FC<Props> = ({
   const options = selectableOptions?.length > 0 ? selectableOptions : data;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'row', marginTop: '5px' }}>
+    <div style={{ display: 'flex', flexDirection: 'row', marginTop: '5px', flexWrap: 'wrap' }}>
       <InlineFormLabel>{name}</InlineFormLabel>
-      {!multiSelectable ? (
-        <Select
-          value={options?.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
-          onChange={(selected: SelectableValue<SelectableVariable>) => {
-            if (selected.value?.value === '$__all') {
-              return onUpdate(selectableOptions);
-            }
+      <div className={flexContainer}>
+        {!multiSelectable ? (
+          <Select
+            value={options?.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
+            onChange={(selected: SelectableValue<SelectableVariable>) => {
+              if (selected.value?.value === '$__all') {
+                return onUpdate(selectableOptions);
+              }
 
-            onUpdate([selected]);
-          }}
-          options={options}
-        />
-      ) : (
-        <MultiSelect
-          onChange={(selected: SelectableValue<SelectableVariable>) => {
-            const isAll = selected.some(({ value }: SelectableValue<SelectableVariable>) => value?.value === '$__all');
-            if (isAll) {
-              return onUpdate(selectableOptions);
-            }
+              onUpdate([selected]);
+            }}
+            options={options}
+          />
+        ) : (
+          <MultiSelect
+            onChange={(selected: SelectableValue<SelectableVariable>) => {
+              const isAll = selected.some(
+                ({ value }: SelectableValue<SelectableVariable>) => value?.value === '$__all'
+              );
+              if (isAll) {
+                return onUpdate(selectableOptions);
+              }
 
-            onUpdate(selected);
-          }}
-          value={options?.filter(
-            (option: SelectableValue<SelectableVariable>) =>
-              !!selectedOptions?.find((selected: string) => selected === option?.value?.value)
-          )}
-          filterOption={(option: SelectableValue<SelectableVariable>, searchQuery: string) =>
-            !!option?.label?.toLowerCase().includes(searchQuery.toLowerCase())
-          }
-          closeMenuOnSelect={false}
-          options={options}
-        />
-      )}
+              onUpdate(selected);
+            }}
+            value={options?.filter(
+              (option: SelectableValue<SelectableVariable>) =>
+                !!selectedOptions?.find((selected: string) => selected === option?.value?.value)
+            )}
+            filterOption={(option: SelectableValue<SelectableVariable>, searchQuery: string) =>
+              !!option?.label?.toLowerCase().includes(searchQuery.toLowerCase())
+            }
+            closeMenuOnSelect={false}
+            options={options}
+          />
+        )}
+      </div>
     </div>
   );
 };

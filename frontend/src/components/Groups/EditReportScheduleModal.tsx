@@ -29,6 +29,7 @@ const headerAdjustments = css`
   display: flex;
   flex: 1;
   justify-content: flex-end;
+  flex-wrap: wrap;
 `;
 
 export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, isOpen }) => {
@@ -71,7 +72,7 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
     >
       <div className={headerAdjustments}>
         <EditScheduleForm schedule={schedule} onUpdate={onUpdateSchedule} />
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
           <Button size="md" variant="destructive" onClick={setDeleteAlertIsOpen}>
             {intl.get('delete')}
           </Button>

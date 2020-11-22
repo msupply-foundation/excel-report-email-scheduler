@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import { Icon, InlineFormLabel, Select, Tooltip } from '@grafana/ui';
+import { css } from 'emotion';
 import intl from 'react-intl-universal';
 import { SelectableValue } from '@grafana/data';
 import { ReportContentKey } from 'common/enums';
@@ -17,6 +18,12 @@ type Props = {
   onUpdateVariable: (variableName: string) => (selectedValue: SelectableValue) => void;
   onUpdateContent: (key: ReportContentKey, selectedValue: SelectableValue<String | Number | Store>) => void;
 };
+
+const flexContainer = css`
+  display: flex;
+  flex: 1;
+  flex-basis: 50%;
+`;
 
 export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateContent, lookback, variables }) => {
   const lookbacks = getLookbacks();
@@ -37,15 +44,18 @@ export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateCon
       </Tooltip>
 
       {usesMacro && (
-        <div style={{ display: 'flex', flexDirection: 'row' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
           <InlineFormLabel tooltip={intl.get('lookback_period_description')}>
             {intl.get('lookback_period')}
           </InlineFormLabel>
-          <Select
-            options={lookbacks}
-            onChange={(selected: SelectableValue<Number>) => onUpdateContent(ReportContentKey.LOOKBACK, selected)}
-            value={lookbacks.filter((selected: SelectableValue<Number>) => selected.value === lookback)}
-          />
+
+          <div className={flexContainer}>
+            <Select
+              options={lookbacks}
+              onChange={(selected: SelectableValue<Number>) => onUpdateContent(ReportContentKey.LOOKBACK, selected)}
+              value={lookbacks.filter((selected: SelectableValue<Number>) => selected.value === lookback)}
+            />
+          </div>
         </div>
       )}
 
