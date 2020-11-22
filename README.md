@@ -41,7 +41,7 @@ allow_loading_unsigned_plugins = msupply, msupply-datasource
 
 To build: cd ./frontend && yarn install && yarn start
 
-The frontend is for setting up reporting groups and schedules. This frontend communicates with the backend through a RESTful server running within the backend/datasource plugin.
+The frontend is for setting up report groups and schedules. This frontend communicates with the backend through a RESTful server running within the backend/datasource plugin.
 
 The UI uses only `@grafana/ui` [components](https://grafana.com/docs/grafana/latest/packages_api/ui/). The docs are still a WIP, I think. Best to use the storybook.
 
