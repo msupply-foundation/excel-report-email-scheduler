@@ -1,5 +1,3 @@
-import { DateTime } from '@grafana/data';
-
 export type ReportGroup = {
   id: string;
   name: string;

@@ -11,6 +11,7 @@ export enum ScheduleKey {
   INTERVAL = 'interval',
   REPORT_GROUP_ID = 'reportGroupID',
   TIME_OF_DAY = 'time',
+  DAY_OF_INTERVAL = 'day',
 }
 
 export enum ReportContentKey {
