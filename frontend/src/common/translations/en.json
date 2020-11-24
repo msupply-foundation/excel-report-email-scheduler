@@ -78,5 +78,5 @@
   "report_time": "Report time",
   "report_time_description": "The time at which to send emails",
   "report_day": "Report day",
-  "report_day_description": "The number of the day in the week/fortnight/month/quarter/year in which to send"
+  "report_day_description": "The number of the day in the month/quarter/year in which to send. Use a value greater than the possible number of days to force 'last day' eg day 31 or greater when emailing monthly will always send on the last day of the month."
 }

@@ -3,6 +3,8 @@ package dbstore
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
@@ -35,6 +37,45 @@ func ScheduleFields() string {
 func NewSchedule(ID string, interval int, nextReportTime int, name string, description string, lookback int, reportGroupID string, time string, day int) Schedule {
 	schedule := Schedule{ID: ID, Interval: interval, NextReportTime: nextReportTime, Name: name, Description: description, Lookback: lookback, ReportGroupID: reportGroupID, Time: time, Day: day}
 	return schedule
+}
+
+func (schedule *Schedule) UpdateNextReportTime() {
+	now := time.Now()
+	daysOffset := 1
+	if schedule.Day > 0 {
+		daysOffset = schedule.Day
+	}
+
+	reportTime := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
+	// there is probably a better way to parse the time string, it didn't work for me though
+	timeOfDay, err := time.Parse(time.RFC3339, "1970-01-01T"+schedule.Time+":00+00:00")
+	if err == nil {
+		log.DefaultLogger.Info(fmt.Sprintf("Adding time of '%s' to '%s'", schedule.Time, reportTime))
+		reportTime = time.Date(reportTime.Year(), reportTime.Month(), reportTime.Day(), timeOfDay.Hour(), timeOfDay.Minute(), 0, 0, now.Location())
+	}
+
+	// for the intervals using x Day of y, remove the current Day value
+	daysOffset = (-1 * int(reportTime.Day())) + daysOffset
+
+	switch schedule.Interval {
+	case 5: //yearly
+		reportTime = reportTime.AddDate(1, 0, daysOffset)
+	case 4: // quarterly
+		reportTime = reportTime.AddDate(0, 3, daysOffset)
+	case 3: // monthly
+		reportTime = reportTime.AddDate(0, 1, daysOffset)
+	case 2: // fortnightly
+		reportTime = reportTime.AddDate(0, 0, 14)
+	case 1: // weekly
+		reportTime = reportTime.AddDate(0, 0, 7)
+	default: // 0 == daily
+		if reportTime.Unix() < now.Unix() {
+			// run tomorrow
+			reportTime = reportTime.AddDate(0, 0, 1)
+		}
+	}
+	schedule.NextReportTime = int(reportTime.Unix())
+	log.DefaultLogger.Info(fmt.Sprintf("Setting time of schedule '%s' to '%s'", schedule.Name, reportTime))
 }
 
 func (datasource *SQLiteDatasource) OverdueSchedules() ([]Schedule, error) {
@@ -76,6 +117,7 @@ func (datasource *SQLiteDatasource) CreateSchedule() (*Schedule, error) {
 
 	newUuid := uuid.New().String()
 	schedule := Schedule{ID: newUuid, NextReportTime: 0, Interval: 0, Name: "", Description: "", Lookback: 0, ReportGroupID: "", Time: "", Day: 1}
+	schedule.UpdateNextReportTime()
 	stmt, err := db.Prepare("INSERT INTO Schedule (ID,  nextReportTime, interval, name, description, lookback, reportGroupID, time, day) VALUES (?,?,?,?,?,?,?,?,?)")
 	if err != nil {
 		log.DefaultLogger.Error("CreateSchedule: db.Prepare()", err.Error())
@@ -106,6 +148,7 @@ func (datasource *SQLiteDatasource) UpdateSchedule(id string, schedule Schedule)
 		return nil, err
 	}
 
+	schedule.UpdateNextReportTime()
 	_, err = stmt.Exec(schedule.NextReportTime, schedule.Interval, schedule.Name, schedule.Description, schedule.Lookback, schedule.ReportGroupID, schedule.Time, schedule.Day, id)
 	defer stmt.Close()
 	if err != nil {

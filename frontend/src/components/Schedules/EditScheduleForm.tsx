@@ -10,12 +10,12 @@ import { getReportGroups } from 'api';
 import { DateTime, dateTime, SelectableValue } from '@grafana/data';
 
 const getIntervals = () => [
-  { label: intl.get('daily'), value: 60 * 60 * 24 },
-  { label: intl.get('weekly'), value: 60 * 60 * 24 * 7 },
-  { label: intl.get('fortnightly'), value: 60 * 60 * 24 * 14 },
-  { label: intl.get('monthly'), value: 60 * 60 * 24 * 30 },
-  { label: intl.get('quarterly'), value: 60 * 60 * 24 * 30 * 6 },
-  { label: intl.get('yearly'), value: 60 * 60 * 24 * 30 * 12 },
+  { label: intl.get('daily'), value: 0 },
+  { label: intl.get('weekly'), value: 1 },
+  { label: intl.get('fortnightly'), value: 2 },
+  { label: intl.get('monthly'), value: 3 },
+  { label: intl.get('quarterly'), value: 4 },
+  { label: intl.get('yearly'), value: 5 },
 ];
 
 const formatTimeToDate = (time?: string) => {
@@ -101,17 +101,13 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
         </div>
 
         <div className={flexWrapping}>
-          <InlineFormLabel tooltip={intl.get('report_day_description')}>{intl.get('report_day')}</InlineFormLabel>
+          <InlineFormLabel tooltip={intl.get('report_time_description')}>{intl.get('report_time')}</InlineFormLabel>
 
-          <Input
-            css=""
-            defaultValue={1}
-            min={1}
-            name={intl.get('report_day')}
-            onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.DAY_OF_INTERVAL, parseInt(value))}
-            placeholder={intl.get('report_day')}
-            type="number"
-            value={schedule?.day || 1}
+          <TimeOfDayPicker
+            onChange={(selected: DateTime) => {
+              onUpdate(ScheduleKey.TIME_OF_DAY, selected.format('HH:mm'));
+            }}
+            value={formatTimeToDate(schedule?.time)}
           />
         </div>
 
@@ -137,16 +133,24 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
           />
         </div>
 
-        <div className={flexWrapping}>
-          <InlineFormLabel tooltip={intl.get('report_time_description')}>{intl.get('report_time')}</InlineFormLabel>
+        {(schedule.interval || 0) > 2 ? (
+          <div className={flexWrapping}>
+            <InlineFormLabel tooltip={intl.get('report_day_description')}>{intl.get('report_day')}</InlineFormLabel>
 
-          <TimeOfDayPicker
-            onChange={(selected: DateTime) => {
-              onUpdate(ScheduleKey.TIME_OF_DAY, selected.format('HH:mm'));
-            }}
-            value={formatTimeToDate(schedule?.time)}
-          />
-        </div>
+            <Input
+              css=""
+              defaultValue={1}
+              min={1}
+              name={intl.get('report_day')}
+              onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.DAY_OF_INTERVAL, parseInt(value))}
+              placeholder={intl.get('report_day')}
+              type="number"
+              value={schedule?.day || 1}
+            />
+          </div>
+        ) : (
+          <div className={flexWrapping}></div>
+        )}
       </div>
     </div>
   );

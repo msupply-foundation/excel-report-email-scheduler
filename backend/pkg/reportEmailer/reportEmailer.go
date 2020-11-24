@@ -60,7 +60,7 @@ func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
 			log.DefaultLogger.Error(fmt.Sprintf("Could not delete %s... : %s.xlsx", schedule.Name, err.Error()))
 		}
 
-		schedule.NextReportTime = int(time.Now().Unix()) + schedule.Interval
+		schedule.UpdateNextReportTime()
 		re.sql.UpdateSchedule(schedule.ID, schedule)
 	}
 
