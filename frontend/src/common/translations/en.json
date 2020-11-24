@@ -46,7 +46,7 @@
   "report_group": "Report group",
   "report_interval": "Report interval",
   "report_interval_description": "The interval frequency for emails to be sent",
-  "report_group_description": "The reporting group assigned to this schedule",
+  "report_group_description": "The report group assigned to this schedule",
   "choose_stores": "Choose stores for which this report should be run for",
   "lookback_period": "Lookback period",
   "lookback_period_description": "The amount of time to lookback for reports",
@@ -73,6 +73,6 @@
   "available_panels": "Available Panels",
   "available_panels_tooltip": "This is a list of all panels which are available to be added as a sheet within an emailed report. They are panels created within any dashboard of your Grafana instance with a few requirements. Panels must use a table format, and must only use variables which are either a query or custom type. For query type variables, the datasource must be the same datasource as defined in this mSupply app configuration.",
   "users": "Users",
-  "users_tooltip": "Select a user who should be a part of this reporting group and receive emails from any report schedule assigned this group. Only users who have an email entered into your mSupply instance can be selected.",
+  "users_tooltip": "Select a user who should be a part of this report group and receive emails from any report schedule assigned this group. Only users who have an email entered into your mSupply instance can be selected.",
   "send_test_emails": "SEND TEST"
 }
