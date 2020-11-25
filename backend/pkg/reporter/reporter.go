@@ -119,7 +119,17 @@ func (r *Report) writeDate(sheetName string) error {
 }
 
 func (r *Report) writeCell(sheetName string, cellRef string, value interface{}) {
-	r.file.SetCellValue(sheetName, cellRef, value)
+	if _, ok := value.(string); ok {
+		r.file.SetCellValue(sheetName, cellRef, value)
+	} else if boolean, ok := value.(bool); ok {
+		r.file.SetCellBool(sheetName, cellRef, boolean)
+	} else {
+		if style, err := r.file.NewStyle(`{"number_format": 2}`); err == nil {
+			r.file.SetCellStyle(sheetName, cellRef, cellRef, style)
+		}
+		r.file.SetCellValue(sheetName, cellRef, value)
+	}
+
 }
 
 func (r *Report) SetSheets(panels []api.TablePanel) {

@@ -31,7 +31,7 @@
   "includes": [
     {
       "type": "page",
-      "name": "Reporting groups",
+      "name": "Report groups",
       "path": "/a/msupply/?tab=report-group",
       "role": "Viewer",
       "addToNav": true,
