@@ -142,7 +142,7 @@ export const EditScheduleForm: FC<Props> = ({ onUpdate, schedule }) => {
               defaultValue={1}
               min={1}
               name={intl.get('report_day')}
-              onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.DAY_OF_INTERVAL, parseInt(value))}
+              onChange={({ currentTarget: { value } }) => onUpdate(ScheduleKey.DAY_OF_INTERVAL, parseInt(value, 10))}
               placeholder={intl.get('report_day')}
               type="number"
               value={schedule?.day || 1}

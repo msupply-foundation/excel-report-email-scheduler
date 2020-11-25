@@ -59,11 +59,23 @@ func (schedule *Schedule) UpdateNextReportTime() {
 
 	switch schedule.Interval {
 	case 5: //yearly
-		reportTime = reportTime.AddDate(1, 0, daysOffset)
+		if daysOffset > 365 {
+			reportTime = reportTime.AddDate(2, 0, -reportTime.Day())
+		} else {
+			reportTime = reportTime.AddDate(1, 0, daysOffset)
+		}
 	case 4: // quarterly
-		reportTime = reportTime.AddDate(0, 3, daysOffset)
+		if daysOffset > 93 {
+			reportTime = reportTime.AddDate(0, 6, -reportTime.Day())
+		} else {
+			reportTime = reportTime.AddDate(0, 3, daysOffset)
+		}
 	case 3: // monthly
-		reportTime = reportTime.AddDate(0, 1, daysOffset)
+		if daysOffset > 31 {
+			reportTime = reportTime.AddDate(0, 2, -reportTime.Day())
+		} else {
+			reportTime = reportTime.AddDate(0, 1, daysOffset)
+		}
 	case 2: // fortnightly
 		reportTime = reportTime.AddDate(0, 0, 14)
 	case 1: // weekly
