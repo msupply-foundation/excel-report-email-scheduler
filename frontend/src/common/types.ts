@@ -21,6 +21,8 @@ export type Schedule = {
   name?: string;
   description?: string;
   interval?: number;
+  time?: string;
+  day?: number;
   nextReportTime?: number;
   lookback?: number;
   reportGroupID: string;

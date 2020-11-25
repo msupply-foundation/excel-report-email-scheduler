@@ -3,7 +3,6 @@ package reportEmailer
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -52,17 +51,16 @@ func (re *ReportEmailer) cleanup(schedules []dbstore.Schedule) {
 	log.DefaultLogger.Info("Starting Clean up...")
 	for _, schedule := range schedules {
 
-		fileName := schedule.Name + ".xlsx"
-		log.DefaultLogger.Info(fmt.Sprintf("Deleting %s...", fileName))
-		path := filepath.Join("..", "data", fileName)
+		log.DefaultLogger.Info(fmt.Sprintf("Deleting %s.xlsx...", schedule.Name))
+		path := reporter.GetFilePath(schedule.Name)
 		err := os.Remove(path)
 		if err != nil {
 			// Failure case shouldn't be much of a problem since we're using the schedule ID for the report name, at the moment
 			// as it will just write to the same file and not create infinitely many if deleting always fails.
-			log.DefaultLogger.Error(fmt.Sprintf("Could not delete %s... : %s", fileName, err.Error()))
+			log.DefaultLogger.Error(fmt.Sprintf("Could not delete %s... : %s.xlsx", schedule.Name, err.Error()))
 		}
 
-		schedule.NextReportTime = int(time.Now().Unix()) + schedule.Interval
+		schedule.UpdateNextReportTime()
 		re.sql.UpdateSchedule(schedule.ID, schedule)
 	}
 
@@ -120,7 +118,7 @@ func (re *ReportEmailer) CreateReport(schedule dbstore.Schedule, authConfig *aut
 		}
 	}
 
-	templatePath := filepath.Join("..", "data", "template.xlsx")
+	templatePath := reporter.GetFilePath("template")
 	reporter := reporter.NewReporter(templatePath)
 
 	for scheduleID, reportSheetPanels := range panels {
@@ -145,7 +143,7 @@ func (re *ReportEmailer) CreateReport(schedule dbstore.Schedule, authConfig *aut
 			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
 			bugsnag.Notify(err)
 		} else {
-			attachmentPath := filepath.Join("..", "data", schedule.Name+".xlsx")
+			attachmentPath := reporter.GetFilePath(schedule.Name)
 			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedule.Name, schedule.Description)
 		}
 	}
@@ -235,8 +233,7 @@ func (re *ReportEmailer) CreateReports() {
 		}
 	}
 
-	templatePath := filepath.Join("..", "data", "template.xlsx")
-
+	templatePath := reporter.GetFilePath("template")
 	reporter := reporter.NewReporter(templatePath)
 
 	for scheduleID, reportSheetPanels := range panels {
@@ -263,7 +260,7 @@ func (re *ReportEmailer) CreateReports() {
 			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
 			bugsnag.Notify(err)
 		} else {
-			attachmentPath := filepath.Join("..", "data", schedule.Name+".xlsx")
+			attachmentPath := reporter.GetFilePath(schedule.Name)
 			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedule.Name, schedule.Description)
 		}
 	}

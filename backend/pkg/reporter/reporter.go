@@ -265,7 +265,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 
 	log.DefaultLogger.Info("Saving report...")
 
-	savePath := filepath.Join("..", "data", r.name+".xlsx")
+	savePath := GetFilePath(r.name)
 	if err := r.file.SaveAs(savePath); err != nil {
 		log.DefaultLogger.Error("Write: ", err.Error())
 	}
@@ -275,6 +275,15 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 	return nil
 }
 
+func GetFilePath(fileName string) string {
+
+	homePath, _ := filepath.Abs(".")
+	filePath := filepath.Join(homePath, "data", fileName+".xlsx")
+
+	log.DefaultLogger.Debug("mSupply App: ReportFilePath=" + filePath)
+	return filePath
+}
+
 func NewReporter(templatePath string) *Reporter {
 	return &Reporter{templatePath: templatePath}
 }
@@ -282,4 +291,8 @@ func NewReporter(templatePath string) *Reporter {
 func (r *Reporter) CreateNewReport(scheduleID string, scheduleName string) *Report {
 	report := NewReport(scheduleID, scheduleName, r.templatePath)
 	return report
+}
+
+func (re *Reporter) GetFilePath(fileName string) string {
+	return GetFilePath(fileName)
 }
