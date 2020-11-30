@@ -277,8 +277,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 
 func GetFilePath(fileName string) string {
 
-	homePath, _ := filepath.Abs(".")
-	filePath := filepath.Join(homePath, "data", fileName+".xlsx")
+	filePath := filepath.Join("..", "data", fileName+".xlsx")
 
 	log.DefaultLogger.Debug("mSupply App: ReportFilePath=" + filePath)
 	return filePath
