@@ -349,6 +349,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 }
 
 func GetFilePath(fileName string) string {
+
 	filePath := filepath.Join("..", "data", fileName+".xlsx")
 
 	log.DefaultLogger.Debug("mSupply App: ReportFilePath=" + filePath)
