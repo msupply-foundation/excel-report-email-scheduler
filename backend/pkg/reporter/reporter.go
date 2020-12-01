@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	_ "image/png"
+	"math"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -118,7 +119,33 @@ func (r *Report) writeDate(sheetName string) error {
 	return nil
 }
 
+func floatToDateString(value interface{}) (string, bool) {
+	var date string
+
+	// dates are returned as float64 values
+	// this is a quick check to see if they might be dates
+	if timestamp, ok := value.(float64); ok {
+
+		// 2000/01/01 < timestamp < 2500/01/01
+		if timestamp > 946684800000 && timestamp < 16725225600000 {
+			unix := time.Unix(int64(timestamp/1000), 0)
+			date = unix.Format("2006/01/02")
+
+			return date, true
+		}
+	}
+
+	return date, false
+}
+
 func (r *Report) writeCell(sheetName string, cellRef string, value interface{}) {
+	if date, ok := floatToDateString(value); ok {
+		value = date
+		if style, err := r.file.NewStyle(`{"number_format": 14, "alignment": { "horizontal": "right"}}`); err == nil {
+			r.file.SetCellStyle(sheetName, cellRef, cellRef, style)
+		}
+	}
+
 	if _, ok := value.(string); ok {
 		r.file.SetCellValue(sheetName, cellRef, value)
 	} else if boolean, ok := value.(bool); ok {
@@ -129,7 +156,6 @@ func (r *Report) writeCell(sheetName string, cellRef string, value interface{}) 
 		}
 		r.file.SetCellValue(sheetName, cellRef, value)
 	}
-
 }
 
 func (r *Report) SetSheets(panels []api.TablePanel) {
@@ -218,6 +244,48 @@ func (r *Report) writeRows(sheetName string, rows [][]interface{}) error {
 	return nil
 }
 
+func (r *Report) setColumnWidths(sheetName string, columns []api.Column, rows [][]interface{}) error {
+
+	headerFontCorrectionFactor := 1.35
+	maximumContentLengths := make(map[int]float64)
+
+	if len(columns) > 0 {
+		for columnNumber, column := range columns {
+			maximumContentLengths[columnNumber] = headerFontCorrectionFactor * float64(len(column.Text))
+		}
+	}
+
+	if len(rows) == 0 {
+		return nil
+	}
+
+	for _, row := range rows {
+		for i, value := range row {
+			if value != nil {
+				if timestamp, ok := value.(float64); ok {
+					// adding 3 to the length, as we are formatting with 2 decimal places
+					maximumContentLengths[i] = math.Max(maximumContentLengths[i], float64(3+len(strconv.FormatFloat(timestamp, 'f', -1, 64))))
+
+					// if a date, then reformat as the appropriate date string
+					if date, ok := floatToDateString(value); ok {
+						value = date
+					}
+				}
+
+				if _, ok := value.(string); ok {
+					maximumContentLengths[i] = math.Max(maximumContentLengths[i], float64(len(value.(string))))
+				}
+			}
+		}
+	}
+
+	for columnNumber, _ := range rows {
+		r.file.SetColWidth(sheetName, intToCol(columnNumber), intToCol(columnNumber), maximumContentLengths[columnNumber])
+	}
+
+	return nil
+}
+
 func (r *Report) Write(auth auth.AuthConfig) error {
 	log.DefaultLogger.Info(fmt.Sprintf("Starting to create report %s...", r.id))
 	if r.file == nil {
@@ -259,6 +327,11 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 			log.DefaultLogger.Error("Write: writeRows: " + err.Error())
 			return err
 		}
+
+		if err := r.setColumnWidths(s.Title, s.Columns, s.Rows); err != nil {
+			log.DefaultLogger.Error("Write: setColumnWidths: " + err.Error())
+			return err
+		}
 	}
 
 	r.file.DeleteSheet("templateSheet")
@@ -276,9 +349,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 }
 
 func GetFilePath(fileName string) string {
-
-	homePath, _ := filepath.Abs(".")
-	filePath := filepath.Join(homePath, "data", fileName+".xlsx")
+	filePath := filepath.Join("..", "data", fileName+".xlsx")
 
 	log.DefaultLogger.Debug("mSupply App: ReportFilePath=" + filePath)
 	return filePath
