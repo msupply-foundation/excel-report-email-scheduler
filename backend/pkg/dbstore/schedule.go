@@ -217,7 +217,7 @@ func (datasource *SQLiteDatasource) GetSchedule(id string) (*Schedule, error) {
 
 	var schedules []Schedule
 
-	rows, err := db.Query("SELECT * FROM Schedule")
+	rows, err := db.Query("SELECT * FROM Schedule where id=?", id)
 	defer rows.Close()
 	if err != nil {
 		log.DefaultLogger.Error("GetSchedules: db.Query(): ", err.Error())
