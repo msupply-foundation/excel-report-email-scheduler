@@ -89,8 +89,8 @@ export const EditReportScheduleModal: FC<Props> = ({ reportSchedule, onClose, is
 
       <ConfirmModal
         isOpen={deleteAlertIsOpen}
-        title={intl.get('delete_report_group')}
-        body={intl.get('delete_report_group_question')}
+        title={intl.get('delete_report_schedule')}
+        body={intl.get('delete_report_schedule_question')}
         confirmText={intl.get('delete')}
         icon="exclamation-triangle"
         onConfirm={onConfirmDelete}
