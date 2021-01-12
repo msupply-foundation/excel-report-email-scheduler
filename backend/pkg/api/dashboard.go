@@ -162,7 +162,7 @@ func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to stri
 	url := authConfig.AuthURL() + "/api/dashboards/uid/" + uuid
 	response, err := http.Get(url)
 	if err != nil {
-		log.DefaultLogger.Error("NewDashboard: HTTP Request", err.Error())
+		log.DefaultLogger.Error("NewDashboard: HTTP Request %s", err.Error())
 		return nil, err
 	}
 
@@ -174,7 +174,7 @@ func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to stri
 
 	var panels []TablePanel
 	for _, panel := range dashboardResponse.Dashboard.Panels {
-		if panel.Type == "table" {
+		if panel.Type == "table" || panel.Type == "msupply-table" {
 			newPanel := NewTablePanel(panel.ID, panel.Title, panel.Targets[0].RawSQL, from, to, datasourceID)
 			panels = append(panels, *newPanel)
 		}

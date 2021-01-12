@@ -176,3 +176,7 @@ func (panel *TablePanel) SetRows(rows [][]interface{}) {
 func (panel *TablePanel) SetColumns(columns []Column) {
 	panel.Columns = columns
 }
+
+func (panel *TablePanel) SetSql(query string) {
+	panel.RawSql = query
+}

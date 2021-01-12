@@ -1,6 +1,8 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/bugsnag/bugsnag-go"
 	"github.com/gorilla/mux"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
@@ -43,6 +45,8 @@ func (server *HttpServer) ResourceHandler(sqliteDatasource *dbstore.SQLiteDataso
 	mux.HandleFunc("/report-content/{id}", bugsnag.HandlerFunc(server.deleteReportContent)).Methods("DELETE")
 
 	mux.HandleFunc("/test-email", bugsnag.HandlerFunc(server.testEmail)).Queries("schedule-id", "{schedule-id}").Methods("GET")
+	mux.HandleFunc("/export-panel", bugsnag.HandlerFunc(server.exportPanel)).Methods("POST")
+	mux.PathPrefix("/download/").Handler(http.StripPrefix("/download/", http.FileServer(http.Dir("../data")))).Methods("GET")
 
 	return httpadapter.New(mux)
 }

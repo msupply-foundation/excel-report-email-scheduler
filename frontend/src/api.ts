@@ -180,7 +180,7 @@ export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
     .filter(({ panels }) => panels?.length > 0)
     .map(({ panels, templating, uid }) => {
       const mappedPanels = panels
-        .filter(({ type }) => type === 'table' || type === 'table-old')
+        .filter(({ type }) => type === 'table' || type === 'table-old' || type === 'msupply-table')
         .map(rawPanel => {
           const { targets } = rawPanel;
           const [target] = targets;
