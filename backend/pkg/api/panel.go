@@ -180,3 +180,7 @@ func (panel *TablePanel) SetColumns(columns []Column) {
 func (panel *TablePanel) SetSql(query string) {
 	panel.RawSql = query
 }
+
+func (panel *TablePanel) SetTitle(title string) {
+	panel.Title = title
+}

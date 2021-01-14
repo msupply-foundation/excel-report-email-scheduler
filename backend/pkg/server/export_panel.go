@@ -15,12 +15,14 @@ type ExportPanelArgs struct {
 	DashboardID string `json:"dashboardID"`
 	PanelID     int    `json:"panelID"`
 	Query       string `json:"query"`
+	Title       string `json:"title"`
 }
 
 func ExportPanelArgsFields() string {
 	return "\n{\n\tPanelID int\n\t" +
 		"DashboardID string\n\t" +
 		"Query string\n\t" +
+		"Title string\n\t" +
 		"\n}"
 }
 
@@ -65,7 +67,7 @@ func (server *HttpServer) exportPanel(rw http.ResponseWriter, request *http.Requ
 	templatePath := reporter.GetFilePath("template")
 	reporter := reporter.NewReporter(templatePath)
 
-	url, err := reporter.ExportPanel(authConfig, settings.DatasourceID, args.DashboardID, args.PanelID, args.Query)
+	url, err := reporter.ExportPanel(authConfig, settings.DatasourceID, args.DashboardID, args.PanelID, args.Query, args.Title)
 	if err != nil {
 		log.DefaultLogger.Error("exportPanel: reporter.SaveReport: ", err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)

@@ -357,7 +357,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 	return nil
 }
 
-func (r *Reporter) ExportPanel(authConfig *auth.AuthConfig, datasourceID int, dashboardID string, panelID int, query string) (string, error) {
+func (r *Reporter) ExportPanel(authConfig *auth.AuthConfig, datasourceID int, dashboardID string, panelID int, query string, title string) (string, error) {
 
 	dashboard, err := api.NewDashboard(authConfig, dashboardID, "", "", datasourceID)
 	if err != nil {
@@ -372,6 +372,7 @@ func (r *Reporter) ExportPanel(authConfig *auth.AuthConfig, datasourceID int, da
 	}
 
 	panel.SetSql(query)
+	panel.SetTitle(title)
 
 	reportSheetPanels := []api.TablePanel{*panel}
 	report := r.CreateNewReport(strconv.Itoa(panelID), panel.Title)
