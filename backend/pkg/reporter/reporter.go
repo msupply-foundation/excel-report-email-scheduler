@@ -357,6 +357,36 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 	return nil
 }
 
+func (r *Reporter) ExportPanel(authConfig *auth.AuthConfig, datasourceID int, dashboardID string, panelID int, query string, title string) (string, error) {
+
+	dashboard, err := api.NewDashboard(authConfig, dashboardID, "", "", datasourceID)
+	if err != nil {
+		log.DefaultLogger.Error("Reporter.ExportPanel: NewDashboard: " + err.Error())
+		return "", err
+	}
+
+	panel := dashboard.Panel(panelID)
+	if panel == nil {
+		log.DefaultLogger.Error("Reporter.ExportPanel: NewDashboard: panel is nil")
+		return "", errors.New(fmt.Sprintf("panel with ID %d cannot be found", panelID))
+	}
+
+	panel.SetSql(query)
+	panel.SetTitle(title)
+
+	reportSheetPanels := []api.TablePanel{*panel}
+	report := r.CreateNewReport(strconv.Itoa(panelID), panel.Title)
+	report.SetSheets(reportSheetPanels)
+
+	err = report.Write(*authConfig)
+	if err != nil {
+		log.DefaultLogger.Error("ReportEmailer.createReports: report.Write: " + err.Error())
+		return "", err
+	}
+
+	return panel.Title + ".xlsx", nil
+}
+
 func GetFilePath(fileName string) string {
 
 	filePath := filepath.Join("..", "data", fileName+".xlsx")
