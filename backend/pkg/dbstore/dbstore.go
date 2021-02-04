@@ -170,7 +170,7 @@ func (datasource *SQLiteDatasource) Init() {
 		panic(err)
 	}
 
-	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, time INTEGER, day INTEGER, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
+	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, time TEXT, day INTEGER, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
 	stmt.Exec()
 	defer stmt.Close()
 	if err != nil {
