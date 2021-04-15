@@ -7,7 +7,7 @@
     "test": "grafana-toolkit plugin:test",
     "dev": "grafana-toolkit plugin:dev",
     "watch": "grafana-toolkit plugin:dev --watch",
-    "sign": "grafana-toolkit plugin:sign --signatureType private --rootUrls http://demo-board.msupply.org"
+    "sign": "rm ./dist/.DS_Store & grafana-toolkit plugin:sign --signatureType private --rootUrls https://demo-board.msupply.org:3000,https://ci.msupply.org:3000,https://liberia.msupply.org:3000,https://tonga-vax.msupply.org:3000"
   },
   "author": "josh",
   "license": "Apache-2.0",
