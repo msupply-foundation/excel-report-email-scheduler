@@ -144,6 +144,7 @@ func (panel *TablePanel) PrepSql(variables TemplateList, contentVariables string
 }
 
 func (panel *TablePanel) GetData(authConfig auth.AuthConfig) error {
+	log.DefaultLogger.Debug("Panel.GetData");
 	body, err := NewQueryRequest(panel.RawSql, panel.From, panel.To, panel.DatasourceID).ToRequestBody()
 	if err != nil {
 		log.DefaultLogger.Error("GetData: NewQueryRequest: " + err.Error())

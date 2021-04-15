@@ -51,4 +51,4 @@ Using [react-query](https://github.com/tannerlinsley/react-query) for async call
 
 To build: cd ./backend && yarn install && yarn start && go run mage.go
 
-The backend primarily creates a static binary which grafana executes. This binary runs an http server which listens on `http://xxxx/api/plugins/msupply-datasource/resources` and the various end points are [here](https://github.com/openmsupply/msupply-dashboard-app/blob/869132fa53b41601bf9459a7c0ab00bdf8ec5476/backend/pkg/http_handler.go#L65-L91) _documentation to come ;-)_
+The backend primarily creates a static binary which grafana executes. This binary runs an http server which listens on `http://xxxx/api/plugins/msupplyfoundation-datasource/resources` and the various end points are [here](https://github.com/openmsupply/msupply-dashboard-app/blob/869132fa53b41601bf9459a7c0ab00bdf8ec5476/backend/pkg/http_handler.go#L65-L91) _documentation to come ;-)_
