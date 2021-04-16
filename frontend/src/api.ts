@@ -30,13 +30,15 @@ export const refreshPanelOptions = async (
 };
 
 export const sendTestEmail = (scheduleID: string) =>
-  getBackendSrv().get(`api/plugins/msupply-datasource/resources/test-email?schedule-id=${scheduleID}`);
+  getBackendSrv().get(`api/plugins/msupplyfoundation-datasource/resources/test-email?schedule-id=${scheduleID}`);
 
 export const getGroupMembers = (_: string, groupId: string): Promise<ReportGroupMember[]> =>
-  getBackendSrv().get(`api/plugins/msupply-datasource/resources/report-group-membership/?group-id=${groupId}`);
+  getBackendSrv().get(
+    `api/plugins/msupplyfoundation-datasource/resources/report-group-membership/?group-id=${groupId}`
+  );
 
 export const getReportGroups = (): Promise<ReportGroup[]> =>
-  getBackendSrv().get('api/plugins/msupply-datasource/resources/report-group');
+  getBackendSrv().get('api/plugins/msupplyfoundation-datasource/resources/report-group');
 
 export const getUsers = (datasourceID: number): Promise<User[]> => {
   return getBackendSrv()
@@ -114,41 +116,46 @@ export const createReportGroupMembership = async (params: any) => {
   const { user, reportGroupID } = params;
 
   const membership = { userID: user.id, reportGroupID };
-  return getBackendSrv().post('./api/plugins/msupply-datasource/resources/report-group-membership', [membership]);
+  return getBackendSrv().post('./api/plugins/msupplyfoundation-datasource/resources/report-group-membership', [
+    membership,
+  ]);
 };
 
 export const deleteReportGroupMembership = async (reportGroupMembership: ReportGroupMember) => {
   const { id } = reportGroupMembership;
-  return getBackendSrv().delete(`./api/plugins/msupply-datasource/resources/report-group-membership/${id}`);
+  return getBackendSrv().delete(`./api/plugins/msupplyfoundation-datasource/resources/report-group-membership/${id}`);
 };
 
 export const updateReportGroup = async (reportGroup: any) => {
-  return getBackendSrv().put(`./api/plugins/msupply-datasource/resources/report-group/${reportGroup?.id}`, reportGroup);
+  return getBackendSrv().put(
+    `./api/plugins/msupplyfoundation-datasource/resources/report-group/${reportGroup?.id}`,
+    reportGroup
+  );
 };
 
 export const deleteReportGroup = async (reportGroup: ReportGroup) => {
-  return getBackendSrv().delete(`./api/plugins/msupply-datasource/resources/report-group/${reportGroup?.id}`);
+  return getBackendSrv().delete(`./api/plugins/msupplyfoundation-datasource/resources/report-group/${reportGroup?.id}`);
 };
 
 export const createReportGroup = async () => {
-  return getBackendSrv().post('./api/plugins/msupply-datasource/resources/report-group');
+  return getBackendSrv().post('./api/plugins/msupplyfoundation-datasource/resources/report-group');
 };
 
 export const getSchedules = async () => {
-  return getBackendSrv().get('./api/plugins/msupply-datasource/resources/schedule');
+  return getBackendSrv().get('./api/plugins/msupplyfoundation-datasource/resources/schedule');
 };
 
 export const createSchedule = async () => {
-  return getBackendSrv().post('./api/plugins/msupply-datasource/resources/schedule');
+  return getBackendSrv().post('./api/plugins/msupplyfoundation-datasource/resources/schedule');
 };
 
 export const deleteSchedule = async (schedule: Schedule) => {
-  return getBackendSrv().delete(`./api/plugins/msupply-datasource/resources/schedule/${schedule?.id}`);
+  return getBackendSrv().delete(`./api/plugins/msupplyfoundation-datasource/resources/schedule/${schedule?.id}`);
 };
 
 export const getReportContent = async (_: string, scheduleID: string) => {
   const content: ReportContent[] = await getBackendSrv().get(
-    `./api/plugins/msupply-datasource/resources/report-content?schedule-id=${scheduleID}`
+    `./api/plugins/msupplyfoundation-datasource/resources/report-content?schedule-id=${scheduleID}`
   );
   return content;
 };
@@ -180,7 +187,7 @@ export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
     .filter(({ panels }) => panels?.length > 0)
     .map(({ panels, templating, uid }) => {
       const mappedPanels = panels
-        .filter(({ type }) => type === 'table' || type === 'table-old' || type === 'msupply-table')
+        .filter(({ type }) => type === 'table' || type === 'table-old' || type === 'msupplyfoundation-table')
         .map(rawPanel => {
           const { targets } = rawPanel;
           const [target] = targets;
@@ -245,20 +252,20 @@ export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
 };
 
 export const updateSchedule = async (schedule: Schedule) => {
-  return getBackendSrv().put(`./api/plugins/msupply-datasource/resources/schedule/${schedule?.id}`, schedule);
+  return getBackendSrv().put(`./api/plugins/msupplyfoundation-datasource/resources/schedule/${schedule?.id}`, schedule);
 };
 
 export const createReportContent = async (contents: CreateContentVars) => {
-  return getBackendSrv().post(`./api/plugins/msupply-datasource/resources/report-content`, contents);
+  return getBackendSrv().post(`./api/plugins/msupplyfoundation-datasource/resources/report-content`, contents);
 };
 
 export const deleteReportContent = async (contents: any) => {
-  return getBackendSrv().delete(`./api/plugins/msupply-datasource/resources/report-content/${contents?.id}`);
+  return getBackendSrv().delete(`./api/plugins/msupplyfoundation-datasource/resources/report-content/${contents?.id}`);
 };
 
 export const updateReportContent = async (reportContent: any) => {
   return getBackendSrv().put(
-    `./api/plugins/msupply-datasource/resources/report-content/${reportContent?.id}`,
+    `./api/plugins/msupplyfoundation-datasource/resources/report-content/${reportContent?.id}`,
     reportContent
   );
 };

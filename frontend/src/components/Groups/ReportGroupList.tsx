@@ -26,7 +26,7 @@ export const ReportGroupList: FC<Props> = ({ onRowPress }) => {
       {reportGroups?.map((reportGroup: ReportGroup) => {
         const { name, description } = reportGroup;
         return (
-          <li className="card-item-wrapper" style={{ cursor: 'pointer' }}>
+          <li className="card-item-wrapper" style={{ cursor: 'pointer' }} key={name}>
             <div className="card-item" onClick={() => onRowPress(reportGroup?.id)}>
               <div className="card-item-name">{name}</div>
               {description && <div className="card-item-type">{description}</div>}

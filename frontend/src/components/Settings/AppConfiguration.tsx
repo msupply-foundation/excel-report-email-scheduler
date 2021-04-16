@@ -26,7 +26,7 @@ export const AppConfiguration: FC<Props> = (props: Props) => {
 
   const onSubmit = (newJsonData: FormValues) => {
     const mapped = { ...newJsonData, emailPort: Number(newJsonData.emailPort) };
-    getBackendSrv().post(`/api/plugins/msupply-datasource/resources/settings`, mapped);
+    getBackendSrv().post(`/api/plugins/msupplyfoundation-datasource/resources/settings`, mapped);
     getBackendSrv().post(`/api/plugins/${props.plugin.meta.id}/settings`, {
       ...props.plugin.meta,
       jsonData: mapped,

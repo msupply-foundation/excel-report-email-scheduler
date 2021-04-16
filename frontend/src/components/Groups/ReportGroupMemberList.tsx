@@ -130,7 +130,7 @@ export const ReportGroupMemberList: FC<Props> = ({ reportGroup }) => {
                 const { name, e_mail, id } = user;
                 const isChecked = groupMembers?.find((groupMember: ReportGroupMember) => groupMember.userID === id);
                 return (
-                  <li className="card-item-wrapper" style={e_mail ? { cursor: 'pointer' } : {}}>
+                  <li className="card-item-wrapper" style={e_mail ? { cursor: 'pointer' } : {}} key={name}>
                     <div className={'card-item'} onClick={() => e_mail && onToggleMember(user)}>
                       <div className="card-item-body">
                         <div className={marginForCheckbox}>

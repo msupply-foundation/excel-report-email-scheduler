@@ -110,7 +110,13 @@ export const PanelList: FC<Props> = ({ schedule }) => {
           const matchingContent = getMatchingContent(panel);
 
           return (
-            <PanelItem reportContent={matchingContent} panel={panel} scheduleID={scheduleID} onToggle={onTogglePanel} />
+            <PanelItem
+              reportContent={matchingContent}
+              panel={panel}
+              scheduleID={scheduleID}
+              onToggle={onTogglePanel}
+              key={scheduleID}
+            />
           );
         })}
       </ol>

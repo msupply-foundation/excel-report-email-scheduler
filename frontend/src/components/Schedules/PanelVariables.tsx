@@ -77,6 +77,7 @@ export const PanelVariables: FC<Props> = ({ onUpdateVariable, panel, onUpdateCon
             selectedOptions={selected}
             selectableOptions={options}
             variable={variable}
+            key={name}
           />
         );
       })}
