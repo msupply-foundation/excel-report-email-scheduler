@@ -368,7 +368,7 @@ func (r *Reporter) ExportPanel(authConfig *auth.AuthConfig, datasourceID int, da
 	panel := dashboard.Panel(panelID)
 	if panel == nil {
 		log.DefaultLogger.Error("Reporter.ExportPanel: panel is nil")
-		return "", errors.New(fmt.Sprintf("panel with ID %d cannot be found. DashboardID: %d, datasourceID: %d", panelID, dashboardID, datasourceID))
+		return "", errors.New(fmt.Sprintf("panel with ID %d cannot be found. DashboardID: %s, datasourceID: %d", panelID, dashboardID, datasourceID))
 	}
 
 	panel.SetSql(query)

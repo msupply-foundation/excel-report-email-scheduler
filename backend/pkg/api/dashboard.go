@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+	"fmt"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/auth"
@@ -147,8 +148,11 @@ func NewDashboardResponse(response *http.Response) (*DashboardResponse, error) {
 	if err != nil {
 		log.DefaultLogger.Error("NewDashboardResponse: ioutil.ReadAll: " + err.Error())
 		return nil, err
-	}
-
+	} 
+// else {
+//		log.DefaultLogger.Debug(fmt.Sprintf("NewDashboard: Dashboard response body: %s", body))
+//	}
+	
 	err = json.Unmarshal(body, &dashboardResponse)
 	if err != nil {
 		log.DefaultLogger.Error("NewDashboardResponse: json.Unmarshal: " + err.Error())
@@ -174,12 +178,12 @@ func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to stri
 
 	var panels []TablePanel
 	for _, panel := range dashboardResponse.Dashboard.Panels {
-		if panel.Type == "table" || panel.Type == "msupply-table" {
+		if panel.Type == "table" || panel.Type == "msupplyfoundation-table" {
 			newPanel := NewTablePanel(panel.ID, panel.Title, panel.Targets[0].RawSQL, from, to, datasourceID)
 			panels = append(panels, *newPanel)
 		}
-
 	}
+
 
 	return &Dashboard{UID: dashboardResponse.Dashboard.UID, Panels: panels, Variables: dashboardResponse.Dashboard.Templating}, nil
 }
@@ -187,8 +191,12 @@ func NewDashboard(authConfig *auth.AuthConfig, uuid string, from string, to stri
 func (dashboard *Dashboard) Panel(panelID int) *TablePanel {
 
 	for _, panel := range dashboard.Panels {
+		log.DefaultLogger.Debug(fmt.Sprintf("Panel: looking for ID [%d] current [%d]", panelID, panel.ID))
+	
 		if panel.ID == panelID {
 			return &panel
+		} else {
+			log.DefaultLogger.Debug(fmt.Sprintf("Panel: looking for ID %d - no match with %d", panelID, panel.ID))
 		}
 	}
 	return nil
