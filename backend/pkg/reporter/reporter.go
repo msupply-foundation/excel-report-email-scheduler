@@ -367,11 +367,12 @@ func (r *Reporter) ExportPanel(authConfig *auth.AuthConfig, datasourceID int, da
 
 	panel := dashboard.Panel(panelID)
 	if panel == nil {
-		log.DefaultLogger.Error("Reporter.ExportPanel: NewDashboard: panel is nil")
-		return "", errors.New(fmt.Sprintf("panel with ID %d cannot be found", panelID))
+		log.DefaultLogger.Error("Reporter.ExportPanel: panel is nil")
+		return "", errors.New(fmt.Sprintf("panel with ID %d cannot be found. DashboardID: %s, datasourceID: %d", panelID, dashboardID, datasourceID))
 	}
 
 	panel.SetSql(query)
+	log.DefaultLogger.Debug("Reporter.ExportPanel: Query=" + query);
 	panel.SetTitle(title)
 
 	reportSheetPanels := []api.TablePanel{*panel}

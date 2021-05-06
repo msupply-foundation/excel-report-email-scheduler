@@ -1,7 +1,7 @@
 {
   "type": "datasource",
   "name": "mSupply Datasource",
-  "id": "msupply-datasource",
+  "id": "msupplyfoundation-datasource",
   "metrics": true,
   "backend": true,
   "executable": "gpx_msupply-datasource",

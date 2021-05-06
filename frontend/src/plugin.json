@@ -1,7 +1,7 @@
 {
   "type": "app",
   "name": "mSupply",
-  "id": "msupply",
+  "id": "msupplyfoundation-scheduler",
 
   "info": {
     "description": "Interface for managing mSupply instance integration with Grafana",
@@ -50,7 +50,7 @@
     "grafanaVersion": "7.0.x",
     "plugins": [
       {
-        "id": "msupply-datasource",
+        "id": "msupplyfoundation-datasource",
         "name": "mSupply Datasource",
         "version": "1.0",
         "type": "datasource"

@@ -16,6 +16,7 @@ type State = {
  */
 export const ConfigPageFactory = (Content: any) =>
   class extends Component<Props, State> {
+    displayName = 'ConfigPageFactory';
     constructor(props: Props) {
       super(props);
 

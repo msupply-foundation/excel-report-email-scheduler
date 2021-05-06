@@ -1,5 +1,5 @@
 {
-  "name": "msupply-datasource",
+  "name": "msupplyfoundation-datasource",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -16,7 +16,7 @@
   "devDependencies": {
     "@grafana/data": "^7.0.0",
     "@grafana/runtime": "^7.0.0",
-    "@grafana/toolkit": "^7.3.1",
+    "@grafana/toolkit": "7.5.4",
     "@grafana/ui": "^7.0.0",
     "@types/lodash": "latest"
   },

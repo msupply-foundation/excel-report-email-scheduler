@@ -27,7 +27,7 @@ export const ScheduleList: FC<Props> = ({ onRowPress }) => {
       {schedules?.map((schedule: Schedule) => {
         const { name, description } = schedule;
         return (
-          <li className="card-item-wrapper" style={{ cursor: 'pointer' }}>
+          <li className="card-item-wrapper" style={{ cursor: 'pointer' }} key={name}>
             <div className={'card-item'} onClick={() => onRowPress(schedule)}>
               <div className="card-item-details">
                 <div className="card-item-name">{name}</div>

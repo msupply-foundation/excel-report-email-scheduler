@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import intl from 'react-intl-universal';
 import { Field, FieldSet, Form, Input } from '@grafana/ui';
-import { FC } from 'react';
 
 import { useQuery } from 'react-query';
 import { getDatasources } from 'api';
