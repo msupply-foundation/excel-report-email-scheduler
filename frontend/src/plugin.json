@@ -32,7 +32,7 @@
     {
       "type": "page",
       "name": "Report groups",
-      "path": "/a/msupply/?tab=report-group",
+      "path": "/a/msupplyfoundation-scheduler/?tab=report-group",
       "role": "Viewer",
       "addToNav": true,
       "defaultNav": true
@@ -40,7 +40,7 @@
     {
       "type": "page",
       "name": "Report Schedules",
-      "path": "/a/msupply/?tab=report-schedule",
+      "path": "/a/msupplyfoundation-scheduler/?tab=report-schedule",
       "role": "Viewer",
       "addToNav": true,
       "defaultNav": false
