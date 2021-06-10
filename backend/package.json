@@ -8,7 +8,7 @@
     "test": "grafana-toolkit plugin:test",
     "dev": "grafana-toolkit plugin:dev",
     "watch": "grafana-toolkit plugin:dev --watch",
-    "sign": "rm ./dist/.DS_Store & grafana-toolkit plugin:sign --signatureType private --rootUrls https://demo-board.msupply.org:3000,https://ci.msupply.org:3000,https://liberia.msupply.org:3000,https://tonga-vax.msupply.org:3000",
+    "sign": "rm ./dist/.DS_Store & grafana-toolkit plugin:sign --signatureType private --rootUrls https://demo-board.msupply.org:3000,https://ci.msupply.org:3000,https://liberia.msupply.org:3000,https://tonga-vax.msupply.org:3000,https://timor.msupply.org:3000",
     "go": "go run mage.go && cp -r ./dist/* ~/GitHub/msupply-dashboard/custom-plugins/msupply-dashboard-app/backend/"
   },
   "author": "josh",
