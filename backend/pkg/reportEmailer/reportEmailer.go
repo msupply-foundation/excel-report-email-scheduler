@@ -135,7 +135,7 @@ func (re *ReportEmailer) CreateReport(schedule dbstore.Schedule, authConfig *aut
 	log.DefaultLogger.Debug("ReportEmailer.createReport: templatePath:", templatePath)
 	reporter := reporter.NewReporter(templatePath)
 
-	log.DefaultLogger.Debug("ReportEmailer.createReport: panels being used:", panels)
+	log.DefaultLogger.Debug("ReportEmailer.createReport: panels being used: ", panels)
 	for scheduleID, reportSheetPanels := range panels {
 		schedule, err := re.sql.GetSchedule(scheduleID)
 
@@ -143,7 +143,7 @@ func (re *ReportEmailer) CreateReport(schedule dbstore.Schedule, authConfig *aut
 			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
 			bugsnag.Notify(err)
 		} else {
-			log.DefaultLogger.Debug("ReportEmailer.createReport: schedule:", schedule)
+			log.DefaultLogger.Debug(fmt.Sprintf("ReportEmailer.createReport: schedule: %s", schedule.Name))
 			report := reporter.CreateNewReport(scheduleID, schedule.Name)
 			report.SetSheets(reportSheetPanels)
 			err := report.Write(*authConfig)
