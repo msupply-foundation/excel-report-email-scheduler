@@ -131,6 +131,11 @@ func (re *ReportEmailer) CreateReport(schedule dbstore.Schedule, authConfig *aut
 		}
 	}
 
+	if len(panels) == 0 {
+		log.DefaultLogger.Info("ReportEmailer.createReports - no panels! quitting report as nothing to do")
+		return nil
+	}
+
 	templatePath := reporter.GetFilePath("template")
 	log.DefaultLogger.Debug("ReportEmailer.createReport: templatePath:", templatePath)
 	reporter := reporter.NewReporter(templatePath)
