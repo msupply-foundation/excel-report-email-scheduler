@@ -352,7 +352,7 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 		log.DefaultLogger.Error("Write: ", err.Error())
 	}
 
-	log.DefaultLogger.Info(fmt.Sprintf("Report finished! %s :tada", r.id))
+	log.DefaultLogger.Info(fmt.Sprintf("Report finished! %s (%s) :tada", r.id, savePath))
 
 	return nil
 }
