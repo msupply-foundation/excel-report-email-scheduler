@@ -53,7 +53,7 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
                 inputName="grafanaUsername"
                 invalid={!!errors.grafanaUsername}
                 errorMessage={errors.grafanaUsername?.message ?? ''}
-                register={() => register({ required: intl.get('required') })}
+                register={() => register('username', { required: intl.get('required') })}
               />
               <FieldInput
                 type="password"
@@ -64,7 +64,7 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
                 inputName="grafanaPassword"
                 invalid={!!errors.grafanaPassword}
                 errorMessage={errors.grafanaPassword?.message ?? ''}
-                register={() => register({ required: intl.get('required') })}
+                register={() => register('password', { required: intl.get('required') })}
               />
               <FieldInput
                 tooltip={intl.get('grafana_url_tooltip')}
@@ -74,7 +74,7 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
                 inputName="grafanaURL"
                 invalid={!!errors.grafanaURL}
                 errorMessage={errors.grafanaURL?.message ?? ''}
-                register={() => register({ required: intl.get('required') })}
+                register={() => register('url', { required: intl.get('required') })}
               />
             </FieldSet>
 
@@ -87,7 +87,7 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
                 inputName="email"
                 invalid={!!errors.email}
                 errorMessage={errors.email?.message ?? ''}
-                register={() => register({ required: intl.get('required') })}
+                register={() => register('email', { required: intl.get('required') })}
               />
               <FieldInput
                 type="password"
@@ -98,7 +98,7 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
                 inputName="emailPassword"
                 invalid={!!errors.emailPassword}
                 errorMessage={errors.emailPassword?.message ?? ''}
-                register={() => register({ required: intl.get('required') })}
+                register={() => register('emailpass', { required: intl.get('required') })}
               />
               <FieldInput
                 tooltip={intl.get('email_host_tooltip')}
@@ -108,7 +108,7 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
                 inputName="emailHost"
                 invalid={!!errors.emailHost}
                 errorMessage={errors.emailHost?.message ?? ''}
-                register={() => register({ required: intl.get('required') })}
+                register={() => register('emailhost', { required: intl.get('required') })}
               />
 
               <FieldInput
@@ -119,7 +119,7 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
                 inputName="emailPort"
                 invalid={!!errors.emailPort}
                 errorMessage={errors.emailPort?.message ?? ''}
-                register={() => register({ required: intl.get('required') })}
+                register={() => register('emailport', { required: intl.get('required') })}
               />
             </FieldSet>
 
