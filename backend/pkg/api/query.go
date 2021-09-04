@@ -82,7 +82,7 @@ func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 		log.DefaultLogger.Error("NewQueryResponse: ioutil.ReadAll: " + err.Error())
 		return nil, err
 	}
-	log.DefaultLogger.Debug(fmt.Sprintf("NewQueryResponse: body: %s", body));
+	log.DefaultLogger.Debug(fmt.Sprintf("NewQueryResponse: body fields: %+v\n", body));
 
 	var qr QueryResponse
 	err = json.Unmarshal(body, &qr)
