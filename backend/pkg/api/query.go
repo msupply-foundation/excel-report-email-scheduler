@@ -59,7 +59,17 @@ type QueryResponse struct {
 				Columns []Column        `json:"columns"`
 				Rows    [][]interface{} `json:"rows"`
 			} `json:"tables"`
-			Dataframes interface{} `json:"dataframes"`
+			Frames []struct {
+				Schema struct {
+					Fields []struct {
+						Name string `json:"name"`
+						Type string `json:"type"`
+					} `json:"fields"`
+				} `json:"schema"`
+				Data struct {
+					Values [][]interface{} `json:"values"`
+				}
+			} `json:"frames"`
 		} `json:"A"`
 	} `json:"results"`
 }
@@ -72,7 +82,7 @@ func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 		log.DefaultLogger.Error("NewQueryResponse: ioutil.ReadAll: " + err.Error())
 		return nil, err
 	}
-	log.DefaultLogger.Debug(fmt.Sprintf("NewQueryResponse: body: %s", body));
+	log.DefaultLogger.Debug(fmt.Sprintf("NewQueryResponse: body fields: %+v\n", body));
 
 	var qr QueryResponse
 	err = json.Unmarshal(body, &qr)
@@ -85,17 +95,37 @@ func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 }
 
 func (qr *QueryResponse) Rows() [][]interface{} {
+	values := qr.Results.A.Frames[0].Data.Values
+	if len(values) > 0 {
+		 columnCount := len(values)
+		 if columnCount > 0 {
+			var rows = make([][]interface {}, len(values[0]))
+			for rownum, _ := range rows {
+				row := make([]interface{}, columnCount)
+				for colnum, value := range values {
+					row[colnum] = value[rownum]
+				}
+				rows[rownum] = row
+			}
 
-	if len(qr.Results.A.Tables) > 0 {
-		return qr.Results.A.Tables[0].Rows
+			return rows
+		}
 	}
 
 	return nil
 }
 
 func (qr *QueryResponse) Columns() []Column {
-	if len(qr.Results.A.Tables) > 0 {
-		return qr.Results.A.Tables[0].Columns
+	fields := qr.Results.A.Frames[0].Schema.Fields	
+
+	if len(fields) > 0 {
+		columns := make([]Column, len(fields))
+		for i, _ := range columns {
+			var column Column
+			column.Text = fields[i].Name
+			columns[i] = column
+		}
+		return columns
 	}
 
 	return nil

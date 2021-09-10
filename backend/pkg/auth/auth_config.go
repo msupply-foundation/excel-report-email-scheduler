@@ -2,7 +2,7 @@ package auth
 
 import (
 	"regexp"
-
+	"strings"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/simple-datasource-backend/pkg/dbstore"
 )
@@ -28,7 +28,13 @@ func (config AuthConfig) AuthString() string {
 }
 
 func (config AuthConfig) AuthURL() string {
-	return config.InjectAuthString()
+	authUrl := config.InjectAuthString()
+	if strings.HasSuffix(authUrl, "/") {
+		authUrl = authUrl[:len(authUrl)-1]
+	}
+	log.DefaultLogger.Debug("auth url: " + authUrl)
+
+	return authUrl
 }
 
 func (config AuthConfig) InjectAuthString() string {
@@ -45,5 +51,4 @@ func (config AuthConfig) InjectAuthString() string {
 	}
 
 	return config.URL[:index[1]] + config.AuthString() + config.URL[index[1]:]
-
 }
