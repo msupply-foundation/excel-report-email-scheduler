@@ -25,10 +25,12 @@ export const ConfigPageFactory = (Content: any) =>
       };
     }
 
-    async componentDidMount() {
+    componentDidMount() {
       // TODO: More comprehensive localization solution
-      await intl.init({ currentLocale: 'en', locales });
-      this.setState({ shouldLoad: true });
+      intl.init({ currentLocale: 'en', locales }).then(() => {
+        // After loading CLDR locale data, start to render
+        this.setState({ shouldLoad: true });
+      });
     }
 
     render() {
