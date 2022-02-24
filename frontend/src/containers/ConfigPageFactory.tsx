@@ -28,7 +28,7 @@ export const ConfigPageFactory = (Content: any) =>
     componentDidMount() {
       // TODO: More comprehensive localization solution
       intl.init({ currentLocale: 'en', locales }).then(() => {
-        // After loading CLDR locale data, start to render
+        // After loading locale data, start to render
         this.setState({ shouldLoad: true });
       });
     }
