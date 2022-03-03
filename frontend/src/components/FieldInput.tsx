@@ -36,7 +36,7 @@ export const FieldInput: FC<Props> = ({
           defaultValue={defaultValue}
           placeholder={placeholder}
           name={inputName}
-          ref={register()}
+          {...register()}
           css=""
         />
 
