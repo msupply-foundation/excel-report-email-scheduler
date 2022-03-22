@@ -29,7 +29,7 @@ func SettingsFields() string {
 }
 
 func (datasource *SQLiteDatasource) settingsExists() (bool, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("settingsExist: sql.Open(): ", err.Error())
@@ -55,7 +55,7 @@ func (datasource *SQLiteDatasource) settingsExists() (bool, error) {
 }
 
 func (datasource *SQLiteDatasource) CreateOrUpdateSettings(settings Settings) error {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("CreateOrUpdateSettings: sql.Open(): ", err.Error())
@@ -101,7 +101,7 @@ func (datasource *SQLiteDatasource) CreateOrUpdateSettings(settings Settings) er
 }
 
 func (datasource *SQLiteDatasource) GetSettings() (*Settings, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("GetSettings: sql.Open(): ", err.Error())

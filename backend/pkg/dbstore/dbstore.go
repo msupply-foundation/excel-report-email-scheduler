@@ -16,7 +16,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
-	_ "github.com/mattn/go-sqlite3"
+		_ "modernc.org/sqlite"
 )
 
 // TODOs:
@@ -46,13 +46,15 @@ func GetDataSource() *SQLiteDatasource {
 
 	instanceManager := datasource.NewInstanceManager(getDataSourceInstanceSettings)
 	dataPath := filepath.Join("..", "data", "msupply.db")
+	//dataPath := filepath.Join("/var/lib/grafana", "msupply.db")
+	log.DefaultLogger.Info("mSupply App: DataPath=" + dataPath)
 
 	sqlDatasource := &SQLiteDatasource{
 		instanceManager: instanceManager,
 		Path:            dataPath,
 	}
 
-	log.DefaultLogger.Debug("mSupply App: DataPath=" + dataPath)
+
 	sqlDatasource.Init()
 
 	return sqlDatasource
@@ -137,7 +139,7 @@ func (datasource *SQLiteDatasource) CheckHealth(ctx context.Context, req *backen
 func (datasource *SQLiteDatasource) Ping() error {
 	log.DefaultLogger.Info("Pinging Database")
 
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 
 	if err != nil {
@@ -163,7 +165,7 @@ func (datasource *SQLiteDatasource) Init() {
 		panic(err)
 	}
 
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Init - sql.Open : ", err.Error())

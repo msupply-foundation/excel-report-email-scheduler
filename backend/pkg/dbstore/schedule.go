@@ -91,7 +91,7 @@ func (schedule *Schedule) UpdateNextReportTime() {
 }
 
 func (datasource *SQLiteDatasource) OverdueSchedules() ([]Schedule, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("OverdueSchedules: sql.Open", err.Error())
@@ -120,7 +120,7 @@ func (datasource *SQLiteDatasource) OverdueSchedules() ([]Schedule, error) {
 }
 
 func (datasource *SQLiteDatasource) CreateSchedule() (*Schedule, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("CreateSchedule: sql.Open", err.Error())
@@ -147,7 +147,7 @@ func (datasource *SQLiteDatasource) CreateSchedule() (*Schedule, error) {
 }
 
 func (datasource *SQLiteDatasource) UpdateSchedule(id string, schedule Schedule) (*Schedule, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("UpdateSchedule: sql.Open()", err.Error())
@@ -172,7 +172,7 @@ func (datasource *SQLiteDatasource) UpdateSchedule(id string, schedule Schedule)
 }
 
 func (datasource *SQLiteDatasource) DeleteSchedule(id string) error {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("DeleteSchedule: sql.Open()", err.Error())
@@ -208,7 +208,7 @@ func (datasource *SQLiteDatasource) DeleteSchedule(id string) error {
 }
 
 func (datasource *SQLiteDatasource) GetSchedule(id string) (*Schedule, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("GetSchedule: sql.Open(): ", err.Error())
@@ -247,7 +247,7 @@ func (datasource *SQLiteDatasource) GetSchedule(id string) (*Schedule, error) {
 }
 
 func (datasource *SQLiteDatasource) GetSchedules() ([]Schedule, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("GetSchedules: sql.Open(): ", err.Error())

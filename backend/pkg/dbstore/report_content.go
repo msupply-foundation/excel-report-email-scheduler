@@ -29,7 +29,7 @@ func ReportContentFields() string {
 func (datasource *SQLiteDatasource) GetReportContent(scheduleID string) ([]ReportContent, error) {
 	var reportContent []ReportContent
 
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("GetReportContent: sql.Open: ", err.Error())
@@ -60,7 +60,7 @@ func (datasource *SQLiteDatasource) GetReportContent(scheduleID string) ([]Repor
 }
 
 func (datasource *SQLiteDatasource) DeleteReportContent(id string) error {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("DeleteReportContent: sql.Open", err.Error())
@@ -84,7 +84,7 @@ func (datasource *SQLiteDatasource) DeleteReportContent(id string) error {
 }
 
 func (datasource *SQLiteDatasource) CreateReportContent(newReportContentValues ReportContent) (*ReportContent, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("CreateReportContent: sql.Open", err.Error())
@@ -110,7 +110,7 @@ func (datasource *SQLiteDatasource) CreateReportContent(newReportContentValues R
 }
 
 func (datasource *SQLiteDatasource) UpdateReportContent(id string, reportContent ReportContent) (*ReportContent, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("UpdateReportContent: sql.Open: ", err.Error())
