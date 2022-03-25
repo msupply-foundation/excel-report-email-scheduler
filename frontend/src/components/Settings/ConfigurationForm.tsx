@@ -119,7 +119,7 @@ export const ConfigurationForm: FC<FormProps> = ({ formValues, onSubmit }) => {
                 inputName="emailPort"
                 invalid={!!errors.emailPort}
                 errorMessage={errors.emailPort?.message ?? ''}
-                register={() => register('emailport', { required: intl.get('required') })}
+                register={() => register('emailPort', { required: intl.get('required') })}
               />
             </FieldSet>
 
