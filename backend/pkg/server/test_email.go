@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -54,5 +55,13 @@ func (server *HttpServer) testEmail(rw http.ResponseWriter, request *http.Reques
 	em := emailer.New(emailConfig)
 	re := reportEmailer.NewReportEmailer(server.db)
 	re.CreateReport(*schedule, authConfig, settings.DatasourceID, *em)
+
+	err = json.NewEncoder(rw).Encode("success")
+	if err != nil {
+		log.DefaultLogger.Error("testEmail: Email successfully sent")
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		panic(err)
+	}
+
 	rw.WriteHeader(http.StatusOK)
 }
