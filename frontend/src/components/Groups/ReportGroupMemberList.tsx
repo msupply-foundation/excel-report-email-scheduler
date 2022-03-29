@@ -2,7 +2,7 @@ import React, { FC, useState } from 'react';
 import classNames from 'classnames';
 import intl from 'react-intl-universal';
 import { css } from 'emotion';
-import { Checkbox, Icon, Input, Legend, Spinner, Tooltip } from '@grafana/ui';
+import { Checkbox, Field, Icon, Input, Label, Legend, Spinner, Tooltip } from '@grafana/ui';
 import { useQuery } from 'react-query';
 import { getUsers, getGroupMembers, deleteReportGroupMembership, createReportGroupMembership } from 'api';
 import { CreateGroupMemberVars, ReportGroup, ReportGroupMember, User } from 'common/types';
@@ -111,32 +111,40 @@ export const ReportGroupMemberList: FC<Props> = ({ reportGroup }) => {
         !error && <Spinner style={{ flex: 1, display: 'flex', justifyContent: 'center' }} />
       ) : (
         <>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', flexDirection: 'row' }}>
-            <Icon style={{ marginRight: '10px' }} name="search" />
+          <Field label="Search for users">
             <Input
+              name="search"
               css=""
-              placeholder="Search for users"
+              placeholder="Search for the user"
+              type="text"
+              prefix={<Icon name="search" />}
+              suffix={<Icon name="trash-alt" onClick={() => setSearchTerm('')} />}
               onChange={e => {
                 const { value } = e.target as HTMLInputElement;
                 return setSearchTerm(value);
               }}
             />
-            <Icon style={{ marginRight: '10px' }} size={'xl'} name="trash-alt" onClick={() => setSearchTerm('')} />
-          </div>
+          </Field>
+          <Field>
+            <Label description="Option description">{searchTerm}</Label>
+          </Field>
+
           <ol className={listStyle} style={{ maxHeight: `${(height ?? 0) / 2}px`, overflow: 'scroll' }}>
             {users
-              ?.filter(({ name }) => name.toLowerCase().includes(searchTerm.toLowerCase()))
+              .filter(user => {
+                const match = user.name.toString().toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+                return match;
+              })
               .map((user: User) => {
                 const { name, e_mail, id } = user;
                 const isChecked = groupMembers?.find((groupMember: ReportGroupMember) => groupMember.userID === id);
                 return (
-                  <li className="card-item-wrapper" style={e_mail ? { cursor: 'pointer' } : {}} key={name}>
+                  <li className="card-item-wrapper" style={e_mail ? { cursor: 'pointer' } : {}} key={id}>
                     <div className={'card-item'} onClick={() => e_mail && onToggleMember(user)}>
                       <div className="card-item-body">
                         <div className={marginForCheckbox}>
                           <Checkbox value={!!isChecked} css="" />
                         </div>
-
                         <div className="card-item-details">
                           <div className="card-item-name">{name}</div>
                           <div className="card-item-type">{e_mail ? e_mail : intl.get('no_email')}</div>
