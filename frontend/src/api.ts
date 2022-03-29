@@ -42,7 +42,7 @@ export const getReportGroups = (): Promise<ReportGroup[]> =>
 
 export const getUsers = (datasourceID: number): Promise<User[]> => {
   return getBackendSrv()
-    .post('/api/tsdb/query', {
+    .post('/api/ds/query', {
       queries: [
         {
           datasourceId: datasourceID,
@@ -52,27 +52,33 @@ export const getUsers = (datasourceID: number): Promise<User[]> => {
       ],
     })
     .then(result => {
+      const frames = result.results.A.frames[0];
+
       const {
-        results: {
-          A: {
-            tables: [{ rows, columns }],
-          },
-        },
-      } = result;
+        schema: { fields },
+        data: { values },
+      } = frames;
 
       const columnsToExtract = ['id', 'name', 'first_name', 'last_name', 'e_mail'];
-      const indexes = columns.reduce((acc: number[], { text }: any, i: number) => {
-        if (columnsToExtract.includes(text)) {
+
+      const indexes = fields.reduce((acc: number[], { name }: any, i: number) => {
+        if (columnsToExtract.includes(name)) {
           return [...acc, i];
         }
         return acc;
       }, []);
 
-      return rows.map((rowData: any) => {
-        return indexes.reduce((acc: any, value: any, i: any) => {
-          return { ...acc, [columns[value].text]: rowData[i] };
-        }, {});
-      });
+      let results: any = [];
+
+      for (let i = 0; i < values[0].length; i++) {
+        const myObj: any = {};
+        for (let j = 0; j < indexes.length; j++) {
+          myObj[fields[indexes[j]].name] = values[j][i];
+        }
+        results.push(myObj);
+      }
+
+      return results;
     });
 };
 
