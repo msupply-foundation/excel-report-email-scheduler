@@ -11070,10 +11070,10 @@ react-input-autosize@^3.0.0:
   dependencies:
     prop-types "^15.5.8"
 
-react-intl-universal@^2.4.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/react-intl-universal/-/react-intl-universal-2.4.1.tgz#930aab866b2fad0c24ffb09469ae872bba6d9776"
-  integrity sha512-nP7DKo4NjTjdHKYQ4szJa2CO2HcpxTyjcunAsAaN9CFJJougxZXaURqDvKmCqT3osx3bG8zyb39ym9N0iiPPnQ==
+react-intl-universal@^2.4.12:
+  version "2.4.12"
+  resolved "https://registry.yarnpkg.com/react-intl-universal/-/react-intl-universal-2.4.12.tgz#d75ea00259dd9dffa916d95f6ac6780f57d2a715"
+  integrity sha512-Y42h3n1IpQAaYSfF7BbXxU2xM4STQep1FrSbPXNgy/7bTJCN0l/I5BAYN96fsQmICLMst5RK7zrkOvTayCNuPw==
   dependencies:
     console-polyfill "^0.3.0"
     cookie "^0.3.1"
