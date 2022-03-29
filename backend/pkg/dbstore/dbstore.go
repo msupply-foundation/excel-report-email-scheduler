@@ -3,20 +3,16 @@ package dbstore
 import (
 	"context"
 	"database/sql"
-	"errors"
 
-	"encoding/json"
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
-	"github.com/grafana/grafana-plugin-sdk-go/data"
-		_ "modernc.org/sqlite"
+	_ "modernc.org/sqlite"
 )
 
 // TODOs:
@@ -36,24 +32,23 @@ type SQLiteDatasource struct {
 type InstanceSettings struct {
 	httpClient *http.Client
 }
-
 type queryModel struct {
-	Format string `json:"format"`
+	QueryText   string   `json:"queryText"`
+	TimeColumns []string `json:"timeColumns"`
 }
 
 func GetDataSource() *SQLiteDatasource {
 	log.DefaultLogger.Info("GetDatasource")
 
 	instanceManager := datasource.NewInstanceManager(getDataSourceInstanceSettings)
-	dataPath := filepath.Join("..", "data", "msupply.db")
-	//dataPath := filepath.Join("/var/lib/grafana", "msupply.db")
+	// dataPath := filepath.Join("..", "data", "msupply.db")
+	dataPath := filepath.Join("/var/lib/grafana", "msupply.db")
 	log.DefaultLogger.Info("mSupply App: DataPath=" + dataPath)
 
 	sqlDatasource := &SQLiteDatasource{
 		instanceManager: instanceManager,
 		Path:            dataPath,
 	}
-
 
 	sqlDatasource.Init()
 
@@ -84,32 +79,6 @@ func (datasource *SQLiteDatasource) QueryData(ctx context.Context, request *back
 	}
 
 	return response, nil
-}
-
-func (datasource *SQLiteDatasource) query(ctx context.Context, query backend.DataQuery) backend.DataResponse {
-	var queryModel queryModel
-
-	response := backend.DataResponse{}
-	response.Error = json.Unmarshal(query.JSON, &queryModel)
-	response.Error = errors.New("Queries are not supported!")
-	if response.Error != nil {
-		return response
-	}
-
-	if queryModel.Format == "" {
-		log.DefaultLogger.Warn("format is empty. defaulting to time series")
-	}
-
-	frame := data.NewFrame("response")
-	frame.Fields = append(frame.Fields,
-		data.NewField("time", nil, []time.Time{query.TimeRange.From, query.TimeRange.To}),
-	)
-	frame.Fields = append(frame.Fields,
-		data.NewField("values", nil, []int64{10, 20}),
-	)
-	response.Frames = append(response.Frames, frame)
-
-	return response
 }
 
 // CheckHealth handles health checks sent from Grafana to the plugin.

@@ -38,6 +38,7 @@ func (server *HttpServer) updateSettings(rw http.ResponseWriter, request *http.R
 	}
 
 	bodyAsBytes, err := ioutil.ReadAll(requestBody)
+	defer request.Body.Close()
 	if err != nil {
 		log.DefaultLogger.Error("updateSettings: ioutil.ReadAll(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)

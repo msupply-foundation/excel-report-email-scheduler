@@ -2,10 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
-	"fmt"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
@@ -82,7 +82,7 @@ func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 		log.DefaultLogger.Error("NewQueryResponse: ioutil.ReadAll: " + err.Error())
 		return nil, err
 	}
-	log.DefaultLogger.Debug(fmt.Sprintf("NewQueryResponse: body fields: %+v\n", body));
+	log.DefaultLogger.Debug(fmt.Sprintf("NewQueryResponse: body fields: %+v\n", body))
 
 	var qr QueryResponse
 	err = json.Unmarshal(body, &qr)
@@ -97,9 +97,9 @@ func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 func (qr *QueryResponse) Rows() [][]interface{} {
 	values := qr.Results.A.Frames[0].Data.Values
 	if len(values) > 0 {
-		 columnCount := len(values)
-		 if columnCount > 0 {
-			var rows = make([][]interface {}, len(values[0]))
+		columnCount := len(values)
+		if columnCount > 0 {
+			var rows = make([][]interface{}, len(values[0]))
 			for rownum, _ := range rows {
 				row := make([]interface{}, columnCount)
 				for colnum, value := range values {
@@ -116,7 +116,7 @@ func (qr *QueryResponse) Rows() [][]interface{} {
 }
 
 func (qr *QueryResponse) Columns() []Column {
-	fields := qr.Results.A.Frames[0].Schema.Fields	
+	fields := qr.Results.A.Frames[0].Schema.Fields
 
 	if len(fields) > 0 {
 		columns := make([]Column, len(fields))
