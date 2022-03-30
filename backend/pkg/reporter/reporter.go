@@ -390,8 +390,7 @@ func (r *Reporter) ExportPanel(authConfig *auth.AuthConfig, datasourceID int, da
 
 func GetFilePath(fileName string) string {
 
-	//filePath := filepath.Join("..", "data", fileName+".xlsx")
-	filePath := filepath.Join("/var/lib/grafana/plugins/msupply-dashboard-app", fileName+".xlsx")
+	filePath := filepath.Join("..", "data", fileName+".xlsx")
 
 	log.DefaultLogger.Debug("mSupply App: ReportFilePath=" + filePath)
 	return filePath

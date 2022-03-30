@@ -41,9 +41,7 @@ func GetDataSource() *SQLiteDatasource {
 	log.DefaultLogger.Info("GetDatasource")
 
 	instanceManager := datasource.NewInstanceManager(getDataSourceInstanceSettings)
-	// dataPath := filepath.Join("..", "data", "msupply.db")
-	dataPath := filepath.Join("/var/lib/grafana", "msupply.db")
-	log.DefaultLogger.Info("mSupply App: DataPath=" + dataPath)
+	dataPath := filepath.Join("..", "data", "msupply.db")
 
 	sqlDatasource := &SQLiteDatasource{
 		instanceManager: instanceManager,
