@@ -218,6 +218,11 @@ func (re *ReportEmailer) CreateReports() {
 			return
 		}
 
+		if(len(userIDs) == 0) {
+			log.DefaultLogger.Error("ReportEmailer.createReports: userIDs empty ")
+			return
+		}
+
 		emailsFromUsers, err := api.GetEmails(*authConfig, userIDs, datasourceID)
 		if err != nil {
 			log.DefaultLogger.Error("ReportEmailer.createReports: emailsFromUsers: " + err.Error())
