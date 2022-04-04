@@ -1,0 +1,12 @@
+{
+  "extends": "@grafana/tsconfig",
+  "include": ["src", "types"],
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "declaration": false,
+    "rootDir": "./src",
+    "baseUrl": "./src",
+    "typeRoots": ["./node_modules/@types"],
+    "resolveJsonModule": true
+  }
+}
