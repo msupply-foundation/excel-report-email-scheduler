@@ -2,41 +2,18 @@ import React, { useState, ChangeEvent, useEffect } from 'react';
 import { Field, Input, FieldSet, Button, useStyles2, LoadingPlaceholder, Select } from '@grafana/ui';
 import { PluginConfigPageProps, AppPluginMeta, GrafanaTheme2, PluginMeta, SelectableValue } from '@grafana/data';
 import { getBackendSrv, locationService } from '@grafana/runtime';
+import intl from 'react-intl-universal';
+import { useQuery } from 'react-query';
 import { SecretInput } from './SecretInput';
 import { css } from '@emotion/css';
 import { locales } from '../locales';
-import intl from 'react-intl-universal';
-import { useQuery } from 'react-query';
+import { AppConfigProps, AppConfigStateType } from 'types';
 
-export type JsonData = {
-  grafanaUsername?: string;
-  isGrafanaPasswordSet?: boolean;
-  senderEmailAddress?: string;
-  senderEmailPassword?: string;
-  isSenderEmailPasswordSet?: boolean;
-  senderEmailHost?: string;
-  senderEmailPort?: number;
-  datasourceID?: number;
-  selectedDatasource?: SelectableValue | null;
-};
-
-type State = {
-  grafanaUsername: string;
-  isGrafanaPasswordSet: boolean;
-  grafanaPassword: string;
-  senderEmailAddress: string;
-  senderEmailPassword: string;
-  isSenderEmailPasswordSet: boolean;
-  senderEmailHost: string;
-  senderEmailPort: number;
-  datasourceID: number;
-  selectedDatasource?: SelectableValue | null;
-};
-
-interface Props extends PluginConfigPageProps<AppPluginMeta<JsonData>> {}
+interface Props extends PluginConfigPageProps<AppPluginMeta<AppConfigProps>> {}
 
 const AppConfigForm = ({ plugin }: Props) => {
   const style = useStyles2(getStyles);
+
   const {
     data: datasources,
     isLoading: isDatasourceListLoading,
@@ -45,7 +22,7 @@ const AppConfigForm = ({ plugin }: Props) => {
 
   const { enabled, pinned, jsonData } = plugin.meta;
 
-  const [state, setState] = useState<State>({
+  const [state, setState] = useState<AppConfigStateType>({
     grafanaUsername: jsonData?.grafanaUsername || '',
     grafanaPassword: '',
     isGrafanaPasswordSet: Boolean(jsonData?.isGrafanaPasswordSet),
@@ -306,7 +283,7 @@ const getStyles = (theme: GrafanaTheme2) => ({
   `,
 });
 
-const updatePluginAndReload = async (pluginId: string, data: Partial<PluginMeta<JsonData>>) => {
+const updatePluginAndReload = async (pluginId: string, data: Partial<PluginMeta<AppConfigProps>>) => {
   try {
     await updatePlugin(pluginId, data);
 

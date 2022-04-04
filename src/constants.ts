@@ -4,33 +4,25 @@ import { NavItem } from './types';
 export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
 
 export enum ROUTES {
-  One = 'one',
-  Two = 'two',
-  Three = 'three',
-  Four = 'four',
+  REPORT_GROUP = 'report-groups',
+  SCHEDULERS = 'schedulers',
 }
 
-export const NAVIGATION_TITLE = 'Basic App Plugin';
-export const NAVIGATION_SUBTITLE = 'Some extra description...';
+export const NAVIGATION_TITLE = 'Excel report e-mail scheduler';
+export const NAVIGATION_SUBTITLE = `The plugin takes data from panels of mSupply dashboard to generate excel reports. The reports are then emailed to a custom user group created with mSupply users pulled from mSupply Dashboard's datasource. The timing of the scheduler can be set in the plugin.`;
 
 // Add a navigation item for each route you would like to display in the navigation bar
 export const NAVIGATION: Record<string, NavItem> = {
-  [ROUTES.One]: {
-    id: ROUTES.One,
-    text: 'Page One',
-    icon: 'database',
-    url: `${PLUGIN_BASE_URL}/one`,
+  [ROUTES.REPORT_GROUP]: {
+    id: ROUTES.REPORT_GROUP,
+    text: 'Report Groups',
+    icon: 'users-alt',
+    url: `${PLUGIN_BASE_URL}/report-groups`,
   },
-  [ROUTES.Two]: {
-    id: ROUTES.Two,
-    text: 'Page Two',
-    icon: 'key-skeleton-alt',
-    url: `${PLUGIN_BASE_URL}/two`,
-  },
-  [ROUTES.Three]: {
-    id: ROUTES.Three,
-    text: 'Page Three',
-    icon: 'chart-line',
-    url: `${PLUGIN_BASE_URL}/three`,
+  [ROUTES.SCHEDULERS]: {
+    id: ROUTES.SCHEDULERS,
+    text: 'Schedulers',
+    icon: 'schedule',
+    url: `${PLUGIN_BASE_URL}/schedulers`,
   },
 };

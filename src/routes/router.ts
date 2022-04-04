@@ -40,7 +40,6 @@ export function useNavigation() {
 
 // Prefixes the route with the base URL of the plugin
 export function prefixRoute(route: string): string {
-  console.log('PLUGIN_BASE_URL', PLUGIN_BASE_URL);
   return `${PLUGIN_BASE_URL}/${route}`;
 }
 

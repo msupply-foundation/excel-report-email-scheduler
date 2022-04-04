@@ -1,4 +1,4 @@
-import { DataQuery, DataSourceJsonData } from '@grafana/data';
+import { DataQuery, DataSourceJsonData, SelectableValue } from '@grafana/data';
 
 export type NavItem = {
   id: string;
@@ -31,3 +31,22 @@ export interface MyDataSourceOptions extends DataSourceJsonData {
 export interface MySecureJsonData {
   apiKey?: string;
 }
+
+type AppConfigProps = {
+  grafanaUsername?: string;
+  isGrafanaPasswordSet?: boolean;
+  senderEmailAddress?: string;
+  senderEmailPassword?: string;
+  isSenderEmailPasswordSet?: boolean;
+  senderEmailHost?: string;
+  senderEmailPort?: number;
+  datasourceID?: number;
+};
+
+type AppConfigStateType = Required<AppConfigProps> & {
+  grafanaPassword: string;
+  senderEmailPassword: string;
+  selectedDatasource?: SelectableValue | null;
+};
+
+export { AppConfigProps, AppConfigStateType };

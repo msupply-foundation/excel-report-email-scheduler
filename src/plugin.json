@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
-  "name": "mSupply Dashboard: Excel report e-mail scheduler",
+  "name": "Excel report e-mail scheduler",
   "id": "msupplyfoundation-excelreportemailscheduler-app",
   "executable": "gpx_excel-report-email-scheduler",
   "info": {
@@ -32,11 +32,20 @@
   "includes": [
     {
       "type": "page",
-      "name": "Root Page (react)",
-      "path": "/a/%PLUGIN_ID%/one",
+      "name": "Report Groups",
+      "icon": "fa fa-group",
+      "path": "/a/%PLUGIN_ID%/report-groups",
       "role": "Admin",
       "addToNav": true,
       "defaultNav": true
+    },
+    {
+      "type": "page",
+      "name": "Schedulers",
+      "icon": "fa fa-calendar",
+      "path": "/a/%PLUGIN_ID%/schedulers",
+      "role": "Admin",
+      "addToNav": true
     },
     {
       "type": "page",
