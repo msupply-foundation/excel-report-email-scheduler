@@ -20,10 +20,18 @@ module.exports = {
 
   entry: {
     module: path.resolve(process.cwd(), ENTRY_FILE),
+    datasource: path.resolve(process.cwd(), 'src', 'datasource', 'module.ts'),
   },
 
   output: {
-    filename: '[name].js',
+    filename: (pathData) => {
+      switch (pathData.chunk.name) {
+        case 'datasource':
+          return path.join('datasource', 'module.js')
+        default:
+          return path.join('module.js')
+      }
+    },
     path: path.resolve(process.cwd(), DIST_DIR),
     libraryTarget: 'amd',
     publicPath: '/',
@@ -99,7 +107,7 @@ module.exports = {
     new ReplaceInFileWebpackPlugin([
       {
         dir: DIST_DIR,
-        files: ['plugin.json', 'README.md'],
+        files: ['plugin.json', 'datasource/plugin.json', 'README.md'],
         rules: [
           {
             search: /\%VERSION\%/g,

@@ -50,6 +50,13 @@
   "dependencies": {
     "grafanaDependency": ">=8.0.0",
     "grafanaVersion": "8.0.0",
-    "plugins": []
+    "plugins": [
+      {
+        "id": "msupplyfoundation-excelreportemailscheduler-datasource",
+        "name": "mSupply Dashboard: Excel report e-mail scheduler datasource",
+        "version": "%VERSION%",
+        "type": "datasource"
+      }
+    ]
   }
 }
