@@ -1,7 +1,8 @@
 import pluginJson from './plugin.json';
 import { NavItem } from './types';
 
-export const PLUGIN_BASE_URL = `/a/${pluginJson.id}`;
+export const PLUGIN_ID = `${pluginJson.id}`;
+export const PLUGIN_BASE_URL = `/a/${PLUGIN_ID}`;
 
 export enum ROUTES {
   REPORT_GROUP = 'report-groups',

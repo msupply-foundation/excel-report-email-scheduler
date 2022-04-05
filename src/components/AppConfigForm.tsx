@@ -4,7 +4,7 @@ import { PluginConfigPageProps, AppPluginMeta, GrafanaTheme2, PluginMeta, Select
 import { getBackendSrv, locationService } from '@grafana/runtime';
 import intl from 'react-intl-universal';
 import { useQuery } from 'react-query';
-import { SecretInput } from './SecretInput';
+import { SecretInput } from './common';
 import { css } from '@emotion/css';
 import { locales } from '../locales';
 import { AppConfigProps, AppConfigStateType } from 'types';

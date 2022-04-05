@@ -1,18 +1,20 @@
 import * as React from 'react';
 import { AppRootProps } from '@grafana/data';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
-import { AppRouter } from '../components/Routes';
+import { PluginPropsContext } from '../context';
+import { AppRoutes } from './AppRoutes';
 
-import { PluginPropsContext } from 'context';
-import { BrowserRouter } from 'react-router-dom';
+import { AppSettings } from 'types';
 
-export class App extends React.PureComponent<AppRootProps> {
+const queryClient = new QueryClient();
+export class App extends React.PureComponent<AppRootProps<AppSettings>> {
   render() {
     return (
       <PluginPropsContext.Provider value={this.props}>
-        <BrowserRouter>
-          <AppRouter />
-        </BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <AppRoutes />
+        </QueryClientProvider>
       </PluginPropsContext.Provider>
     );
   }

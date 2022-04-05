@@ -3,7 +3,7 @@ import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { LinkButton, useStyles2 } from '@grafana/ui';
 import { ROUTES } from '../constants';
-import { prefixRoute } from 'routes/router';
+import { prefixRoute } from '../utils/navigation';
 
 const Scheduler = () => {
   const s = useStyles2(getStyles);

@@ -1,11 +1,12 @@
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { NavModel } from '@grafana/data';
-import { usePluginProps } from '../context';
-import { NAVIGATION, NAVIGATION_TITLE, NAVIGATION_SUBTITLE, PLUGIN_BASE_URL } from '../constants';
+import { NAVIGATION } from '../../constants';
+import { usePluginProps } from 'context';
+import { useLocation } from 'react-router-dom';
+import { getNavModel } from '.';
+import { useEffect } from 'react';
 
 // Displays a top navigation tab-bar if needed
-export function useNavigation() {
+function useNavigation() {
   const pluginProps = usePluginProps();
   const location = useLocation();
 
@@ -17,6 +18,7 @@ export function useNavigation() {
 
     const activeId = Object.keys(NAVIGATION).find((routeId) => location.pathname.includes(routeId)) || '';
     const activeNavItem = NAVIGATION[activeId];
+
     const { onNavChanged, meta, basename } = pluginProps;
 
     // Disable tab navigation
@@ -38,25 +40,4 @@ export function useNavigation() {
   }, [location.pathname, pluginProps]);
 }
 
-// Prefixes the route with the base URL of the plugin
-export function prefixRoute(route: string): string {
-  return `${PLUGIN_BASE_URL}/${route}`;
-}
-
-export function getNavModel({ activeId, basePath, logoUrl }: { activeId: string; basePath: string; logoUrl: string }) {
-  const main = {
-    text: NAVIGATION_TITLE,
-    subTitle: NAVIGATION_SUBTITLE,
-    url: basePath,
-    img: logoUrl,
-    children: Object.values(NAVIGATION).map((navItem) => ({
-      ...navItem,
-      active: navItem.id === activeId,
-    })),
-  };
-
-  return {
-    main,
-    node: main,
-  };
-}
+export { useNavigation };

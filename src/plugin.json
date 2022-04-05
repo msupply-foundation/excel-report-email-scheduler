@@ -34,7 +34,7 @@
       "type": "page",
       "name": "Report Groups",
       "icon": "fa fa-group",
-      "path": "/a/%PLUGIN_ID%/report-groups",
+      "path": "/a/%PLUGIN_ID%",
       "role": "Admin",
       "addToNav": true,
       "defaultNav": true
@@ -47,6 +47,7 @@
       "role": "Admin",
       "addToNav": true
     },
+
     {
       "type": "page",
       "icon": "fa fa-cog",

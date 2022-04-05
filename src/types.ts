@@ -18,6 +18,8 @@ export const defaultQuery: Partial<MyQuery> = {
   withStreaming: false,
 };
 
+export interface AppSettings {}
+
 /**
  * These are options configured for each DataSource instance.
  */

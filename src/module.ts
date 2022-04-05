@@ -1,8 +1,9 @@
 import { AppPlugin } from '@grafana/data';
 import { App } from 'components/App';
+import { AppSettings } from 'types';
 import { AppConfig } from './Pages/AppConfig';
 
-export const plugin = new AppPlugin<{}>().setRootPage(App).addConfigPage({
+export const plugin = new AppPlugin<AppSettings>().setRootPage(App).addConfigPage({
   title: 'Configuration',
   icon: 'fa fa-cog',
   // @ts-ignore - Would expect a Class component, however works absolutely fine with a functional one

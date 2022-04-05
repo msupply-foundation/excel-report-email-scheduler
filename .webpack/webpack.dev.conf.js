@@ -16,7 +16,7 @@ module.exports = {
   context: path.join(process.cwd(), SOURCE_DIR),
 
   // Source map type
-  devtool: 'source-map',
+  devtool: 'eval-source-map',
 
   entry: {
     module: path.resolve(process.cwd(), ENTRY_FILE),
@@ -58,6 +58,10 @@ module.exports = {
     'react-redux',
     'redux',
     'rxjs',
+    // Grafana 8 wraps plugin with react-router-dom it must be specified as external.
+    // If you do not use Grafan's react-router-dom then the plugin's navigation would not work
+    // out of the box. Learnt this the hard way. :D
+    'react-router-dom',
     'd3',
     'angular',
     '@grafana/ui',

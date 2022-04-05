@@ -1,8 +1,8 @@
 import { AppPluginMeta, PluginConfigPageProps } from '@grafana/data';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { AppConfigForm } from 'components/AppConfigForm';
-import { AppConfigProps } from 'types';
+import { AppConfigForm } from '../components';
+import { AppConfigProps } from '../types';
 
 const queryClient = new QueryClient();
 
