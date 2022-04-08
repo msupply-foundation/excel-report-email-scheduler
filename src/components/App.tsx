@@ -5,7 +5,7 @@ import intl from 'react-intl-universal';
 import { css } from '@emotion/css';
 
 import { LoadingPlaceholder, useStyles2 } from '@grafana/ui';
-import { AppRootProps, GrafanaTheme2 } from '@grafana/data';
+import { AppRootProps, GrafanaTheme2, getLocale } from '@grafana/data';
 
 import { PluginPropsContext } from '../context';
 import { AppRoutes } from './AppRoutes';
@@ -29,7 +29,7 @@ const App = (props: AppRootProps<AppSettings>) => {
     // react-intl-universal is singleton, so you should init it only once in your app
     intl
       .init({
-        currentLocale: 'en', // TODO: determine locale here
+        currentLocale: getLocale(), // TODO: determine locale here
         locales,
       })
       .then(() => {
