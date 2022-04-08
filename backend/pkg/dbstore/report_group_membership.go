@@ -22,7 +22,7 @@ func NewReportGroupMembership(ID string, userID string, reportGroupID string) *R
 }
 
 func (datasource *SQLiteDatasource) GroupMemberUserIDs(reportGroup ReportGroup) ([]string, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("GroupMemberUserIDs: sql.Open", err.Error())
@@ -56,7 +56,7 @@ func (datasource *SQLiteDatasource) GroupMemberUserIDs(reportGroup ReportGroup) 
 }
 
 func (datasource *SQLiteDatasource) GetReportGroupMemberships(groupID string) ([]ReportGroupMembership, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("GetReportGroupMemberships: sql.Open(): ", err.Error())
@@ -87,7 +87,7 @@ func (datasource *SQLiteDatasource) GetReportGroupMemberships(groupID string) ([
 }
 
 func (datasource *SQLiteDatasource) CreateReportGroupMembership(members []ReportGroupMembership) ([]ReportGroupMembership, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("CreateReportGroupMembership: sql.Open(): ", err.Error())
@@ -119,7 +119,7 @@ func (datasource *SQLiteDatasource) CreateReportGroupMembership(members []Report
 }
 
 func (datasource *SQLiteDatasource) DeleteReportGroupMembership(id string) error {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("DeleteReportGroupMembership: sql.Open(): ", err.Error())

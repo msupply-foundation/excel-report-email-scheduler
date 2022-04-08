@@ -26,6 +26,7 @@ func (server *HttpServer) ResourceHandler(sqliteDatasource *dbstore.SQLiteDataso
 	mux.HandleFunc("/settings", bugsnag.HandlerFunc(server.fetchSettings)).Methods("GET")
 
 	mux.HandleFunc("/schedule", bugsnag.HandlerFunc(server.createSchedule)).Methods("POST")
+	mux.HandleFunc("/schedule/{id}", bugsnag.HandlerFunc(server.fetchSingleSchedules)).Methods("GET")
 	mux.HandleFunc("/schedule/{id}", bugsnag.HandlerFunc(server.updateSchedule)).Methods("PUT")
 	mux.HandleFunc("/schedule", bugsnag.HandlerFunc(server.fetchSchedules)).Methods("GET")
 	mux.HandleFunc("/schedule/{id}", bugsnag.HandlerFunc(server.deleteSchedule)).Methods("DELETE")

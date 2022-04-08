@@ -372,7 +372,7 @@ func (r *Reporter) ExportPanel(authConfig *auth.AuthConfig, datasourceID int, da
 	}
 
 	panel.SetSql(query)
-	log.DefaultLogger.Debug("Reporter.ExportPanel: Query=" + query);
+	log.DefaultLogger.Debug("Reporter.ExportPanel: Query=" + query)
 	panel.SetTitle(title)
 
 	reportSheetPanels := []api.TablePanel{*panel}

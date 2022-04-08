@@ -24,7 +24,7 @@ func NewReportGroup(ID string, name string, description string) *ReportGroup {
 }
 
 func (datasource *SQLiteDatasource) ReportGroupFromSchedule(schedule Schedule) (*ReportGroup, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("ReportGroupFromSchedule: sql.Open", err.Error())
@@ -44,7 +44,7 @@ func (datasource *SQLiteDatasource) ReportGroupFromSchedule(schedule Schedule) (
 }
 
 func (datasource *SQLiteDatasource) GetReportGroups() ([]ReportGroup, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("GetReportGroups: sql.Open", err.Error())
@@ -76,7 +76,7 @@ func (datasource *SQLiteDatasource) GetReportGroups() ([]ReportGroup, error) {
 }
 
 func (datasource *SQLiteDatasource) CreateReportGroup() (*ReportGroup, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("CreateReportGroup: sql.Open(): ", err.Error())
@@ -101,7 +101,7 @@ func (datasource *SQLiteDatasource) CreateReportGroup() (*ReportGroup, error) {
 }
 
 func (datasource *SQLiteDatasource) UpdateReportGroup(id string, reportGroup ReportGroup) (*ReportGroup, error) {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("UpdateReportGroup: sql.Open(): ", err.Error())
@@ -124,7 +124,7 @@ func (datasource *SQLiteDatasource) UpdateReportGroup(id string, reportGroup Rep
 }
 
 func (datasource *SQLiteDatasource) DeleteReportGroup(id string) error {
-	db, err := sql.Open("sqlite3", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("DeleteReportGroup: sql.Open(): ", err.Error())
