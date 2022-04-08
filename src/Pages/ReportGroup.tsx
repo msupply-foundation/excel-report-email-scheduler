@@ -1,18 +1,18 @@
 import * as React from 'react';
 import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
-import { LinkButton, useStyles2 } from '@grafana/ui';
-import { ROUTES } from '../constants';
-import { prefixRoute } from '../utils/navigation';
+import { Button, useStyles2 } from '@grafana/ui';
+import intl from 'react-intl-universal';
 
 const ReportGroup = () => {
-  const s = useStyles2(getStyles);
+  const styles = useStyles2(getStyles);
 
   return (
     <div>
-      This is page one.
-      <div className={s.marginTop}>
-        <LinkButton href={prefixRoute(ROUTES.REPORT_GROUP)}>Full-width page example</LinkButton>
+      <div className={styles.adjustButtonToRight}>
+        <Button onClick={() => {}} variant="primary">
+          {intl.get('add_report_group')}
+        </Button>
       </div>
     </div>
   );
@@ -21,6 +21,11 @@ const ReportGroup = () => {
 const getStyles = (theme: GrafanaTheme2) => ({
   marginTop: css`
     margin-top: ${theme.spacing(2)};
+  `,
+  adjustButtonToRight: css`
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
   `,
 });
 
