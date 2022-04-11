@@ -1,3 +1,3 @@
 import { SecretInput } from './SecretInput';
-
-export { SecretInput };
+import { EmptyListCTA } from './EmptyListCTA';
+export { SecretInput, EmptyListCTA };

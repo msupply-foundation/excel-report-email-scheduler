@@ -3,8 +3,19 @@ import { DataQuery, DataSourceJsonData, SelectableValue } from '@grafana/data';
 export type NavItem = {
   id: string;
   text: string;
+  sub?: string;
   icon?: string;
   url?: string;
+};
+
+export type AppData = {
+  pluginID: number | string | undefined;
+};
+
+export type User = {
+  id: string;
+  e_mail: string;
+  name: string;
 };
 
 export interface MyQuery extends DataQuery {

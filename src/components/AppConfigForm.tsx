@@ -121,8 +121,6 @@ const AppConfigForm = ({ plugin }: Props) => {
     );
   }
 
-  if (isDSlistLoadSuccess) {
-  }
   return (
     <div>
       {/* Grafana Username */}

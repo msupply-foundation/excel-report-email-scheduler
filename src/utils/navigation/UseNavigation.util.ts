@@ -11,12 +11,16 @@ function useNavigation() {
   const location = useLocation();
 
   useEffect(() => {
+    const excludeURIs: string[] = ['create', 'edit'];
+
     if (!pluginProps) {
       console.error('Root plugin props are not available in the context.');
       return;
     }
 
-    const activeId = Object.keys(NAVIGATION).find((routeId) => location.pathname.includes(routeId)) || '';
+    const activeId = excludeURIs.some((uri) => location.pathname.includes(uri))
+      ? ''
+      : Object.keys(NAVIGATION).find((routeId) => location.pathname.includes(routeId)) || '';
     const activeNavItem = NAVIGATION[activeId];
 
     const { onNavChanged, meta, basename } = pluginProps;
