@@ -39,12 +39,17 @@ type queryModel struct {
 }
 
 func GetDataSource() *SQLiteDatasource {
+	var runningOS string
+	var dataPath string
+
 	log.DefaultLogger.Info("GetDatasource")
 
 	instanceManager := datasource.NewInstanceManager(getDataSourceInstanceSettings)
 
-	var dataPath string
-	if runtime.GOOS == "windows" {
+	runningOS = runtime.GOOS
+	log.DefaultLogger.Info("OS Check: You are running %s platform.", runningOS)
+
+	if runningOS == "windows" {
 		dataPath = filepath.Join("..", "data", "msupply.db")
 	} else {
 		dataPath = filepath.Join("/var/lib/grafana/plugins", "data", "msupply.db")
@@ -114,12 +119,11 @@ func (datasource *SQLiteDatasource) Ping() error {
 	log.DefaultLogger.Info("Pinging Database")
 
 	db, err := sql.Open("sqlite", datasource.Path)
-	defer db.Close()
-
 	if err != nil {
 		log.DefaultLogger.Error("Ping - sql.Open: ", err.Error())
 		return err
 	}
+	defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
