@@ -34,7 +34,7 @@ func (server *HttpServer) ResourceHandler(sqliteDatasource *dbstore.SQLiteDataso
 
 	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.fetchReportGroup)).Methods("GET")
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.updateReportGroup)).Methods("PUT")
-	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.createReportGroup)).Methods("POST")
+	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.CreateReportGroupWithMembers)).Methods("POST")
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.deleteReportGroup)).Methods("DELETE")
 
 	mux.HandleFunc("/report-group-membership", bugsnag.HandlerFunc(server.fetchReportGroupMembership)).Queries("group-id", "{group-id}").Methods("GET")

@@ -31,10 +31,50 @@ func (server *HttpServer) fetchReportGroup(rw http.ResponseWriter, request *http
 	rw.WriteHeader(http.StatusOK)
 }
 
-func (server *HttpServer) createReportGroup(rw http.ResponseWriter, request *http.Request) {
-	result, err := server.db.CreateReportGroup()
+// func (server *HttpServer) createReportGroup(rw http.ResponseWriter, request *http.Request) {
+// 	result, err := server.db.CreateReportGroup()
+// 	if err != nil {
+// 		log.DefaultLogger.Error("createReportGroup: CreateReportGroup(): " + err.Error())
+// 		http.Error(rw, err.Error(), http.StatusBadRequest)
+// 		panic(err)
+// 	}
+
+// 	err = json.NewEncoder(rw).Encode(result)
+// 	if err != nil {
+// 		log.DefaultLogger.Error("createReportGroup: json.NewEncoder().Encode(): " + err.Error())
+// 		http.Error(rw, err.Error(), http.StatusInternalServerError)
+// 		panic(err)
+// 	}
+
+// 	rw.WriteHeader(http.StatusOK)
+// }
+
+func (server *HttpServer) CreateReportGroupWithMembers(rw http.ResponseWriter, request *http.Request) {
+	var group dbstore.ReportGroupWithMembers
+	requestBody, err := request.GetBody()
 	if err != nil {
-		log.DefaultLogger.Error("createReportGroup: CreateReportGroup(): " + err.Error())
+		log.DefaultLogger.Error("updateReportGroup: request.GetBody(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		panic(err)
+	}
+
+	bodyAsBytes, err := ioutil.ReadAll(requestBody)
+	if err != nil {
+		log.DefaultLogger.Error("updateReportGroup: ioutil.ReadAll(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		panic(err)
+	}
+
+	err = json.Unmarshal(bodyAsBytes, &group)
+	if err != nil {
+		log.DefaultLogger.Error("updateReportGroup: json.Unmarshal: " + err.Error())
+		http.Error(rw, NewRequestBodyError(err, dbstore.ReportGroupFields()).Error(), http.StatusBadRequest)
+		panic(err)
+	}
+
+	result, err := server.db.CreateReportGroupWithMembers(group)
+	if err != nil {
+		log.DefaultLogger.Error("updateReportGroup: db.UpdateReportGroup: " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		panic(err)
 	}

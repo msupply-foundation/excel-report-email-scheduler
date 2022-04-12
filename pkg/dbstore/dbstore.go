@@ -3,6 +3,7 @@ package dbstore
 import (
 	"context"
 	"database/sql"
+	"runtime"
 
 	"net/http"
 	"os"
@@ -41,7 +42,13 @@ func GetDataSource() *SQLiteDatasource {
 	log.DefaultLogger.Info("GetDatasource")
 
 	instanceManager := datasource.NewInstanceManager(getDataSourceInstanceSettings)
-	dataPath := filepath.Join("..", "data", "msupply.db")
+
+	var dataPath string
+	if runtime.GOOS == "windows" {
+		dataPath = filepath.Join("..", "data", "msupply.db")
+	} else {
+		dataPath = filepath.Join("/var/lib/grafana/plugins", "data", "msupply.db")
+	}
 
 	sqlDatasource := &SQLiteDatasource{
 		instanceManager: instanceManager,
@@ -133,11 +140,11 @@ func (datasource *SQLiteDatasource) Init() {
 	}
 
 	db, err := sql.Open("sqlite", datasource.Path)
-	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("FATAL. Init - sql.Open : ", err.Error())
 		panic(err)
 	}
+	defer db.Close()
 
 	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, time TEXT, day INTEGER, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
 	stmt.Exec()

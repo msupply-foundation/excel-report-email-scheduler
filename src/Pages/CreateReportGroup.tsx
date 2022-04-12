@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Field, FieldSet, FilterInput, Form, Input, VerticalGroup } from '@grafana/ui';
+import { Button, Field, FieldSet, Input } from '@grafana/ui';
 import { Page } from 'components/common/Page';
 import { ROUTES, NAVIGATION_TITLE, NAVIGATION_SUBTITLE } from '../constants';
 import { prefixRoute } from 'utils';
@@ -7,16 +7,18 @@ import { useDatasourceID } from 'hooks/useDatasourceID';
 import { useQuery } from 'react-query';
 import { getUsers } from 'api/getUsers.api';
 import { User } from 'types';
+import UserList from 'components/UserList';
+import { useForm } from 'react-hook-form';
+import { getBackendSrv } from '@grafana/runtime';
 
 interface ReportGroupType {
   name: string;
-  description: string;
+  description?: string;
+  selectedUsers: string[];
 }
 
 const CreateReportGroup = () => {
   const datasourceID = useDatasourceID();
-
-  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: users, error } = useQuery<User[], Error>(`users-${datasourceID}`, () => getUsers(datasourceID), {
     enabled: !!datasourceID,
@@ -24,28 +26,49 @@ const CreateReportGroup = () => {
     retry: 0,
   });
 
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+    setValue,
+  } = useForm({
+    shouldFocusError: false,
+  });
+
+  const [checkedUsers, setCheckedUsers] = useState<string[]>([]);
+
   useEffect(() => {
     console.log('error', error);
   }, [error]);
 
-  const renderUser = (user: User) => {
-    return (
-      <tr key={user.id}>
-        <td className="width-4"></td>
-        <td className="width-4">
-          <div style={{ padding: '0px 8px' }}>{user.name}</div>
-        </td>
-        <td className="width-4">
-          <div style={{ padding: '0px 8px' }} aria-label={user.e_mail?.length > 0 ? undefined : 'Empty email cell'}>
-            {user.e_mail}
-          </div>
-        </td>
-        <td className="width-4"></td>
-      </tr>
-    );
+  const onUserChecked = (event: React.FormEvent<HTMLInputElement>, userID: string) => {
+    setCheckedUsers((oldArray: string[]) => {
+      if (oldArray.includes(userID)) {
+        return oldArray.filter((el) => el !== userID);
+      } else {
+        return [...oldArray, userID];
+      }
+    });
   };
 
-  const submitCreateReportGroup = (formModel: ReportGroupType) => {};
+  const submitCreateReportGroup = (data: ReportGroupType): any => {
+    try {
+      return getBackendSrv().post(
+        `./api/plugins/msupplyfoundation-excelreportemailscheduler-datasource/resources/report-group`,
+        data
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    setValue('selectedUsers', checkedUsers);
+  }, [checkedUsers, setValue]);
+
+  useEffect(() => {
+    register('selectedUsers', { validate: (value) => value.length > 0 });
+  }, [register]);
 
   return (
     <Page
@@ -59,58 +82,41 @@ const CreateReportGroup = () => {
       }}
     >
       <Page.Contents>
-        <Form onSubmit={submitCreateReportGroup}>
-          {({ register, errors }) => (
-            <>
-              <FieldSet label="New Report Group">
-                <Field
-                  invalid={!!errors.name}
-                  error={errors.name && errors.name.message}
-                  label="Name"
-                  description="Name of the report group"
-                >
-                  <Input
-                    {...register('name', { required: 'Report group name is required' })}
-                    id="report-group-name"
-                    width={60}
-                  />
-                </Field>
+        <form onSubmit={handleSubmit(submitCreateReportGroup)}>
+          <FieldSet label="New Report Group">
+            <Field
+              invalid={!!errors.name}
+              error={errors.name && errors.name.message}
+              label="Name"
+              description="Name of the report group"
+            >
+              <Input
+                {...register('name', { required: 'Report group name is required' })}
+                id="report-group-name"
+                width={60}
+              />
+            </Field>
 
-                <Field label="description" description="Description of the report group">
-                  <Input {...register('description')} id="report-group-description" width={60} />
-                </Field>
-              </FieldSet>
+            <Field label="description" description="Description of the report group">
+              <Input {...register('description')} id="report-group-description" width={60} />
+            </Field>
+          </FieldSet>
 
-              <div className="page-action-bar">
-                <div className="gf-form gf-form--grow">
-                  <FilterInput placeholder="Search users" value={searchQuery} onChange={setSearchQuery} />
-                </div>
-              </div>
-
-              <div className="admin-list-table">
-                <VerticalGroup spacing="md">
-                  <table className="filter-table filter-table--hover form-inline">
-                    <thead>
-                      <tr>
-                        <th />
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th style={{ width: '1%' }} />
-                      </tr>
-                    </thead>
-                    <tbody>{users?.map((user) => renderUser(user))}</tbody>
-                  </table>
-                </VerticalGroup>
-              </div>
-
-              <div className="gf-form-button-row">
-                <Button type="submit" variant="primary">
-                  Create Report Group
-                </Button>
-              </div>
-            </>
+          {users && (
+            <UserList
+              users={users}
+              userListError={errors.selectedUsers}
+              checkedUsers={checkedUsers}
+              onUserChecked={onUserChecked}
+            ></UserList>
           )}
-        </Form>
+
+          <div className="gf-form-button-row">
+            <Button type="submit" variant="primary">
+              Create Report Group
+            </Button>
+          </div>
+        </form>
       </Page.Contents>
     </Page>
   );

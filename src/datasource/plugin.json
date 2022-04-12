@@ -5,6 +5,7 @@
   "id": "msupplyfoundation-excelreportemailscheduler-datasource",
   "metrics": true,
   "backend": true,
+  "executable": "../gpx_excel_report_email_scheduler",
   "info": {
     "description": "Grafana datasource plugin for mSupply Dashboard application. The plugin creates the datasource to be used with mSupply Dashboard: Excel report e-mail scheduler app plugin.",
     "author": {

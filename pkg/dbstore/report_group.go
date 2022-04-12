@@ -25,11 +25,11 @@ func NewReportGroup(ID string, name string, description string) *ReportGroup {
 
 func (datasource *SQLiteDatasource) ReportGroupFromSchedule(schedule Schedule) (*ReportGroup, error) {
 	db, err := sql.Open("sqlite", datasource.Path)
-	defer db.Close()
 	if err != nil {
 		log.DefaultLogger.Error("ReportGroupFromSchedule: sql.Open", err.Error())
 		return nil, err
 	}
+	defer db.Close()
 
 	row := db.QueryRow("SELECT * FROM ReportGroup WHERE ID = ?", schedule.ReportGroupID)
 
