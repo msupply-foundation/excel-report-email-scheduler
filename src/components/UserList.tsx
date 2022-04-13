@@ -45,7 +45,12 @@ const UserList: React.FC<UserListProps> = ({ users, userListError, onUserChecked
       <tr key={user.id}>
         <td className="width-2">
           <div className={styles.checkboxWrapper}>
-            <Checkbox disabled={user.e_mail === ''} onChange={(event) => onUserChecked(event, user.id)} label="" />
+            <Checkbox
+              value={checkedUsers.includes(user.id)}
+              disabled={user.e_mail === ''}
+              onChange={(event) => onUserChecked(event, user.id)}
+              label=""
+            />
           </div>
         </td>
         <td className="width-5">
