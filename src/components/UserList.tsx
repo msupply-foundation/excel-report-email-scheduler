@@ -33,7 +33,7 @@ const UserList: React.FC<UserListProps> = ({ users, userListError, onUserChecked
   const styles = useStyles2(getStyles);
   const [data, setData] = useState<User[] | undefined>(users);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isNoEmailUsersHidden, setIsNoEmailUsersHidden] = useState(false);
+  const [isNoEmailUsersHidden, setIsNoEmailUsersHidden] = useState(true);
 
   const [paginationStates, setPaginationStates] = useState({
     totalPages: 1,
@@ -114,7 +114,7 @@ const UserList: React.FC<UserListProps> = ({ users, userListError, onUserChecked
               })}
             </HorizontalGroup>
           ) : (
-            <EmptySearchResult>You have not selected any user yet</EmptySearchResult>
+            <EmptySearchResult>You have not selected any member(s) yet</EmptySearchResult>
           )}
         </FieldSet>
       </div>
@@ -135,7 +135,7 @@ const UserList: React.FC<UserListProps> = ({ users, userListError, onUserChecked
               </InlineField>
               <InlineField grow={true} label="Hide users without email" transparent={true}>
                 <InlineSwitch
-                  checked={isNoEmailUsersHidden}
+                  value={isNoEmailUsersHidden}
                   transparent={true}
                   onChange={onIsNoEmailUsersHiddenChange}
                 ></InlineSwitch>
