@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-
+import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import intl from 'react-intl-universal';
 import { css } from '@emotion/css';
@@ -16,15 +15,20 @@ import { locales } from '../locales';
 
 const queryClient = new QueryClient();
 
-const App = (props: AppRootProps<AppSettings>) => {
-  const style = useStyles2(getStyles);
-  const [initDone, setInitDone] = useState(false);
+type AppRootState = { initDone: boolean };
+class App extends React.PureComponent<AppRootProps<AppSettings>, AppRootState> {
+  state: AppRootState = {
+    // optional second annotation for better type inference
+    initDone: false,
+  };
 
-  useEffect(() => {
-    loadLocales();
-  }, []);
+  style = getStyles;
 
-  const loadLocales = () => {
+  componentDidMount() {
+    this.loadLocales();
+  }
+
+  loadLocales() {
     // init method will load CLDR locale data according to currentLocale
     // react-intl-universal is singleton, so you should init it only once in your app
     intl
@@ -34,22 +38,26 @@ const App = (props: AppRootProps<AppSettings>) => {
       })
       .then(() => {
         // After loading CLDR locale data, start to render
-        setInitDone(true);
+        this.setState({
+          initDone: true,
+        });
       });
-  };
+  }
 
-  return initDone ? (
-    <PluginPropsContext.Provider value={props}>
-      <QueryClientProvider client={queryClient}>
-        <AppRoutes />
-      </QueryClientProvider>
-    </PluginPropsContext.Provider>
-  ) : (
-    <div className={style.loadingWrapper}>
-      <LoadingPlaceholder text="Loading..." />
-    </div>
-  );
-};
+  render() {
+    return this.state.initDone ? (
+      <PluginPropsContext.Provider value={this.props}>
+        <QueryClientProvider client={queryClient}>
+          <AppRoutes />
+        </QueryClientProvider>
+      </PluginPropsContext.Provider>
+    ) : (
+      <div className={this.style.loadingWrapper}>
+        <LoadingPlaceholder text="Loading..." />
+      </div>
+    );
+  }
+}
 
 const getStyles = (theme: GrafanaTheme2) => ({
   loadingWrapper: css`
