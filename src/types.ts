@@ -32,6 +32,7 @@ export const defaultQuery: Partial<MyQuery> = {
 export interface AppSettings {}
 
 type ReportGroupType = {
+  id: string;
   name: string;
   description?: string;
   selectedUsers: string[];

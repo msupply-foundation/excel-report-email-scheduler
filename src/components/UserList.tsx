@@ -6,7 +6,6 @@ import {
   InlineSwitch,
   VerticalGroup,
   HorizontalGroup,
-  Pagination,
   Checkbox,
   Tag,
   FieldSet,
@@ -15,6 +14,8 @@ import {
   Alert,
 } from '@grafana/ui';
 import { User } from '../types';
+
+import { Pagination } from './common/Pagination';
 
 import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
