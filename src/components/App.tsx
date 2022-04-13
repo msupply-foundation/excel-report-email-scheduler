@@ -1,10 +1,9 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import intl from 'react-intl-universal';
-import { css } from '@emotion/css';
 
-import { LoadingPlaceholder, useStyles2 } from '@grafana/ui';
-import { AppRootProps, GrafanaTheme2, getLocale } from '@grafana/data';
+import { LoadingPlaceholder } from '@grafana/ui';
+import { AppRootProps, getLocale } from '@grafana/data';
 
 import { PluginPropsContext } from '../context';
 import { AppRoutes } from './AppRoutes';
@@ -21,8 +20,6 @@ class App extends React.PureComponent<AppRootProps<AppSettings>, AppRootState> {
     // optional second annotation for better type inference
     initDone: false,
   };
-
-  style = getStyles;
 
   componentDidMount() {
     this.loadLocales();
@@ -52,20 +49,11 @@ class App extends React.PureComponent<AppRootProps<AppSettings>, AppRootState> {
         </QueryClientProvider>
       </PluginPropsContext.Provider>
     ) : (
-      <div className={this.style.loadingWrapper}>
+      <div>
         <LoadingPlaceholder text="Loading..." />
       </div>
     );
   }
 }
-
-const getStyles = (theme: GrafanaTheme2) => ({
-  loadingWrapper: css`
-    display: flex;
-    height: 50vh;
-    align-items: center;
-    justify-content: center;
-  `,
-});
 
 export { App };
