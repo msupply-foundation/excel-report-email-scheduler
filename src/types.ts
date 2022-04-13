@@ -31,6 +31,12 @@ export const defaultQuery: Partial<MyQuery> = {
 
 export interface AppSettings {}
 
+type ReportGroupType = {
+  name: string;
+  description?: string;
+  selectedUsers: string[];
+};
+
 /**
  * These are options configured for each DataSource instance.
  */
@@ -62,4 +68,4 @@ type AppConfigStateType = Required<AppConfigProps> & {
   selectedDatasource?: SelectableValue | null;
 };
 
-export { AppConfigProps, AppConfigStateType };
+export { AppConfigProps, AppConfigStateType, ReportGroupType };
