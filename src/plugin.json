@@ -3,6 +3,8 @@
   "type": "app",
   "name": "Excel report e-mail scheduler",
   "id": "msupplyfoundation-excelreportemailscheduler-app",
+  "backend": true,
+  "executable": "gpx_excel_report_email_scheduler",
   "info": {
     "description": "Grafana plugin for mSupply Dashboard application. The plugin takes data from panels of mSupply dashboard to generate excel reports. The reports are then emailed to a custom user group created with mSupply users pulled from mSupply Dashboard's datasource. The timing of the scheduler can be set in the plugin.",
     "author": {
@@ -59,13 +61,6 @@
   "dependencies": {
     "grafanaDependency": ">=8.0.0",
     "grafanaVersion": "8.0.0",
-    "plugins": [
-      {
-        "id": "msupplyfoundation-excelreportemailscheduler-datasource",
-        "name": "mSupply Dashboard: Excel report e-mail scheduler datasource",
-        "version": "%VERSION%",
-        "type": "datasource"
-      }
-    ]
+    "plugins": []
   }
 }
