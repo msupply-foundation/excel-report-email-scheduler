@@ -5,11 +5,20 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"excel-report-email-scheduler/pkg/api"
+	"excel-report-email-scheduler/pkg/auth"
 	"excel-report-email-scheduler/pkg/dbstore"
 
 	"github.com/gorilla/mux"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
+
+type ReportGroupWithMembers struct {
+	ID          string            `json:"ID"`
+	Name        string            `json:"name"`
+	Description string            `json:"email"`
+	Members     []api.UserDetails `json:"members"`
+}
 
 func (server *HttpServer) fetchReportGroup(rw http.ResponseWriter, request *http.Request) {
 	var groups []dbstore.ReportGroup
@@ -21,7 +30,36 @@ func (server *HttpServer) fetchReportGroup(rw http.ResponseWriter, request *http
 		panic(err)
 	}
 
-	err = json.NewEncoder(rw).Encode(groups)
+	authConfig, err := auth.NewAuthConfig(server.db)
+	if err != nil {
+		log.DefaultLogger.Error("fetchReportGroup: auth.NewAuthConfig")
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		panic(err)
+	}
+
+	var reportGroupsWithMembers []ReportGroupWithMembers
+
+	for _, group := range groups {
+		groupMembers, err := server.db.GetReportGroupMemberships(group.ID)
+		if err != nil {
+			log.DefaultLogger.Error("fetchReportGroup: db.GetReportGroups", err.Error())
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			panic(err)
+		}
+
+		membersDetails, err := api.GetMembersDetailFromGroup(authConfig, groupMembers, 1)
+		if err != nil {
+			log.DefaultLogger.Error("fetchReportGroup: db.GetReportGroups")
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			panic(err)
+		}
+
+		reportGroupWithMembers := ReportGroupWithMembers{ID: group.ID, Name: group.Name, Description: group.Description, Members: membersDetails}
+
+		reportGroupsWithMembers = append(reportGroupsWithMembers, reportGroupWithMembers)
+	}
+
+	err = json.NewEncoder(rw).Encode(reportGroupsWithMembers)
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroup: json.NewEncoder().Encode()", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)

@@ -9,7 +9,7 @@ import { getUsers } from 'api/getUsers.api';
 import { ReportGroupType, User } from 'types';
 import UserList from 'components/UserList';
 import { Controller } from 'react-hook-form';
-import { createReportGroup } from 'api/createReportGroup';
+import { createReportGroup } from 'api/ReportGroup';
 
 const CreateReportGroup = () => {
   const datasourceID = useDatasourceID();
