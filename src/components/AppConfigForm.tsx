@@ -25,6 +25,7 @@ const AppConfigForm = ({ plugin }: Props) => {
   const [state, setState] = useState<AppConfigStateType>({
     grafanaUsername: jsonData?.grafanaUsername || '',
     grafanaPassword: '',
+    grafanaURL: jsonData?.grafanaURL || '',
     isGrafanaPasswordSet: Boolean(jsonData?.isGrafanaPasswordSet),
     senderEmailAddress: jsonData?.senderEmailAddress || '',
     senderEmailPassword: '',
@@ -92,6 +93,13 @@ const AppConfigForm = ({ plugin }: Props) => {
     });
   };
 
+  const onChangeGrafanaURL = (event: ChangeEvent<HTMLInputElement>) => {
+    setState({
+      ...state,
+      grafanaURL: event.target.value.trim(),
+    });
+  };
+
   const onEmailAddressChange = (event: ChangeEvent<HTMLInputElement>) => {
     setState({
       ...state,
@@ -125,6 +133,18 @@ const AppConfigForm = ({ plugin }: Props) => {
     <div>
       {/* Grafana Username */}
       <FieldSet label={intl.get('grafana_details')}>
+        <Field label={intl.get('grafana_url')} description="Full URL of your Grafana installation">
+          <Input
+            width={60}
+            id="api-grafana-url"
+            data-testid="api-grafana-url"
+            label={intl.get('grafana_url')}
+            value={state?.grafanaURL}
+            placeholder={intl.get('grafana_url')}
+            onChange={onChangeGrafanaURL}
+          />
+        </Field>
+
         <Field label={intl.get('grafana_username')}>
           <Input
             width={60}
@@ -231,6 +251,7 @@ const AppConfigForm = ({ plugin }: Props) => {
               pinned,
               jsonData: {
                 grafanaUsername: state.grafanaUsername,
+                grafanaURL: state.grafanaURL,
                 isGrafanaPasswordSet: true,
                 senderEmailAddress: state.senderEmailAddress,
                 isSenderEmailPasswordSet: true,
@@ -253,6 +274,7 @@ const AppConfigForm = ({ plugin }: Props) => {
               (!state.isSenderEmailPasswordSet && !state.senderEmailAddress) ||
               !state.senderEmailHost ||
               !state.senderEmailPort ||
+              !state.grafanaURL ||
               !state.datasourceID
           )}
         >

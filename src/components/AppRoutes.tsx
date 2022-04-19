@@ -15,6 +15,7 @@ const AppRoutes = () => {
 
       {/* Full-width page (this page will have no navigation bar) */}
       <Route exact path={prefixRoute(ROUTES.REPORT_GROUP) + '/create'} component={CreateReportGroup} />
+      <Route exact path={prefixRoute(ROUTES.REPORT_GROUP) + '/edit/:id'} component={CreateReportGroup} />
 
       {/* Default page */}
       <Route exact path="*">

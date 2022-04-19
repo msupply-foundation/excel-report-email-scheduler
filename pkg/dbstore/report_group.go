@@ -75,6 +75,37 @@ func (datasource *SQLiteDatasource) GetReportGroups() ([]ReportGroup, error) {
 	return reportGroups, nil
 }
 
+func (datasource *SQLiteDatasource) GetReportGroup(id string) (*ReportGroup, error) {
+	db, err := sql.Open("sqlite", datasource.Path)
+	if err != nil {
+		log.DefaultLogger.Error("GetReportGroup: sql.Open(): ", err.Error())
+		return nil, err
+	}
+	defer db.Close()
+
+	var reportGroup ReportGroup
+
+	rows, err := db.Query("SELECT * FROM ReportGroup where id=?", id)
+	if err != nil {
+		log.DefaultLogger.Error("GetReportGroup: db.Query(): ", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ID, Name, Description string
+		err = rows.Scan(&ID, &Name, &Description)
+		if err != nil {
+			log.DefaultLogger.Error("GetReportGroup: rows.Scan(): ", err.Error())
+			return nil, err
+		}
+
+		reportGroup = ReportGroup{ID, Name, Description}
+	}
+
+	return &reportGroup, nil
+}
+
 func (datasource *SQLiteDatasource) CreateReportGroup() (*ReportGroup, error) {
 	db, err := sql.Open("sqlite", datasource.Path)
 	defer db.Close()

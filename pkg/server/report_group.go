@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"excel-report-email-scheduler/pkg/api"
-	"excel-report-email-scheduler/pkg/auth"
 	"excel-report-email-scheduler/pkg/dbstore"
 
 	"github.com/gorilla/mux"
@@ -14,10 +12,10 @@ import (
 )
 
 type ReportGroupWithMembers struct {
-	ID          string            `json:"ID"`
-	Name        string            `json:"name"`
-	Description string            `json:"email"`
-	Members     []api.UserDetails `json:"members"`
+	ID          string                          `json:"id"`
+	Name        string                          `json:"name"`
+	Description string                          `json:"description"`
+	Members     []dbstore.ReportGroupMembership `json:"members"`
 }
 
 func (server *HttpServer) fetchReportGroup(rw http.ResponseWriter, request *http.Request) {
@@ -26,13 +24,6 @@ func (server *HttpServer) fetchReportGroup(rw http.ResponseWriter, request *http
 	groups, err := server.db.GetReportGroups()
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroup: db.GetReportGroups")
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
-	}
-
-	authConfig, err := auth.NewAuthConfig(server.db)
-	if err != nil {
-		log.DefaultLogger.Error("fetchReportGroup: auth.NewAuthConfig")
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		panic(err)
 	}
@@ -47,14 +38,7 @@ func (server *HttpServer) fetchReportGroup(rw http.ResponseWriter, request *http
 			panic(err)
 		}
 
-		membersDetails, err := api.GetMembersDetailFromGroup(authConfig, groupMembers, 1)
-		if err != nil {
-			log.DefaultLogger.Error("fetchReportGroup: db.GetReportGroups")
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-			panic(err)
-		}
-
-		reportGroupWithMembers := ReportGroupWithMembers{ID: group.ID, Name: group.Name, Description: group.Description, Members: membersDetails}
+		reportGroupWithMembers := ReportGroupWithMembers{ID: group.ID, Name: group.Name, Description: group.Description, Members: groupMembers}
 
 		reportGroupsWithMembers = append(reportGroupsWithMembers, reportGroupWithMembers)
 	}
@@ -69,23 +53,26 @@ func (server *HttpServer) fetchReportGroup(rw http.ResponseWriter, request *http
 	rw.WriteHeader(http.StatusOK)
 }
 
-// func (server *HttpServer) createReportGroup(rw http.ResponseWriter, request *http.Request) {
-// 	result, err := server.db.CreateReportGroup()
-// 	if err != nil {
-// 		log.DefaultLogger.Error("createReportGroup: CreateReportGroup(): " + err.Error())
-// 		http.Error(rw, err.Error(), http.StatusBadRequest)
-// 		panic(err)
-// 	}
+func (server *HttpServer) fetchSingleReportGroup(rw http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	id := vars["id"]
 
-// 	err = json.NewEncoder(rw).Encode(result)
-// 	if err != nil {
-// 		log.DefaultLogger.Error("createReportGroup: json.NewEncoder().Encode(): " + err.Error())
-// 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-// 		panic(err)
-// 	}
+	reportGroup, err := server.db.GetReportGroup(id)
+	if err != nil {
+		log.DefaultLogger.Error("fetchSingleReportGroup: server.db.GetReportGroup(id): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		panic(err)
+	}
 
-// 	rw.WriteHeader(http.StatusOK)
-// }
+	err = json.NewEncoder(rw).Encode(reportGroup)
+	if err != nil {
+		log.DefaultLogger.Error("fetchSingleReportGroup: json.NewEncoder().Encode(): " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		panic(err)
+	}
+
+	rw.WriteHeader(http.StatusOK)
+}
 
 func (server *HttpServer) CreateReportGroupWithMembers(rw http.ResponseWriter, request *http.Request) {
 	var group dbstore.ReportGroupWithMembers

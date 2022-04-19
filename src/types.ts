@@ -35,7 +35,7 @@ type ReportGroupType = {
   id: string;
   name: string;
   description?: string;
-  selectedUsers: string[];
+  members: string[];
 };
 
 /**
@@ -55,6 +55,7 @@ export interface MySecureJsonData {
 type AppConfigProps = {
   grafanaUsername?: string;
   isGrafanaPasswordSet?: boolean;
+  grafanaURL?: string;
   senderEmailAddress?: string;
   senderEmailPassword?: string;
   isSenderEmailPasswordSet?: boolean;

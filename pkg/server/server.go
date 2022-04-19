@@ -33,6 +33,7 @@ func (server *HttpServer) ResourceHandler(sqliteDatasource *dbstore.SQLiteDataso
 	mux.HandleFunc("/schedule/{id}", bugsnag.HandlerFunc(server.deleteSchedule)).Methods("DELETE")
 
 	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.fetchReportGroup)).Methods("GET")
+	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.fetchSingleReportGroup)).Methods("GET")
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.updateReportGroup)).Methods("PUT")
 	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.CreateReportGroupWithMembers)).Methods("POST")
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.deleteReportGroup)).Methods("DELETE")

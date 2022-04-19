@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Button, Field, FieldSet, Form, Input } from '@grafana/ui';
+import React from 'react';
+import { Button, Field, FieldSet, Form, Input, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import { Page } from 'components/common/Page';
 import { ROUTES, NAVIGATION_TITLE, NAVIGATION_SUBTITLE } from '../constants';
 import { prefixRoute } from 'utils';
@@ -9,31 +9,65 @@ import { getUsers } from 'api/getUsers.api';
 import { ReportGroupType, User } from 'types';
 import UserList from 'components/UserList';
 import { Controller } from 'react-hook-form';
-import { createReportGroup } from 'api/ReportGroup';
+import { createReportGroup, getReportGroupByID, getReportGroupMembersByGroupID } from 'api/ReportGroup';
+import { css } from '@emotion/css';
+import { GrafanaTheme2 } from '@grafana/data';
 
-const CreateReportGroup = () => {
+const CreateReportGroup = ({ history, match }: any) => {
+  const style = useStyles2(getStyles);
   const datasourceID = useDatasourceID();
+  const { id: reportGroupIdToEdit } = match.params;
+  const isEditMode = !!reportGroupIdToEdit;
+  const [ready, setReady] = React.useState(false);
 
-  const { data: users, error } = useQuery<User[], Error>(`users-${datasourceID}`, () => getUsers(datasourceID), {
+  const { data: users } = useQuery<User[], Error>(`users-${datasourceID}`, () => getUsers(datasourceID), {
     enabled: !!datasourceID,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     retry: 0,
   });
 
-  const createReportGroupMutation = useMutation(
-    (newReportGroup: ReportGroupType) => createReportGroup(newReportGroup),
-    {}
+  const { data: defaultReportGroup, isLoading: isReportGroupByIDLoading } = useQuery<ReportGroupType, Error>(
+    `report-group-${reportGroupIdToEdit}`,
+    () => getReportGroupByID(reportGroupIdToEdit),
+    {
+      enabled: isEditMode,
+    }
   );
 
-  useEffect(() => {
-    console.log('error', error);
-  }, [error]);
+  const { data: defaultReportGroupMembers, isLoading: isReportGroupMembersByGroupIDLoading } = useQuery<any, Error>(
+    `report-group-members-${reportGroupIdToEdit}`,
+    () => getReportGroupMembersByGroupID(reportGroupIdToEdit),
+    {
+      enabled: isEditMode,
+    }
+  );
+
+  React.useEffect(() => {
+    if (
+      !isReportGroupByIDLoading &&
+      !isReportGroupMembersByGroupIDLoading &&
+      !!defaultReportGroup &&
+      !!defaultReportGroupMembers
+    ) {
+      defaultReportGroup.members = defaultReportGroupMembers.map((member: any) => member.userID);
+      setReady(true);
+    }
+  }, [defaultReportGroup, defaultReportGroupMembers, isReportGroupByIDLoading, isReportGroupMembersByGroupIDLoading]);
+
+  const createReportGroupMutation = useMutation((newReportGroup: ReportGroupType) => createReportGroup(newReportGroup));
 
   const submitCreateReportGroup = (data: ReportGroupType): any => {
-    console.log('data', data);
     createReportGroupMutation.mutate(data);
   };
+
+  if (!ready) {
+    return (
+      <div className={style.loadingWrapper}>
+        <LoadingPlaceholder text="Loading..." />
+      </div>
+    );
+  }
 
   return (
     <Page
@@ -47,11 +81,16 @@ const CreateReportGroup = () => {
       }}
     >
       <Page.Contents>
-        <Form onSubmit={submitCreateReportGroup} validateOnMount={false} validateOn="onSubmit">
+        <Form
+          onSubmit={submitCreateReportGroup}
+          validateOnMount={false}
+          validateOn="onSubmit"
+          defaultValues={!!defaultReportGroup ? defaultReportGroup : undefined}
+        >
           {({ register, errors, control }) => {
             return (
               <>
-                <FieldSet label="New Report Group">
+                <FieldSet label={`${isEditMode ? 'Edit "' + defaultReportGroup?.name + '"' : 'New'} Report Group`}>
                   <Field
                     invalid={!!errors.name}
                     error={errors.name && errors.name.message}
@@ -73,10 +112,11 @@ const CreateReportGroup = () => {
                 {users && (
                   <Controller
                     render={({ field: { onChange, value: selectedMembers } }) => {
+                      console.log('selectedMembers', defaultReportGroup);
                       return (
                         <UserList
                           users={users}
-                          userListError={errors.selectedUsers}
+                          userListError={errors.members}
                           checkedUsers={selectedMembers}
                           onUserChecked={(event, userID) => {
                             const updatedSelectedMembers = selectedMembers.includes(userID)
@@ -88,15 +128,15 @@ const CreateReportGroup = () => {
                         ></UserList>
                       );
                     }}
-                    name="selectedUsers"
+                    name="members"
                     control={control}
-                    defaultValue={[]}
+                    defaultValue={!!defaultReportGroup ? defaultReportGroup.members : []}
                   />
                 )}
 
                 <div className="gf-form-button-row">
                   <Button type="submit" variant="primary">
-                    Create Report Group
+                    {isEditMode ? 'Update' : 'Create'} Report Group
                   </Button>
                 </div>
               </>
@@ -107,4 +147,14 @@ const CreateReportGroup = () => {
     </Page>
   );
 };
+
+const getStyles = (theme: GrafanaTheme2) => ({
+  loadingWrapper: css`
+    display: flex;
+    height: 50vh;
+    align-items: center;
+    justify-content: center;
+  `,
+});
+
 export { CreateReportGroup };

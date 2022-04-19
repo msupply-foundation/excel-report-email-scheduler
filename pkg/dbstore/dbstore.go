@@ -189,3 +189,14 @@ func (datasource *SQLiteDatasource) Init() {
 
 	log.DefaultLogger.Info("Database initialized!")
 }
+
+// getDSInstance Returns cached datasource or creates new one
+func (ds *SQLiteDatasource) GetDSInstance(pluginContext backend.PluginContext) (*InstanceSettings, error) {
+	log.DefaultLogger.Debug("pluginContext.DataSourceInstanceSettings.ID", pluginContext.DataSourceInstanceSettings.ID)
+	instance, err := ds.instanceManager.Get(pluginContext)
+	if err != nil {
+		log.DefaultLogger.Error("GetDSInstance", err.Error())
+		return nil, err
+	}
+	return instance.(*InstanceSettings), nil
+}

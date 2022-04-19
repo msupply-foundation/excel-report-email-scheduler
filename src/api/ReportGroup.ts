@@ -11,4 +11,16 @@ const createReportGroup = (reportGroup: ReportGroupType) => {
   );
 };
 
-export { createReportGroup, getReportGroups };
+const getReportGroupByID = (reportGroupID: string) => {
+  return getBackendSrv().get(
+    `/api/plugins/msupplyfoundation-excelreportemailscheduler-app/resources/report-group/${reportGroupID}`
+  );
+};
+
+const getReportGroupMembersByGroupID = (reportGroupID: string) => {
+  return getBackendSrv().get(
+    `/api/plugins/msupplyfoundation-excelreportemailscheduler-app/resources/report-group-membership?&group-id=${reportGroupID}`
+  );
+};
+
+export { createReportGroup, getReportGroups, getReportGroupByID, getReportGroupMembersByGroupID };
