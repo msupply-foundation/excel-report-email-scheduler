@@ -8,6 +8,7 @@ import (
 	"excel-report-email-scheduler/pkg/setting"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
 
@@ -59,6 +60,20 @@ func (server *HttpServer) fetchReportGroupsWithMembers(rw http.ResponseWriter, r
 	err = json.NewEncoder(rw).Encode(reportGroupsWithMembership)
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: json.NewEncoder().Encode()", err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		panic(err)
+	}
+
+	rw.WriteHeader(http.StatusOK)
+}
+
+func (server *HttpServer) deleteReportGroupsWithMembers(rw http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	id := vars["id"]
+
+	err := server.db.DeleteReportGroupsWithMembers(id)
+	if err != nil {
+		log.DefaultLogger.Error("deleteReportGroup: db.DeleteReportGroup(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		panic(err)
 	}

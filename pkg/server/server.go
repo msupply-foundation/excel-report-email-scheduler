@@ -21,6 +21,7 @@ func (server *HttpServer) ResourceHandler(mSupplyEresDatasource *datasource.Msup
 	mux := mux.NewRouter()
 
 	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.fetchReportGroupsWithMembers)).Methods("GET")
+	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.deleteReportGroupsWithMembers)).Methods("DELETE")
 
 	return httpadapter.New(mux)
 }
