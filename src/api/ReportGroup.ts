@@ -23,4 +23,10 @@ const getReportGroupMembersByGroupID = (reportGroupID: string) => {
   );
 };
 
-export { createReportGroup, getReportGroups, getReportGroupByID, getReportGroupMembersByGroupID };
+const deleteReportGroup = async (reportGroupID: string) => {
+  return getBackendSrv().delete(
+    `./api/plugins/msupplyfoundation-excelreportemailscheduler-app/resources/report-group/${reportGroupID}`
+  );
+};
+
+export { createReportGroup, getReportGroups, getReportGroupByID, getReportGroupMembersByGroupID, deleteReportGroup };

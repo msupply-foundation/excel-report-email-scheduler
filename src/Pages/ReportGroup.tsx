@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { css, cx } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
-import { Button, Card, HorizontalGroup, Spinner, Tag, useStyles2 } from '@grafana/ui';
+import { Button, Card, ConfirmModal, HorizontalGroup, Spinner, Tag, useStyles2 } from '@grafana/ui';
 import intl from 'react-intl-universal';
 import { EmptyListCTA } from 'components/common';
 import { prefixRoute } from '../utils';
 import { PLUGIN_BASE_URL, ROUTES } from '../constants';
 import { ReportGroupType } from 'types';
-import { useQuery } from 'react-query';
-import { getReportGroups } from 'api/ReportGroup';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { deleteReportGroup, getReportGroups } from 'api/ReportGroup';
+import { useToggle } from 'hooks';
 
 const EmptyList = () => {
   return (
@@ -28,17 +29,36 @@ const EmptyList = () => {
 const ReportGroup = () => {
   const styles = useStyles2(getStyles);
 
+  const queryClient = useQueryClient();
+
+  const [deleteAlertIsOpen, setDeleteAlertIsOpen] = useToggle(false);
+  const [deleteReportGroupID, setDeleteReportGroupID] = useState('');
+
+  const { mutate: deleteGroup } = useMutation(deleteReportGroup, {
+    onSuccess: () => queryClient.refetchQueries(['reportGroups']),
+  });
+
+  const onConfirmDeleteGroup = () => {
+    deleteGroup(deleteReportGroupID);
+    setDeleteAlertIsOpen();
+  };
+
   const { data: reportGroups, isLoading } = useQuery<ReportGroupType[], Error>(`reportGroups`, getReportGroups, {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     retry: 0,
   });
 
+  const onReportGroupDelete = (reportGroupID: string) => {
+    setDeleteAlertIsOpen();
+    setDeleteReportGroupID(reportGroupID);
+  };
+
   if (isLoading) {
     return <Spinner />;
   }
 
-  if (reportGroups === undefined || reportGroups.length <= 0) {
+  if (!!!reportGroups) {
     return <EmptyList />;
   }
 
@@ -80,13 +100,24 @@ const ReportGroup = () => {
                   <Button icon="cog" key="edit" variant="secondary">
                     Edit
                   </Button>
-                  <Button key="delete">Delete</Button>
+                  <Button key="delete" variant="destructive" onClick={(e) => onReportGroupDelete(reportGroup.id)}>
+                    {intl.get('delete')}
+                  </Button>
                 </Card.Actions>
               </Card>
             </li>
           );
         })}
       </ul>
+      <ConfirmModal
+        isOpen={deleteAlertIsOpen}
+        title={intl.get('delete_report_group')}
+        body={intl.get('delete_report_group_question')}
+        confirmText={intl.get('delete')}
+        icon="exclamation-triangle"
+        onConfirm={onConfirmDeleteGroup}
+        onDismiss={setDeleteAlertIsOpen}
+      />
     </div>
   );
 };

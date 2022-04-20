@@ -73,7 +73,7 @@ func (server *HttpServer) deleteReportGroupsWithMembers(rw http.ResponseWriter, 
 
 	err := server.db.DeleteReportGroupsWithMembers(id)
 	if err != nil {
-		log.DefaultLogger.Error("deleteReportGroup: db.DeleteReportGroup(): " + err.Error())
+		log.DefaultLogger.Error("deleteReportGroupsWithMembers: db.DeleteReportGroupsWithMembers(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		panic(err)
 	}
