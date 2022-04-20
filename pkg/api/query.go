@@ -103,10 +103,10 @@ func (qr *QueryResponse) Rows() [][]interface{} {
 		columnCount := len(values)
 		if columnCount > 0 {
 			var rows = make([][]interface{}, len(values[0]))
-			for rownum, _ := range rows {
+			for rownum := range rows {
 				row := make([]interface{}, columnCount)
-				for colnum, value := range values {
-					row[colnum] = value[rownum]
+				for column, value := range values {
+					row[column] = value[rownum]
 				}
 				rows[rownum] = row
 			}
@@ -123,7 +123,7 @@ func (qr *QueryResponse) Columns() []Column {
 
 	if len(fields) > 0 {
 		columns := make([]Column, len(fields))
-		for i, _ := range columns {
+		for i := range columns {
 			var column Column
 			column.Text = fields[i].Name
 			columns[i] = column

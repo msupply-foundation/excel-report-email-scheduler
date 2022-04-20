@@ -80,7 +80,7 @@ const ReportGroup = () => {
                   <Button icon="cog" key="edit" variant="secondary">
                     Edit
                   </Button>
-                  <Button key="edit">Delete</Button>
+                  <Button key="delete">Delete</Button>
                 </Card.Actions>
               </Card>
             </li>

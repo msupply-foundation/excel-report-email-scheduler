@@ -25,11 +25,6 @@ type MsupplyEresDatasourceInstance struct {
 	logger log.Logger
 }
 
-type queryModel struct {
-	QueryText   string   `json:"queryText"`
-	TimeColumns []string `json:"timeColumns"`
-}
-
 func NewMsupplyEresDatasource() *MsupplyEresDatasource {
 	var runningOS string
 	var dataPath string
