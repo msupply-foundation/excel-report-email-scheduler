@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"excel-report-email-scheduler/pkg/dbstore"
+	"excel-report-email-scheduler/pkg/setting"
 	"regexp"
 	"strings"
 
@@ -14,13 +14,7 @@ type AuthConfig struct {
 	URL      string
 }
 
-func NewAuthConfig(datasource *dbstore.SQLiteDatasource) (*AuthConfig, error) {
-	settings, err := datasource.GetSettings()
-	if err != nil {
-		log.DefaultLogger.Error("NewAuthConfig: datasource.GetSettings(): ", err.Error())
-		return nil, err
-	}
-
+func NewAuthConfig(settings *setting.Settings) (*AuthConfig, error) {
 	return &AuthConfig{Username: settings.GrafanaUsername, Password: settings.GrafanaPassword, URL: settings.GrafanaURL}, nil
 }
 
@@ -30,9 +24,9 @@ func (config AuthConfig) AuthString() string {
 
 func (config AuthConfig) AuthURL() string {
 	authUrl := config.InjectAuthString()
-	if strings.HasSuffix(authUrl, "/") {
-		authUrl = authUrl[:len(authUrl)-1]
-	}
+
+	authUrl = strings.TrimSuffix(authUrl, "/")
+
 	log.DefaultLogger.Debug("auth url: " + authUrl)
 
 	return authUrl

@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -25,11 +24,16 @@ type QueryRequest struct {
 	Queries []Query `json:"queries"`
 }
 
+type Column struct {
+	Text string `json:"text"`
+}
+
 func NewQuery(rawSql string, datasource int) *Query {
 	return &Query{RawSQL: rawSql, DatasourceID: datasource, Format: "table", RefID: "A"}
 }
 
 func NewQueryRequest(rawSql string, from string, to string, datasourceID int) *QueryRequest {
+	log.DefaultLogger.Debug("NewQueryRequest: datasourceID: ", datasourceID)
 	query := NewQuery(rawSql, datasourceID)
 	queryRequest := &QueryRequest{From: from, To: to, Queries: []Query{*query}}
 	return queryRequest
@@ -82,7 +86,6 @@ func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 		log.DefaultLogger.Error("NewQueryResponse: ioutil.ReadAll: " + err.Error())
 		return nil, err
 	}
-	log.DefaultLogger.Debug(fmt.Sprintf("NewQueryResponse: body fields: %+v\n", body))
 
 	var qr QueryResponse
 	err = json.Unmarshal(body, &qr)

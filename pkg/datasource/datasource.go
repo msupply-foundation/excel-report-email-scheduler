@@ -1,53 +1,45 @@
-package dbstore
+package datasource
 
 import (
 	"context"
 	"database/sql"
-	"runtime"
-
-	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+
 	_ "modernc.org/sqlite"
 )
 
-// TODOs:
-// SQL In separate files.
-// Repository structs for each table? i.e. `ScheduleRepository` which has the methods `ScheduleRepository.update()` etc to partition the datasource struct.
-// Common serialization/deserialization methods
-// Better/consistent erroring
-// Better/consistent return values
-
-// Basic SQLite datasource
-type SQLiteDatasource struct {
-	instanceManager instancemgmt.InstanceManager
-	Path            string
+type MsupplyEresDatasource struct {
+	im       instancemgmt.InstanceManager
+	logger   log.Logger
+	DataPath string
 }
 
-// Basic plugin instance settings
-type InstanceSettings struct {
-	httpClient *http.Client
+type MsupplyEresDatasourceInstance struct {
+	logger log.Logger
 }
+
 type queryModel struct {
 	QueryText   string   `json:"queryText"`
 	TimeColumns []string `json:"timeColumns"`
 }
 
-func GetDataSource() *SQLiteDatasource {
+func NewMsupplyEresDatasource() *MsupplyEresDatasource {
 	var runningOS string
 	var dataPath string
 
-	log.DefaultLogger.Info("GetDatasource")
+	logger := log.New()
 
-	instanceManager := datasource.NewInstanceManager(getDataSourceInstanceSettings)
+	im := datasource.NewInstanceManager(newMsupplyEresDatasourceInstance)
 
 	runningOS = runtime.GOOS
-	log.DefaultLogger.Info("OS Check: You are running %s platform.", runningOS)
+	logger.Info("OS Check: You are running %s platform.", runningOS)
 
 	if runningOS == "windows" {
 		dataPath = filepath.Join("..", "data", "msupply.db")
@@ -55,19 +47,23 @@ func GetDataSource() *SQLiteDatasource {
 		dataPath = filepath.Join("/var/lib/grafana/plugins", "data", "msupply.db")
 	}
 
-	sqlDatasource := &SQLiteDatasource{
-		instanceManager: instanceManager,
-		Path:            dataPath,
+	mSupplyEresDatasource := &MsupplyEresDatasource{
+		im:       im,
+		logger:   logger,
+		DataPath: dataPath,
 	}
 
-	sqlDatasource.Init()
+	mSupplyEresDatasource.Init()
 
-	return sqlDatasource
+	return mSupplyEresDatasource
 }
 
-func getDataSourceInstanceSettings(setting backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
-	return &InstanceSettings{
-		httpClient: &http.Client{},
+func newMsupplyEresDatasourceInstance(dsSettings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
+	logger := log.New()
+	logger.Debug("Initializing new data source instance")
+
+	return &MsupplyEresDatasourceInstance{
+		logger: logger,
 	}, nil
 }
 
@@ -75,7 +71,7 @@ func getDataSourceInstanceSettings(setting backend.DataSourceInstanceSettings) (
 // req contains the queries []DataQuery (where each query contains RefID as a unique identifer).
 // The QueryDataResponse contains a map of RefID to the response for each query, and each response
 // contains Frames ([]*Frame).
-func (datasource *SQLiteDatasource) QueryData(ctx context.Context, request *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
+func (datasource *MsupplyEresDatasource) QueryData(ctx context.Context, request *backend.QueryDataRequest) (*backend.QueryDataResponse, error) {
 	if os.Getenv("APP_ENV") != "production" {
 		log.DefaultLogger.Info("QueryData", "request", request)
 	}
@@ -83,10 +79,10 @@ func (datasource *SQLiteDatasource) QueryData(ctx context.Context, request *back
 	// TODO: Use context to timeout/cancel?
 	response := backend.NewQueryDataResponse()
 
-	for _, query := range request.Queries {
-		res := datasource.query(ctx, query)
-		response.Responses[query.RefID] = res
-	}
+	// for _, query := range request.Queries {
+	// 	res := datasource.query(ctx, query)
+	// 	response.Responses[query.RefID] = res
+	// }
 
 	return response, nil
 }
@@ -95,7 +91,7 @@ func (datasource *SQLiteDatasource) QueryData(ctx context.Context, request *back
 // The main use case for these health checks is the test button on the
 // datasource configuration page which allows users to verify that
 // a datasource is working as expected.
-func (datasource *SQLiteDatasource) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
+func (datasource *MsupplyEresDatasource) CheckHealth(ctx context.Context, req *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
 
 	err := datasource.Ping()
 
@@ -115,10 +111,10 @@ func (datasource *SQLiteDatasource) CheckHealth(ctx context.Context, req *backen
 	}, nil
 }
 
-func (datasource *SQLiteDatasource) Ping() error {
+func (datasource *MsupplyEresDatasource) Ping() error {
 	log.DefaultLogger.Info("Pinging Database")
 
-	db, err := sql.Open("sqlite", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.DataPath)
 	if err != nil {
 		log.DefaultLogger.Error("Ping - sql.Open: ", err.Error())
 		return err
@@ -134,18 +130,18 @@ func (datasource *SQLiteDatasource) Ping() error {
 	return nil
 }
 
-func (datasource *SQLiteDatasource) Init() {
-	log.DefaultLogger.Info("Initializing Database")
+func (datasource *MsupplyEresDatasource) Init() {
+	datasource.logger.Info("Initializing Database")
 
 	err := datasource.Ping()
 	if err != nil {
-		log.DefaultLogger.Error("FATAL. Init - Ping. ", err.Error())
+		datasource.logger.Error("FATAL. Init - Ping. ", err.Error())
 		panic(err)
 	}
 
-	db, err := sql.Open("sqlite", datasource.Path)
+	db, err := sql.Open("sqlite", datasource.DataPath)
 	if err != nil {
-		log.DefaultLogger.Error("FATAL. Init - sql.Open : ", err.Error())
+		datasource.logger.Error("FATAL. Init - sql.Open : ", err.Error())
 		panic(err)
 	}
 	defer db.Close()
@@ -154,21 +150,14 @@ func (datasource *SQLiteDatasource) Init() {
 	stmt.Exec()
 	defer stmt.Close()
 	if err != nil {
-		log.DefaultLogger.Error("FATAL. Could not create Schedule:", err.Error())
-		panic(err)
-	}
-
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS Config (id TEXT PRIMARY KEY, grafanaUsername TEXT, grafanaPassword TEXT, emailPassword TEXT, email TEXT, datasourceID INTEGER, emailHost TEXT, emailPort INTEGER, grafanaURL TEXT)")
-	stmt.Exec()
-	if err != nil {
-		log.DefaultLogger.Error("FATAL. Could not create Config:", err.Error())
+		datasource.logger.Error("FATAL. Could not create Schedule:", err.Error())
 		panic(err)
 	}
 
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroup (id TEXT PRIMARY KEY, name TEXT, description TEXT)")
 	stmt.Exec()
 	if err != nil {
-		log.DefaultLogger.Error("FATAL. Could not create ReportGroup:", err.Error())
+		datasource.logger.Error("FATAL. Could not create ReportGroup:", err.Error())
 		panic(err)
 	}
 
@@ -176,27 +165,16 @@ func (datasource *SQLiteDatasource) Init() {
 	stmt.Exec()
 
 	if err != nil {
-		log.DefaultLogger.Error("FATAL. Could not create ReportGroupMembership:", err.Error())
+		datasource.logger.Error("FATAL. Could not create ReportGroupMembership:", err.Error())
 		panic(err)
 	}
 
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
 	if err != nil {
-		log.DefaultLogger.Error("FATAL. Could not create ReportContent:", err.Error())
+		datasource.logger.Error("FATAL. Could not create ReportContent:", err.Error())
 		panic(err)
 	}
 
-	log.DefaultLogger.Info("Database initialized!")
-}
-
-// getDSInstance Returns cached datasource or creates new one
-func (ds *SQLiteDatasource) GetDSInstance(pluginContext backend.PluginContext) (*InstanceSettings, error) {
-	log.DefaultLogger.Debug("pluginContext.DataSourceInstanceSettings.ID", pluginContext.DataSourceInstanceSettings.ID)
-	instance, err := ds.instanceManager.Get(pluginContext)
-	if err != nil {
-		log.DefaultLogger.Error("GetDSInstance", err.Error())
-		return nil, err
-	}
-	return instance.(*InstanceSettings), nil
+	datasource.logger.Info("Database initialized!")
 }

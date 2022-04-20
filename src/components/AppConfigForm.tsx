@@ -14,11 +14,7 @@ interface Props extends PluginConfigPageProps<AppPluginMeta<AppConfigProps>> {}
 const AppConfigForm = ({ plugin }: Props) => {
   const style = useStyles2(getStyles);
 
-  const {
-    data: datasources,
-    isLoading: isDatasourceListLoading,
-    isSuccess: isDSlistLoadSuccess,
-  } = useQuery('datasources', getDatasources);
+  const { data: datasources, isLoading: isDatasourceListLoading } = useQuery('datasources', getDatasources);
 
   const { enabled, pinned, jsonData } = plugin.meta;
 
@@ -33,7 +29,7 @@ const AppConfigForm = ({ plugin }: Props) => {
     senderEmailHost: jsonData?.senderEmailHost || '',
     senderEmailPort: jsonData?.senderEmailPort || 0,
     datasourceID: jsonData?.datasourceID || 0,
-    selectedDatasource: null,
+    //    selectedDatasource: null,
   });
 
   const [loading, setLoading] = useState(true);
@@ -45,18 +41,18 @@ const AppConfigForm = ({ plugin }: Props) => {
     });
   }, []);
 
-  useEffect(() => {
-    if (isDSlistLoadSuccess) {
-      const foundDatasource = datasources?.find((datasource: any) => datasource.id === state?.datasourceID);
-      setState((states) => ({
-        ...states,
-        selectedDatasource: {
-          label: foundDatasource.name,
-          value: foundDatasource,
-        },
-      }));
-    }
-  }, [datasources, isDSlistLoadSuccess, state?.datasourceID]);
+  // useEffect(() => {
+  //   if (isDSlistLoadSuccess) {
+  //     const foundDatasource = datasources?.find((datasource: any) => datasource.id === state?.datasourceID);
+  //     setState((states) => ({
+  //       ...states,
+  //       selectedDatasource: {
+  //         label: foundDatasource.name,
+  //         value: foundDatasource,
+  //       },
+  //     }));
+  //   }
+  // }, [datasources, isDSlistLoadSuccess, state?.datasourceID]);
 
   const onResetGrafanaPassword = () =>
     setState({
@@ -229,13 +225,12 @@ const AppConfigForm = ({ plugin }: Props) => {
           <Select
             width={60}
             menuShouldPortal
-            value={state.selectedDatasource}
-            options={datasources?.map((datasource: any) => ({ label: datasource.name, value: datasource })) ?? []}
+            value={state?.datasourceID}
+            options={datasources?.map((datasource: any) => ({ label: datasource.name, value: datasource.id })) ?? []}
             onChange={(selectedDatasource: SelectableValue) => {
               setState({
                 ...state,
                 datasourceID: Number(selectedDatasource.value),
-                selectedDatasource: selectedDatasource,
               });
             }}
           ></Select>
@@ -271,7 +266,8 @@ const AppConfigForm = ({ plugin }: Props) => {
           disabled={Boolean(
             !state.grafanaUsername ||
               (!state.isGrafanaPasswordSet && !state.grafanaPassword) ||
-              (!state.isSenderEmailPasswordSet && !state.senderEmailAddress) ||
+              (!state.isSenderEmailPasswordSet && !state.senderEmailPassword) ||
+              !state.senderEmailAddress ||
               !state.senderEmailHost ||
               !state.senderEmailPort ||
               !state.grafanaURL ||

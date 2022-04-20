@@ -6,11 +6,9 @@ import intl from 'react-intl-universal';
 import { EmptyListCTA } from 'components/common';
 import { prefixRoute } from '../utils';
 import { PLUGIN_BASE_URL, ROUTES } from '../constants';
-import { ReportGroupType, User } from 'types';
+import { ReportGroupType } from 'types';
 import { useQuery } from 'react-query';
 import { getReportGroups } from 'api/ReportGroup';
-import { useDatasourceID } from 'hooks/useDatasourceID';
-import { getUsers } from 'api/getUsers.api';
 
 const EmptyList = () => {
   return (
@@ -30,16 +28,7 @@ const EmptyList = () => {
 const ReportGroup = () => {
   const styles = useStyles2(getStyles);
 
-  const datasourceID = useDatasourceID();
-
-  const { data: reportGroups, isLoading } = useQuery<ReportGroupType[], Error>(`reportGroup`, getReportGroups, {
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    retry: 0,
-  });
-
-  const { data: users } = useQuery<User[], Error>(`users-${datasourceID}`, () => getUsers(datasourceID), {
-    enabled: !!datasourceID,
+  const { data: reportGroups, isLoading } = useQuery<ReportGroupType[], Error>(`reportGroups`, getReportGroups, {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     retry: 0,
@@ -80,9 +69,8 @@ const ReportGroup = () => {
                         align="flex-start"
                         justify="flex-start"
                       >
-                        {reportGroup.members.map(({ userID }: any) => {
-                          const user = users?.find((user) => user.id === userID);
-                          return <Tag key={userID} icon="user" name={`${user?.name} <${user?.e_mail} >`} />;
+                        {reportGroup.members.map(({ id, name, email }: any) => {
+                          return <Tag key={id} icon="user" name={`${name} <${email} >`} />;
                         })}
                       </HorizontalGroup>,
                     ]}
