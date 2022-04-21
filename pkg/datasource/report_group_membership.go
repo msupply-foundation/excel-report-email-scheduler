@@ -3,6 +3,7 @@ package datasource
 import (
 	"database/sql"
 
+	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
 
@@ -20,7 +21,7 @@ func NewReportGroupMembership(ID string, userID string, reportGroupID string) *R
 	return &ReportGroupMembership{ID: ID, UserID: userID, ReportGroupID: reportGroupID}
 }
 
-func (datasource *MsupplyEresDatasource) GroupMemberUserIDs(reportGroup ReportGroup) ([]string, error) {
+func (datasource *MsupplyEresDatasource) GroupMemberUserIDs(reportGroup *ReportGroup) ([]string, error) {
 	db, err := sql.Open("sqlite", datasource.DataPath)
 	if err != nil {
 		log.DefaultLogger.Error("GroupMemberUserIDs: sql.Open", err.Error())
@@ -52,4 +53,36 @@ func (datasource *MsupplyEresDatasource) GroupMemberUserIDs(reportGroup ReportGr
 	}
 
 	return userIDs, nil
+}
+
+func (datasource *MsupplyEresDatasource) CreateReportGroupMembership(members []ReportGroupMembership) (*[]ReportGroupMembership, error) {
+	db, err := sql.Open("sqlite", datasource.DataPath)
+	if err != nil {
+		log.DefaultLogger.Error("CreateReportGroupMembership: sql.Open(): ", err.Error())
+		return nil, err
+	}
+	defer db.Close()
+
+	var addedMemberships []ReportGroupMembership
+	for _, member := range members {
+		newUuid := uuid.New().String()
+
+		stmt, err := db.Prepare("INSERT INTO ReportGroupMembership (ID, userID, reportGroupID) VALUES (?,?,?)")
+		if err != nil {
+			log.DefaultLogger.Error("CreateReportGroupMembership: db.Prepare(): ", err.Error())
+			return nil, err
+		}
+		defer stmt.Close()
+
+		_, err = stmt.Exec(newUuid, member.UserID, member.ReportGroupID)
+		if err != nil {
+			log.DefaultLogger.Error("CreateReportGroupMembership: stmt.Exec() ", err.Error())
+			return nil, err
+		}
+
+		member.ID = newUuid
+		addedMemberships = append(addedMemberships, member)
+	}
+
+	return &addedMemberships, nil
 }

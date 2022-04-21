@@ -38,6 +38,13 @@ type ReportGroupType = {
   members: string[];
 };
 
+type ReportGroupTypeWithMembersDetail = {
+  id: string;
+  name: string;
+  description?: string;
+  members: User[];
+};
+
 /**
  * These are options configured for each DataSource instance.
  */
@@ -70,4 +77,4 @@ type AppConfigStateType = Required<AppConfigProps> & {
   selectedDatasource?: SelectableValue | null;
 };
 
-export { AppConfigProps, AppConfigStateType, ReportGroupType };
+export { AppConfigProps, AppConfigStateType, ReportGroupType, ReportGroupTypeWithMembersDetail };

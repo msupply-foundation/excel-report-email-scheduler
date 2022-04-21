@@ -6,54 +6,65 @@ import { prefixRoute } from 'utils';
 import { useDatasourceID } from 'hooks/useDatasourceID';
 import { useMutation, useQuery } from 'react-query';
 import { getUsers } from 'api/getUsers.api';
-import { ReportGroupType, User } from 'types';
+import { ReportGroupType, ReportGroupTypeWithMembersDetail, User } from 'types';
 import UserList from 'components/UserList';
 import { Controller } from 'react-hook-form';
-import { createReportGroup, getReportGroupByID, getReportGroupMembersByGroupID } from 'api/ReportGroup';
+import { createReportGroup, getReportGroupByID } from 'api/ReportGroup';
 import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 
-const CreateReportGroup = ({ history, match }: any) => {
+const defaultFormValues: ReportGroupType = {
+  id: '',
+  name: '',
+  description: '',
+  members: [],
+};
+
+const CreateReportGroup = ({ match }: any) => {
   const style = useStyles2(getStyles);
   const datasourceID = useDatasourceID();
   const { id: reportGroupIdToEdit } = match.params;
   const isEditMode = !!reportGroupIdToEdit;
   const [ready, setReady] = React.useState(false);
 
-  const { data: users } = useQuery<User[], Error>(`users-${datasourceID}`, () => getUsers(datasourceID), {
-    enabled: !!datasourceID,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    retry: 0,
+  const { data: users, isLoading: isUsersLoading } = useQuery<User[], Error>(
+    `users-${datasourceID}`,
+    () => getUsers(datasourceID),
+    {
+      enabled: !!datasourceID,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+      retry: 0,
+    }
+  );
+
+  const [defaultReportGroup, setDefaultReportGroup] = React.useState<ReportGroupType>(defaultFormValues);
+
+  const { data: defaultReportGroupFetched, isLoading: isReportGroupByIDLoading } = useQuery<
+    ReportGroupTypeWithMembersDetail,
+    Error
+  >(`report-group-${reportGroupIdToEdit}`, () => getReportGroupByID(reportGroupIdToEdit), {
+    enabled: isEditMode,
   });
 
-  const { data: defaultReportGroup, isLoading: isReportGroupByIDLoading } = useQuery<ReportGroupType, Error>(
-    `report-group-${reportGroupIdToEdit}`,
-    () => getReportGroupByID(reportGroupIdToEdit),
-    {
-      enabled: isEditMode,
+  React.useEffect(() => {
+    if (!!defaultReportGroupFetched) {
+      setDefaultReportGroup({
+        ...defaultReportGroupFetched,
+        members: defaultReportGroupFetched.members.map((member: User) => member.id),
+      });
     }
-  );
-
-  const { data: defaultReportGroupMembers, isLoading: isReportGroupMembersByGroupIDLoading } = useQuery<any, Error>(
-    `report-group-members-${reportGroupIdToEdit}`,
-    () => getReportGroupMembersByGroupID(reportGroupIdToEdit),
-    {
-      enabled: isEditMode,
-    }
-  );
+  }, [defaultReportGroupFetched]);
 
   React.useEffect(() => {
-    if (
-      !isReportGroupByIDLoading &&
-      !isReportGroupMembersByGroupIDLoading &&
-      !!defaultReportGroup &&
-      !!defaultReportGroupMembers
-    ) {
-      defaultReportGroup.members = defaultReportGroupMembers.map((member: any) => member.userID);
+    if (!isEditMode && !isUsersLoading) {
       setReady(true);
     }
-  }, [defaultReportGroup, defaultReportGroupMembers, isReportGroupByIDLoading, isReportGroupMembersByGroupIDLoading]);
+
+    if (isEditMode && !isUsersLoading && !isReportGroupByIDLoading && !!defaultReportGroup) {
+      setReady(true);
+    }
+  }, [defaultReportGroup, isEditMode, isReportGroupByIDLoading, isUsersLoading, ready]);
 
   const createReportGroupMutation = useMutation((newReportGroup: ReportGroupType) => createReportGroup(newReportGroup));
 
@@ -85,7 +96,7 @@ const CreateReportGroup = ({ history, match }: any) => {
           onSubmit={submitCreateReportGroup}
           validateOnMount={false}
           validateOn="onSubmit"
-          defaultValues={!!defaultReportGroup ? defaultReportGroup : undefined}
+          defaultValues={defaultReportGroup}
         >
           {({ register, errors, control }) => {
             return (
@@ -112,7 +123,7 @@ const CreateReportGroup = ({ history, match }: any) => {
                 {users && (
                   <Controller
                     render={({ field: { onChange, value: selectedMembers } }) => {
-                      console.log('selectedMembers', defaultReportGroup);
+                      console.log('selectedMembers', selectedMembers);
                       return (
                         <UserList
                           users={users}
@@ -130,7 +141,6 @@ const CreateReportGroup = ({ history, match }: any) => {
                     }}
                     name="members"
                     control={control}
-                    defaultValue={!!defaultReportGroup ? defaultReportGroup.members : []}
                   />
                 )}
 
