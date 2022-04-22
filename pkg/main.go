@@ -43,5 +43,4 @@ func Init(logger log.Logger) (*datasource.MsupplyEresDatasource, *server.HttpSer
 	server := server.NewServer(mSupplyEresDatasource)
 
 	return mSupplyEresDatasource, server, nil
-
 }
