@@ -30,19 +30,41 @@ func (datasource *MsupplyEresDatasource) CreateReportGroupWithMembers(reportGrou
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("INSERT INTO ReportGroup (id, name, description) VALUES (?,?,?) RETURNING *")
-	if err != nil {
-		log.DefaultLogger.Error("CreateReportGroupWithMembers: db.Prepare(): ", err.Error())
-		return nil, err
-	}
-	defer stmt.Close()
+	datasource.logger.Debug("reportGroupWithMembers.ID", reportGroupWithMembers.ID)
 
-	reportGroupWithMembers.ID = uuid.New().String()
+	if reportGroupWithMembers.ID == "" {
+		stmt, err := db.Prepare("INSERT INTO ReportGroup (id, name, description) VALUES (?,?,?) RETURNING *")
+		if err != nil {
+			log.DefaultLogger.Error("CreateReportGroupWithMembers: db.Prepare(): ", err.Error())
+			return nil, err
+		}
+		defer stmt.Close()
 
-	_, err = stmt.Exec(reportGroupWithMembers.ID, reportGroupWithMembers.Name, reportGroupWithMembers.Description)
-	if err != nil {
-		log.DefaultLogger.Error("CreateReportGroup: stmt.Exec(): ", err.Error())
-		return nil, err
+		reportGroupWithMembers.ID = uuid.New().String()
+
+		_, err = stmt.Exec(reportGroupWithMembers.ID, reportGroupWithMembers.Name, reportGroupWithMembers.Description)
+		if err != nil {
+			log.DefaultLogger.Error("CreateReportGroup: stmt.Exec(): ", err.Error())
+			return nil, err
+		}
+	} else {
+		stmt, err := db.Prepare("UPDATE ReportGroup SET name = ?, description = ? where id = ? RETURNING *")
+		if err != nil {
+			log.DefaultLogger.Error("CreateReportGroupWithMembers: db.Prepare(): ", err.Error())
+			return nil, err
+		}
+
+		_, err = stmt.Exec(reportGroupWithMembers.Name, reportGroupWithMembers.Description, reportGroupWithMembers.ID)
+		if err != nil {
+			log.DefaultLogger.Error("CreateReportGroup: stmt.Exec(): ", err.Error())
+			return nil, err
+		}
+
+		err = datasource.DeleteReportGroupMembersByGroupID(reportGroupWithMembers.ID)
+		if err != nil {
+			log.DefaultLogger.Error("deleteReportGroupMembership: db.DeleteReportGroupMembership(): ", err.Error())
+			return nil, err
+		}
 	}
 
 	var reportGroupMemberships []ReportGroupMembership

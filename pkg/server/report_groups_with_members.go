@@ -21,14 +21,15 @@ func (server *HttpServer) fetchSingleReportGroupWithMembers(rw http.ResponseWrit
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: db.GetReportGroups")
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		// panic(err) is causing a RPC error so removing it for now
+		return
 	}
 
 	authConfig, err := auth.NewAuthConfig(settings)
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: auth.NewAuthConfig", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 
 	var group *datasource.ReportGroup
@@ -36,23 +37,22 @@ func (server *HttpServer) fetchSingleReportGroupWithMembers(rw http.ResponseWrit
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: server.db.GetReportGroups", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 
 	groupMemberUserIDs, err := server.db.GroupMemberUserIDs(group)
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: server.db.GroupMemberUserIDs", err.Error())
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	memberDetails, err := api.GetMemberDeatailsFromUserIDs(authConfig, groupMemberUserIDs, settings.DatasourceID)
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: api.GetMemberDeatailsFromUserIDs", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		return
 	}
-	log.DefaultLogger.Error("fetchReportGroupsWithMembers: memberDetails[0].Email", memberDetails[0].Email)
 
 	reportGroupWithMembership := datasource.ReportGroupWithMembership{ID: group.ID, Name: group.Name, Description: group.Description, Members: memberDetails}
 
@@ -60,7 +60,7 @@ func (server *HttpServer) fetchSingleReportGroupWithMembers(rw http.ResponseWrit
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: json.NewEncoder().Encode()", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -71,14 +71,14 @@ func (server *HttpServer) fetchReportGroupsWithMembers(rw http.ResponseWriter, r
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: db.GetReportGroups")
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 
 	authConfig, err := auth.NewAuthConfig(settings)
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: auth.NewAuthConfig", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 
 	var groups []datasource.ReportGroup
@@ -86,36 +86,38 @@ func (server *HttpServer) fetchReportGroupsWithMembers(rw http.ResponseWriter, r
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: server.db.GetReportGroups", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 
-	var reportGroupsWithMembership []datasource.ReportGroupWithMembership
+	reportGroupsWithMembership := []datasource.ReportGroupWithMembership{}
 
-	for _, group := range groups {
-		groupMemberUserIDs, err := server.db.GroupMemberUserIDs(&group)
-		if err != nil {
-			log.DefaultLogger.Error("fetchReportGroupsWithMembers: server.db.GroupMemberUserIDs", err.Error())
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-			panic(err)
+	if len(groups) > 0 {
+		for _, group := range groups {
+			groupMemberUserIDs, err := server.db.GroupMemberUserIDs(&group)
+			if err != nil {
+				log.DefaultLogger.Error("fetchReportGroupsWithMembers: server.db.GroupMemberUserIDs", err.Error())
+				http.Error(rw, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			memberDetails, err := api.GetMemberDeatailsFromUserIDs(authConfig, groupMemberUserIDs, settings.DatasourceID)
+			if err != nil {
+				log.DefaultLogger.Error("fetchReportGroupsWithMembers: api.GetMemberDeatailsFromUserIDs", err.Error())
+				http.Error(rw, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			reportGroupWithMembership := datasource.ReportGroupWithMembership{ID: group.ID, Name: group.Name, Description: group.Description, Members: memberDetails}
+
+			reportGroupsWithMembership = append(reportGroupsWithMembership, reportGroupWithMembership)
 		}
-
-		memberDetails, err := api.GetMemberDeatailsFromUserIDs(authConfig, groupMemberUserIDs, settings.DatasourceID)
-		if err != nil {
-			log.DefaultLogger.Error("fetchReportGroupsWithMembers: api.GetMemberDeatailsFromUserIDs", err.Error())
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-			panic(err)
-		}
-
-		reportGroupWithMembership := datasource.ReportGroupWithMembership{ID: group.ID, Name: group.Name, Description: group.Description, Members: memberDetails}
-
-		reportGroupsWithMembership = append(reportGroupsWithMembership, reportGroupWithMembership)
 	}
 
 	err = json.NewEncoder(rw).Encode(reportGroupsWithMembership)
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: json.NewEncoder().Encode()", err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 
 	rw.WriteHeader(http.StatusOK)
@@ -128,38 +130,38 @@ func (server *HttpServer) CreateReportGroupWithMembers(rw http.ResponseWriter, r
 	if err != nil {
 		log.DefaultLogger.Error("updateReportGroup: request.GetBody(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
 	bodyAsBytes, err := ioutil.ReadAll(requestBody)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportGroup: ioutil.ReadAll(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
 	err = json.Unmarshal(bodyAsBytes, &group)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportGroup: json.Unmarshal: " + err.Error())
 		http.Error(rw, NewRequestBodyError(err, datasource.ReportGroupFields()).Error(), http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
-	result, err := server.db.CreateReportGroupWithMembers(group)
+	_, err = server.db.CreateReportGroupWithMembers(group)
 	if err != nil {
 		log.DefaultLogger.Error("updateReportGroup: db.UpdateReportGroup: " + err.Error())
 		http.Error(rw, err.Error(), http.StatusBadRequest)
-		panic(err)
+		return
 	}
 
-	err = json.NewEncoder(rw).Encode(result)
-	if err != nil {
-		log.DefaultLogger.Error("createReportGroup: json.NewEncoder().Encode(): " + err.Error())
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+	successMessageChunk := ""
+	if group.ID != "" {
+		successMessageChunk = "updated"
+	} else {
+		successMessageChunk = "created"
 	}
 
-	rw.WriteHeader(http.StatusOK)
+	server.Success(rw, "Report group successfully "+successMessageChunk)
 }
 
 func (server *HttpServer) deleteReportGroupsWithMembers(rw http.ResponseWriter, request *http.Request) {
@@ -170,8 +172,8 @@ func (server *HttpServer) deleteReportGroupsWithMembers(rw http.ResponseWriter, 
 	if err != nil {
 		log.DefaultLogger.Error("deleteReportGroupsWithMembers: db.DeleteReportGroupsWithMembers(): " + err.Error())
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+		return
 	}
 
-	rw.WriteHeader(http.StatusOK)
+	server.Success(rw, "Report group deleted")
 }

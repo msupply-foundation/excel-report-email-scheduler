@@ -86,6 +86,6 @@ func (datasource *MsupplyEresDatasource) GetSingleReportGroup(ID string) (*Repor
 	if len(reportGroups) > 0 {
 		return &reportGroups[0], nil
 	} else {
-		return nil, errors.New("no report group found")
+		return nil, errors.New("no report group with id " + ID + " found")
 	}
 }

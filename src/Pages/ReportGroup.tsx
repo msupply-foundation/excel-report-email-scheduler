@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { css, cx } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
-import { Button, Card, ConfirmModal, HorizontalGroup, Spinner, Tag, useStyles2 } from '@grafana/ui';
+import { Button, Card, ConfirmModal, HorizontalGroup, LinkButton, Spinner, Tag, useStyles2 } from '@grafana/ui';
 import intl from 'react-intl-universal';
 import { EmptyListCTA } from 'components/common';
 import { prefixRoute } from '../utils';
 import { PLUGIN_BASE_URL, ROUTES } from '../constants';
 import { ReportGroupType } from 'types';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 import { deleteReportGroup, getReportGroups } from 'api/ReportGroup';
 import { useToggle } from 'hooks';
 
@@ -29,13 +29,15 @@ const EmptyList = () => {
 const ReportGroup = () => {
   const styles = useStyles2(getStyles);
 
-  const queryClient = useQueryClient();
-
   const [deleteAlertIsOpen, setDeleteAlertIsOpen] = useToggle(false);
   const [deleteReportGroupID, setDeleteReportGroupID] = useState('');
 
   const { mutate: deleteGroup } = useMutation(deleteReportGroup, {
-    onSuccess: () => queryClient.refetchQueries(['reportGroups']),
+    onSuccess: () => {
+      console.log('deleted success');
+      refetchReportGroups();
+      return;
+    },
   });
 
   const onConfirmDeleteGroup = () => {
@@ -43,7 +45,11 @@ const ReportGroup = () => {
     setDeleteAlertIsOpen();
   };
 
-  const { data: reportGroups, isLoading } = useQuery<ReportGroupType[], Error>(`reportGroups`, getReportGroups, {
+  const {
+    data: reportGroups,
+    isLoading,
+    refetch: refetchReportGroups,
+  } = useQuery<ReportGroupType[], Error>(`reportGroups`, getReportGroups, {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     retry: 0,
@@ -58,16 +64,16 @@ const ReportGroup = () => {
     return <Spinner />;
   }
 
-  if (!!!reportGroups) {
+  if (!!!reportGroups || !reportGroups.length) {
     return <EmptyList />;
   }
 
   return (
     <div>
       <div className={styles.adjustButtonToRight}>
-        <Button onClick={() => {}} variant="primary">
+        <LinkButton icon="plus-circle" key="create" variant="primary" href={`${PLUGIN_BASE_URL}/report-groups/create`}>
           {intl.get('add_report_group')}
-        </Button>
+        </LinkButton>
       </div>
       <ul className={styles.list}>
         {reportGroups.map((reportGroup) => {
@@ -97,10 +103,20 @@ const ReportGroup = () => {
                   </Card.Meta>
                 )}
                 <Card.Actions className={styles.actions}>
-                  <Button icon="cog" key="edit" variant="secondary">
+                  <LinkButton
+                    icon="cog"
+                    key="edit"
+                    variant="secondary"
+                    href={`${PLUGIN_BASE_URL}/report-groups/edit/${reportGroup.id}`}
+                  >
                     Edit
-                  </Button>
-                  <Button key="delete" variant="destructive" onClick={(e) => onReportGroupDelete(reportGroup.id)}>
+                  </LinkButton>
+                  <Button
+                    key="delete"
+                    icon="trash-alt"
+                    variant="destructive"
+                    onClick={(e) => onReportGroupDelete(reportGroup.id)}
+                  >
                     {intl.get('delete')}
                   </Button>
                 </Card.Actions>

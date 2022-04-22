@@ -4,6 +4,7 @@ import (
 	"excel-report-email-scheduler/pkg/datasource"
 	"excel-report-email-scheduler/pkg/server"
 
+	"github.com/bugsnag/bugsnag-go"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
@@ -11,6 +12,11 @@ import (
 const ERES_PLUGIN_ID = "msupplyfoundation-excelreportemailscheduler-app"
 
 func main() {
+	bugsnag.Configure(bugsnag.Configuration{
+		APIKey:       "90618551d4e8d52a45260c61033093df",
+		ReleaseStage: "production",
+	})
+
 	backend.SetupPluginEnvironment(ERES_PLUGIN_ID)
 
 	pluginLogger := log.New()

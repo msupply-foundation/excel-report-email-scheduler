@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Field, FieldSet, Form, Input, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 import { Page } from 'components/common/Page';
-import { ROUTES, NAVIGATION_TITLE, NAVIGATION_SUBTITLE } from '../constants';
+import { ROUTES, NAVIGATION_TITLE, NAVIGATION_SUBTITLE, PLUGIN_BASE_URL } from '../constants';
 import { prefixRoute } from 'utils';
 import { useDatasourceID } from 'hooks/useDatasourceID';
 import { useMutation, useQuery } from 'react-query';
@@ -11,7 +11,6 @@ import UserList from 'components/UserList';
 import { Controller } from 'react-hook-form';
 import { createReportGroup, getReportGroupByID } from 'api/ReportGroup';
 import { css } from '@emotion/css';
-import { GrafanaTheme2 } from '@grafana/data';
 
 const defaultFormValues: ReportGroupType = {
   id: '',
@@ -20,7 +19,7 @@ const defaultFormValues: ReportGroupType = {
   members: [],
 };
 
-const CreateReportGroup = ({ match }: any) => {
+const CreateReportGroup = ({ history, match }: any) => {
   const style = useStyles2(getStyles);
   const datasourceID = useDatasourceID();
   const { id: reportGroupIdToEdit } = match.params;
@@ -40,12 +39,23 @@ const CreateReportGroup = ({ match }: any) => {
 
   const [defaultReportGroup, setDefaultReportGroup] = React.useState<ReportGroupType>(defaultFormValues);
 
-  const { data: defaultReportGroupFetched, isLoading: isReportGroupByIDLoading } = useQuery<
-    ReportGroupTypeWithMembersDetail,
-    Error
-  >(`report-group-${reportGroupIdToEdit}`, () => getReportGroupByID(reportGroupIdToEdit), {
-    enabled: isEditMode,
-  });
+  const {
+    data: defaultReportGroupFetched,
+    isLoading: isReportGroupByIDLoading,
+    isRefetching,
+  } = useQuery<ReportGroupTypeWithMembersDetail, Error>(
+    `report-group-${reportGroupIdToEdit}`,
+    () => getReportGroupByID(reportGroupIdToEdit),
+    {
+      enabled: isEditMode,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+      onError: () => {
+        history.push(`${PLUGIN_BASE_URL}/report-groups/`);
+        return;
+      },
+    }
+  );
 
   React.useEffect(() => {
     if (!!defaultReportGroupFetched) {
@@ -61,12 +71,21 @@ const CreateReportGroup = ({ match }: any) => {
       setReady(true);
     }
 
-    if (isEditMode && !isUsersLoading && !isReportGroupByIDLoading && !!defaultReportGroup) {
+    if (isEditMode && !isUsersLoading && !isRefetching && !isReportGroupByIDLoading) {
       setReady(true);
     }
-  }, [defaultReportGroup, isEditMode, isReportGroupByIDLoading, isUsersLoading, ready]);
+  }, [isEditMode, isRefetching, isReportGroupByIDLoading, isUsersLoading]);
 
-  const createReportGroupMutation = useMutation((newReportGroup: ReportGroupType) => createReportGroup(newReportGroup));
+  const createReportGroupMutation = useMutation(
+    (newReportGroup: ReportGroupType) => createReportGroup(newReportGroup),
+    {
+      onSuccess: () => {
+        console.log('On success called');
+        history.push(`${PLUGIN_BASE_URL}/report-groups/`);
+        return;
+      },
+    }
+  );
 
   const submitCreateReportGroup = (data: ReportGroupType): any => {
     createReportGroupMutation.mutate(data);
@@ -122,23 +141,20 @@ const CreateReportGroup = ({ match }: any) => {
 
                 {users && (
                   <Controller
-                    render={({ field: { onChange, value: selectedMembers } }) => {
-                      console.log('selectedMembers', selectedMembers);
-                      return (
-                        <UserList
-                          users={users}
-                          userListError={errors.members}
-                          checkedUsers={selectedMembers}
-                          onUserChecked={(event, userID) => {
-                            const updatedSelectedMembers = selectedMembers.includes(userID)
-                              ? selectedMembers.filter((el) => el !== userID)
-                              : [...selectedMembers, userID];
+                    render={({ field: { onChange, value: selectedMembers } }) => (
+                      <UserList
+                        users={users}
+                        userListError={errors.members}
+                        checkedUsers={selectedMembers}
+                        onUserChecked={(event, userID) => {
+                          const updatedSelectedMembers = selectedMembers.includes(userID)
+                            ? selectedMembers.filter((el) => el !== userID)
+                            : [...selectedMembers, userID];
 
-                            onChange(updatedSelectedMembers);
-                          }}
-                        ></UserList>
-                      );
-                    }}
+                          onChange(updatedSelectedMembers);
+                        }}
+                      ></UserList>
+                    )}
                     name="members"
                     control={control}
                   />
@@ -158,7 +174,7 @@ const CreateReportGroup = ({ match }: any) => {
   );
 };
 
-const getStyles = (theme: GrafanaTheme2) => ({
+const getStyles = () => ({
   loadingWrapper: css`
     display: flex;
     height: 50vh;

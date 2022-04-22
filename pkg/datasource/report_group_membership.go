@@ -86,3 +86,27 @@ func (datasource *MsupplyEresDatasource) CreateReportGroupMembership(members []R
 
 	return &addedMemberships, nil
 }
+
+func (datasource *MsupplyEresDatasource) DeleteReportGroupMembersByGroupID(id string) error {
+	db, err := sql.Open("sqlite", datasource.DataPath)
+	if err != nil {
+		log.DefaultLogger.Error("DeleteReportGroupMembership: sql.Open(): ", err.Error())
+		return err
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
+	if err != nil {
+		log.DefaultLogger.Error("DeleteReportGroupMembership: db.Prepare(): ", err.Error())
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(id)
+	if err != nil {
+		log.DefaultLogger.Error("DeleteReportGroupMembership: stmt.Exec(): ", err.Error())
+		return err
+	}
+
+	return nil
+}

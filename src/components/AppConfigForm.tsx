@@ -41,19 +41,6 @@ const AppConfigForm = ({ plugin }: Props) => {
     });
   }, []);
 
-  // useEffect(() => {
-  //   if (isDSlistLoadSuccess) {
-  //     const foundDatasource = datasources?.find((datasource: any) => datasource.id === state?.datasourceID);
-  //     setState((states) => ({
-  //       ...states,
-  //       selectedDatasource: {
-  //         label: foundDatasource.name,
-  //         value: foundDatasource,
-  //       },
-  //     }));
-  //   }
-  // }, [datasources, isDSlistLoadSuccess, state?.datasourceID]);
-
   const onResetGrafanaPassword = () =>
     setState({
       ...state,
