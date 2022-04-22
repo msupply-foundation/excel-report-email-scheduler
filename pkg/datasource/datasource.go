@@ -48,7 +48,11 @@ func NewMsupplyEresDatasource() *MsupplyEresDatasource {
 		DataPath: dataPath,
 	}
 
-	mSupplyEresDatasource.Init()
+	_, err := mSupplyEresDatasource.Init()
+	if err != nil {
+		log.DefaultLogger.Error("Failed to initiate mSupplyEresDatasource", err.Error())
+		return nil
+	}
 
 	return mSupplyEresDatasource
 }
@@ -125,19 +129,19 @@ func (datasource *MsupplyEresDatasource) Ping() error {
 	return nil
 }
 
-func (datasource *MsupplyEresDatasource) Init() {
+func (datasource *MsupplyEresDatasource) Init() (*bool, error) {
 	datasource.logger.Info("Initializing Database")
 
 	err := datasource.Ping()
 	if err != nil {
 		datasource.logger.Error("FATAL. Init - Ping. ", err.Error())
-		panic(err)
+		return nil, err
 	}
 
 	db, err := sql.Open("sqlite", datasource.DataPath)
 	if err != nil {
 		datasource.logger.Error("FATAL. Init - sql.Open : ", err.Error())
-		panic(err)
+		return nil, err
 	}
 	defer db.Close()
 
@@ -146,14 +150,14 @@ func (datasource *MsupplyEresDatasource) Init() {
 	defer stmt.Close()
 	if err != nil {
 		datasource.logger.Error("FATAL. Could not create Schedule:", err.Error())
-		panic(err)
+		return nil, err
 	}
 
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroup (id TEXT PRIMARY KEY, name TEXT, description TEXT)")
 	stmt.Exec()
 	if err != nil {
 		datasource.logger.Error("FATAL. Could not create ReportGroup:", err.Error())
-		panic(err)
+		return nil, err
 	}
 
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroupMembership (id TEXT PRIMARY KEY, userID TEXT, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
@@ -161,15 +165,18 @@ func (datasource *MsupplyEresDatasource) Init() {
 
 	if err != nil {
 		datasource.logger.Error("FATAL. Could not create ReportGroupMembership:", err.Error())
-		panic(err)
+		return nil, err
 	}
 
 	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
 	if err != nil {
 		datasource.logger.Error("FATAL. Could not create ReportContent:", err.Error())
-		panic(err)
+		return nil, err
 	}
 
 	datasource.logger.Info("Database initialized!")
+
+	status := true
+	return &status, nil
 }

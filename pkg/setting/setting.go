@@ -25,7 +25,7 @@ func NewSettings(ctx context.Context) (*Settings, error) {
 	jsonData, err := simplejson.NewJson(pluginCxt.AppInstanceSettings.JSONData)
 	if err != nil {
 		log.DefaultLogger.Error("simplejson.NewJson:" + err.Error())
-		panic(err)
+		return nil, err
 	}
 
 	grafanaUsername := jsonData.Get("grafanaUsername").MustString()
