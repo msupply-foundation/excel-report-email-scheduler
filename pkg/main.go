@@ -24,6 +24,7 @@ func main() {
 	ds, server, err := Init(pluginLogger)
 	if err != nil {
 		pluginLogger.Error("Error starting mSupply Excel report e-mail scheduler datasource", "error", err.Error())
+		return
 	}
 
 	pluginLogger.Debug("Starting mSupply Excel report e-mail scheduler datasource")
@@ -38,7 +39,7 @@ func main() {
 }
 
 func Init(logger log.Logger) (*datasource.MsupplyEresDatasource, *server.HttpServer, error) {
-	mSupplyEresDatasource := datasource.NewMsupplyEresDatasource()
+	mSupplyEresDatasource, _ := datasource.NewMsupplyEresDatasource()
 
 	server := server.NewServer(mSupplyEresDatasource)
 

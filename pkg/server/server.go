@@ -2,7 +2,10 @@ package server
 
 import (
 	"encoding/json"
+	"runtime"
+
 	"excel-report-email-scheduler/pkg/datasource"
+	"excel-report-email-scheduler/pkg/ereserror"
 	"net/http"
 
 	"github.com/bugsnag/bugsnag-go"
@@ -10,6 +13,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
+	"github.com/pkg/errors"
 )
 
 type HttpServer struct {
@@ -23,7 +27,7 @@ func NewServer(sqliteDatasource *datasource.MsupplyEresDatasource) *HttpServer {
 func (server *HttpServer) ResourceHandler(mSupplyEresDatasource *datasource.MsupplyEresDatasource) backend.CallResourceHandler {
 	mux := mux.NewRouter()
 
-	mux.HandleFunc("/report-group", server.fetchReportGroupsWithMembers).Methods("GET")
+	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.fetchReportGroupsWithMembers)).Methods("GET")
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.fetchSingleReportGroupWithMembers)).Methods("GET")
 	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.CreateReportGroupWithMembers)).Methods("POST")
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.deleteReportGroupsWithMembers)).Methods("DELETE")
@@ -42,30 +46,22 @@ func (server *HttpServer) Success(rw http.ResponseWriter, message string) {
 	rw.Write(jsonResp)
 }
 
-func (server *HttpServer) Error(rw http.ResponseWriter, status int, message string, err error) {
-	data := make(map[string]interface{})
+func (server *HttpServer) Error(rw http.ResponseWriter, err error) {
+	log.DefaultLogger.Error(err.Error())
 
-	data["status"] = status
-
-	switch status {
-	case 404:
-		data["message"] = "Not Found"
-	case 500:
-		data["message"] = "Internal Server Error"
+	var ew ereserror.EresError
+	if errors.As(err, &ew) {
+		ew = ew.Dig()
+		http.Error(rw, ew.Message, ew.Code)
+	} else {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
 	}
+}
 
-	if message != "" {
-		data["message"] = message
-	}
-
-	if err != nil {
-		data["error"] = err.Error()
-	}
-
-	rw.Header().Set("Content-Type", "application/json")
-	jsonResp, err := json.Marshal(data)
-	if err != nil {
-		log.DefaultLogger.Error("updateReportGroup: db.UpdateReportGroup: " + err.Error())
-	}
-	rw.Write(jsonResp)
+func trace() *runtime.Frame {
+	pc := make([]uintptr, 15)
+	n := runtime.Callers(2, pc)
+	frames := runtime.CallersFrames(pc[:n])
+	frame, _ := frames.Next()
+	return &frame
 }

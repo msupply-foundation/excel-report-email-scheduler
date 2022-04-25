@@ -24,18 +24,19 @@ func NewReportGroup(ID string, name string, description string) *ReportGroup {
 }
 
 func (datasource *MsupplyEresDatasource) GetReportGroups() ([]ReportGroup, error) {
+	frame := trace()
 	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		err = fmt.Errorf("NewSqlClient() : %w", err)
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return nil, err
 	}
 	defer sqlClient.db.Close()
 
 	var reportGroups []ReportGroup
 
-	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroup")
+	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroups")
 	if err != nil {
-		err = ereserror.New(500, errors.Wrap(err, "db.Query failed"), "Could not get report group list")
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not get report group list")
 		return nil, err
 	}
 	defer rows.Close()
@@ -44,7 +45,7 @@ func (datasource *MsupplyEresDatasource) GetReportGroups() ([]ReportGroup, error
 		var ID, Name, Description string
 		err = rows.Scan(&ID, &Name, &Description)
 		if err != nil {
-			err = fmt.Errorf("GetReportGroups: rows.Scan : %w", err)
+			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not scan report group rows")
 			return nil, err
 		}
 
@@ -56,17 +57,20 @@ func (datasource *MsupplyEresDatasource) GetReportGroups() ([]ReportGroup, error
 }
 
 func (datasource *MsupplyEresDatasource) GetSingleReportGroup(ID string) (*ReportGroup, error) {
+	frame := trace()
 	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		err = fmt.Errorf("GetSingleReportGroup: NewSqlClient() : %w", err)
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return nil, err
 	}
+	defer sqlClient.db.Close()
 
 	var reportGroups []ReportGroup
 
 	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroup where id=?", ID)
 	if err != nil {
-		datasource.logger.Error("GetSchedules: db.Query(): ", err.Error())
+		err = ereserror.New(500, errors.Wrap(err, frame.Function),
+			fmt.Sprintf("Could not find ReportGroup with id: %s", ID))
 		return nil, err
 	}
 	defer rows.Close()
@@ -76,7 +80,7 @@ func (datasource *MsupplyEresDatasource) GetSingleReportGroup(ID string) (*Repor
 
 		err = rows.Scan(&ID, &Name, &Description)
 		if err != nil {
-			datasource.logger.Error("GetSchedules: rows.Scan(): ", err.Error())
+			err = ereserror.New(500, errors.Wrap(err, frame.Function), fmt.Sprintf("Could not scan rows of ReportGroup with id: %s", ID))
 			return nil, err
 		}
 
@@ -87,6 +91,6 @@ func (datasource *MsupplyEresDatasource) GetSingleReportGroup(ID string) (*Repor
 	if len(reportGroups) > 0 {
 		return &reportGroups[0], nil
 	} else {
-		return nil, errors.New("no report group with id " + ID + " found")
+		return nil, ereserror.New(500, errors.Wrap(err, frame.Function), fmt.Sprintf("Could not find of ReportGroup with id: %s", ID))
 	}
 }

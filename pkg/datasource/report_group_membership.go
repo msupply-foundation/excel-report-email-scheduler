@@ -1,10 +1,11 @@
 package datasource
 
 import (
+	"excel-report-email-scheduler/pkg/ereserror"
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/pkg/errors"
 )
 
 type ReportGroupMembership struct {
@@ -22,15 +23,18 @@ func NewReportGroupMembership(ID string, userID string, reportGroupID string) *R
 }
 
 func (datasource *MsupplyEresDatasource) GroupMemberUserIDs(reportGroup *ReportGroup) ([]string, error) {
+	frame := trace()
 	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		err = fmt.Errorf("GroupMemberUserIDs: sql.Open: %w", err)
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return nil, err
 	}
+	defer sqlClient.db.Close()
 
 	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroupMembership WHERE reportGroupID = ?", reportGroup.ID)
 	if err != nil {
-		log.DefaultLogger.Error("GroupMemberUserIDs: sqlClie.db.Query()", err.Error())
+		err = ereserror.New(500, errors.Wrap(err, frame.Function),
+			fmt.Sprintf("Could not find Report Group members for report group with id: %s", reportGroup.ID))
 		return nil, err
 	}
 
@@ -39,7 +43,8 @@ func (datasource *MsupplyEresDatasource) GroupMemberUserIDs(reportGroup *ReportG
 		var ID, UserID, ReportGroupID string
 		err = rows.Scan(&ID, &UserID, &ReportGroupID)
 		if err != nil {
-			log.DefaultLogger.Error("GroupMemberUserIDs: rows.Scan(): ", err.Error())
+			err = ereserror.New(500, errors.Wrap(err, frame.Function),
+				fmt.Sprintf("Could not find Report Group members for report group with id: %s", reportGroup.ID))
 			return nil, err
 		}
 		membership := ReportGroupMembership{ID, UserID, ReportGroupID}
@@ -55,11 +60,13 @@ func (datasource *MsupplyEresDatasource) GroupMemberUserIDs(reportGroup *ReportG
 }
 
 func (datasource *MsupplyEresDatasource) CreateReportGroupMembership(members []ReportGroupMembership) (*[]ReportGroupMembership, error) {
+	frame := trace()
 	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		err = fmt.Errorf("CreateReportGroupMembership: sql.Open() : %w", err)
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return nil, err
 	}
+	defer sqlClient.db.Close()
 
 	var addedMemberships []ReportGroupMembership
 	for _, member := range members {
@@ -67,14 +74,14 @@ func (datasource *MsupplyEresDatasource) CreateReportGroupMembership(members []R
 
 		stmt, err := sqlClient.db.Prepare("INSERT INTO ReportGroupMembership (ID, userID, reportGroupID) VALUES (?,?,?)")
 		if err != nil {
-			log.DefaultLogger.Error("CreateReportGroupMembership: db.Prepare(): ", err.Error())
+			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not create report group membership")
 			return nil, err
 		}
 		defer stmt.Close()
 
 		_, err = stmt.Exec(newUuid, member.UserID, member.ReportGroupID)
 		if err != nil {
-			log.DefaultLogger.Error("CreateReportGroupMembership: stmt.Exec() ", err.Error())
+			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not create report group membership")
 			return nil, err
 		}
 
@@ -86,22 +93,24 @@ func (datasource *MsupplyEresDatasource) CreateReportGroupMembership(members []R
 }
 
 func (datasource *MsupplyEresDatasource) DeleteReportGroupMembersByGroupID(id string) error {
+	frame := trace()
 	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		err = fmt.Errorf("DeleteReportGroupMembership: sql.Open(): %w", err)
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return err
 	}
+	defer sqlClient.db.Close()
 
 	stmt, err := sqlClient.db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
 	if err != nil {
-		log.DefaultLogger.Error("DeleteReportGroupMembership: db.Prepare(): ", err.Error())
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not delete report group membership")
 		return err
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(id)
 	if err != nil {
-		log.DefaultLogger.Error("DeleteReportGroupMembership: stmt.Exec(): ", err.Error())
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not delete report group membership")
 		return err
 	}
 

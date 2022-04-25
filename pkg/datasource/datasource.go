@@ -25,7 +25,7 @@ type MsupplyEresDatasourceInstance struct {
 	logger log.Logger
 }
 
-func NewMsupplyEresDatasource() *MsupplyEresDatasource {
+func NewMsupplyEresDatasource() (*MsupplyEresDatasource, error) {
 	var runningOS string
 	var dataPath string
 
@@ -51,9 +51,10 @@ func NewMsupplyEresDatasource() *MsupplyEresDatasource {
 	_, err := mSupplyEresDatasource.Init()
 	if err != nil {
 		log.DefaultLogger.Error("Failed to initiate mSupplyEresDatasource", err)
+		// return nil, err
 	}
 
-	return mSupplyEresDatasource
+	return mSupplyEresDatasource, nil
 }
 
 func newMsupplyEresDatasourceInstance(dsSettings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
@@ -176,4 +177,12 @@ func (datasource *MsupplyEresDatasource) Init() (*bool, error) {
 
 	status := true
 	return &status, nil
+}
+
+func trace() *runtime.Frame {
+	pc := make([]uintptr, 15)
+	n := runtime.Callers(2, pc)
+	frames := runtime.CallersFrames(pc[:n])
+	frame, _ := frames.Next()
+	return &frame
 }
