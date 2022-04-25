@@ -1,8 +1,8 @@
 package datasource
 
 import (
-	"database/sql"
 	"excel-report-email-scheduler/pkg/api"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
@@ -23,17 +23,14 @@ type ReportGroupWithMembersRequest struct {
 }
 
 func (datasource *MsupplyEresDatasource) CreateReportGroupWithMembers(reportGroupWithMembers ReportGroupWithMembersRequest) (*ReportGroupWithMembersRequest, error) {
-	db, err := sql.Open("sqlite", datasource.DataPath)
+	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		log.DefaultLogger.Error("CreateReportGroupWithMembers: sql.Open(): ", err.Error())
+		err = fmt.Errorf("CreateReportGroupWithMembers: sql.Open() : %w", err)
 		return nil, err
 	}
-	defer db.Close()
-
-	datasource.logger.Debug("reportGroupWithMembers.ID", reportGroupWithMembers.ID)
 
 	if reportGroupWithMembers.ID == "" {
-		stmt, err := db.Prepare("INSERT INTO ReportGroup (id, name, description) VALUES (?,?,?) RETURNING *")
+		stmt, err := sqlClient.db.Prepare("INSERT INTO ReportGroup (id, name, description) VALUES (?,?,?) RETURNING *")
 		if err != nil {
 			log.DefaultLogger.Error("CreateReportGroupWithMembers: db.Prepare(): ", err.Error())
 			return nil, err
@@ -48,7 +45,7 @@ func (datasource *MsupplyEresDatasource) CreateReportGroupWithMembers(reportGrou
 			return nil, err
 		}
 	} else {
-		stmt, err := db.Prepare("UPDATE ReportGroup SET name = ?, description = ? where id = ? RETURNING *")
+		stmt, err := sqlClient.db.Prepare("UPDATE ReportGroup SET name = ?, description = ? where id = ? RETURNING *")
 		if err != nil {
 			log.DefaultLogger.Error("CreateReportGroupWithMembers: db.Prepare(): ", err.Error())
 			return nil, err
@@ -84,14 +81,13 @@ func (datasource *MsupplyEresDatasource) CreateReportGroupWithMembers(reportGrou
 }
 
 func (datasource *MsupplyEresDatasource) DeleteReportGroupsWithMembers(id string) error {
-	db, err := sql.Open("sqlite", datasource.DataPath)
+	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		log.DefaultLogger.Error("DeleteReportGroup: sql.Open(): ", err.Error())
+		err = fmt.Errorf("DeleteReportGroup: sql.Open(): %w", err)
 		return err
 	}
-	defer db.Close()
 
-	stmt, err := db.Prepare("DELETE FROM ReportGroup WHERE id = ?")
+	stmt, err := sqlClient.db.Prepare("DELETE FROM ReportGroup WHERE id = ?")
 	if err != nil {
 		log.DefaultLogger.Error("DeleteReportGroup: db.Prepare(): ", err.Error())
 		return err
@@ -100,7 +96,7 @@ func (datasource *MsupplyEresDatasource) DeleteReportGroupsWithMembers(id string
 
 	stmt.Exec(id)
 
-	stmt, err = db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
+	stmt, err = sqlClient.db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
 	if err != nil {
 		log.DefaultLogger.Error("DeleteReportGroup: db.Prepare(): ", err.Error())
 		return err

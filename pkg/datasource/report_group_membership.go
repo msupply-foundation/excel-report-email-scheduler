@@ -1,7 +1,7 @@
 package datasource
 
 import (
-	"database/sql"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
@@ -22,16 +22,15 @@ func NewReportGroupMembership(ID string, userID string, reportGroupID string) *R
 }
 
 func (datasource *MsupplyEresDatasource) GroupMemberUserIDs(reportGroup *ReportGroup) ([]string, error) {
-	db, err := sql.Open("sqlite", datasource.DataPath)
+	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		log.DefaultLogger.Error("GroupMemberUserIDs: sql.Open", err.Error())
+		err = fmt.Errorf("GroupMemberUserIDs: sql.Open: %w", err)
 		return nil, err
 	}
-	defer db.Close()
 
-	rows, err := db.Query("SELECT * FROM ReportGroupMembership WHERE reportGroupID = ?", reportGroup.ID)
+	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroupMembership WHERE reportGroupID = ?", reportGroup.ID)
 	if err != nil {
-		log.DefaultLogger.Error("GroupMemberUserIDs: db.Query()", err.Error())
+		log.DefaultLogger.Error("GroupMemberUserIDs: sqlClie.db.Query()", err.Error())
 		return nil, err
 	}
 
@@ -56,18 +55,17 @@ func (datasource *MsupplyEresDatasource) GroupMemberUserIDs(reportGroup *ReportG
 }
 
 func (datasource *MsupplyEresDatasource) CreateReportGroupMembership(members []ReportGroupMembership) (*[]ReportGroupMembership, error) {
-	db, err := sql.Open("sqlite", datasource.DataPath)
+	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		log.DefaultLogger.Error("CreateReportGroupMembership: sql.Open(): ", err.Error())
+		err = fmt.Errorf("CreateReportGroupMembership: sql.Open() : %w", err)
 		return nil, err
 	}
-	defer db.Close()
 
 	var addedMemberships []ReportGroupMembership
 	for _, member := range members {
 		newUuid := uuid.New().String()
 
-		stmt, err := db.Prepare("INSERT INTO ReportGroupMembership (ID, userID, reportGroupID) VALUES (?,?,?)")
+		stmt, err := sqlClient.db.Prepare("INSERT INTO ReportGroupMembership (ID, userID, reportGroupID) VALUES (?,?,?)")
 		if err != nil {
 			log.DefaultLogger.Error("CreateReportGroupMembership: db.Prepare(): ", err.Error())
 			return nil, err
@@ -88,14 +86,13 @@ func (datasource *MsupplyEresDatasource) CreateReportGroupMembership(members []R
 }
 
 func (datasource *MsupplyEresDatasource) DeleteReportGroupMembersByGroupID(id string) error {
-	db, err := sql.Open("sqlite", datasource.DataPath)
+	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		log.DefaultLogger.Error("DeleteReportGroupMembership: sql.Open(): ", err.Error())
+		err = fmt.Errorf("DeleteReportGroupMembership: sql.Open(): %w", err)
 		return err
 	}
-	defer db.Close()
 
-	stmt, err := db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
+	stmt, err := sqlClient.db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
 	if err != nil {
 		log.DefaultLogger.Error("DeleteReportGroupMembership: db.Prepare(): ", err.Error())
 		return err

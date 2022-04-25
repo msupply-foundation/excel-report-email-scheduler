@@ -2,10 +2,13 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"excel-report-email-scheduler/pkg/api"
 	"excel-report-email-scheduler/pkg/auth"
 	"excel-report-email-scheduler/pkg/datasource"
+	"excel-report-email-scheduler/pkg/ereserror"
 	"excel-report-email-scheduler/pkg/setting"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -19,9 +22,14 @@ func (server *HttpServer) fetchSingleReportGroupWithMembers(rw http.ResponseWrit
 
 	settings, err := setting.NewSettings(request.Context())
 	if err != nil {
-		log.DefaultLogger.Error("fetchReportGroupsWithMembers: db.GetReportGroups")
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		// panic(err) is causing a RPC error so removing it for now
+		log.DefaultLogger.Error("fetchReportGroupsWithMembers: db.GetReportGroups", err)
+		var ew ereserror.EresError
+		if errors.As(err, &ew) {
+			ew = ew.Dig()
+			http.Error(rw, ew.Message, ew.Code)
+		} else {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -35,7 +43,7 @@ func (server *HttpServer) fetchSingleReportGroupWithMembers(rw http.ResponseWrit
 	var group *datasource.ReportGroup
 	group, err = server.db.GetSingleReportGroup(id)
 	if err != nil {
-		log.DefaultLogger.Error("fetchReportGroupsWithMembers: server.db.GetReportGroups", err.Error())
+		log.DefaultLogger.Error("fetchReportGroupsWithMembers: server.db.GetReportGroups", fmt.Sprintf("%+v", err))
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -85,7 +93,13 @@ func (server *HttpServer) fetchReportGroupsWithMembers(rw http.ResponseWriter, r
 	groups, err = server.db.GetReportGroups()
 	if err != nil {
 		log.DefaultLogger.Error("fetchReportGroupsWithMembers: server.db.GetReportGroups", err.Error())
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		var ew ereserror.EresError
+		if errors.As(err, &ew) {
+			ew = ew.Dig()
+			http.Error(rw, ew.Message, ew.Code)
+		} else {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 

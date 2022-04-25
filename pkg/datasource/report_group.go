@@ -1,8 +1,10 @@
 package datasource
 
 import (
-	"database/sql"
-	"errors"
+	"excel-report-email-scheduler/pkg/ereserror"
+	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 type ReportGroup struct {
@@ -22,18 +24,18 @@ func NewReportGroup(ID string, name string, description string) *ReportGroup {
 }
 
 func (datasource *MsupplyEresDatasource) GetReportGroups() ([]ReportGroup, error) {
-	db, err := sql.Open("sqlite", datasource.DataPath)
+	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		datasource.logger.Error("GetReportGroups: sql.Open", err.Error())
+		err = fmt.Errorf("NewSqlClient() : %w", err)
 		return nil, err
 	}
-	defer db.Close()
+	defer sqlClient.db.Close()
 
 	var reportGroups []ReportGroup
 
-	rows, err := db.Query("SELECT * FROM ReportGroup")
+	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroup")
 	if err != nil {
-		datasource.logger.Error("GetReportGroups: db.Query(): ", err.Error())
+		err = ereserror.New(500, errors.Wrap(err, "db.Query failed"), "Could not get report group list")
 		return nil, err
 	}
 	defer rows.Close()
@@ -42,7 +44,7 @@ func (datasource *MsupplyEresDatasource) GetReportGroups() ([]ReportGroup, error
 		var ID, Name, Description string
 		err = rows.Scan(&ID, &Name, &Description)
 		if err != nil {
-			datasource.logger.Error("GetReportGroups: rows.Scan(): ", err.Error())
+			err = fmt.Errorf("GetReportGroups: rows.Scan : %w", err)
 			return nil, err
 		}
 
@@ -54,16 +56,15 @@ func (datasource *MsupplyEresDatasource) GetReportGroups() ([]ReportGroup, error
 }
 
 func (datasource *MsupplyEresDatasource) GetSingleReportGroup(ID string) (*ReportGroup, error) {
-	db, err := sql.Open("sqlite", datasource.DataPath)
+	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		datasource.logger.Error("GetSchedule: sql.Open(): ", err.Error())
+		err = fmt.Errorf("GetSingleReportGroup: NewSqlClient() : %w", err)
 		return nil, err
 	}
-	defer db.Close()
 
 	var reportGroups []ReportGroup
 
-	rows, err := db.Query("SELECT * FROM ReportGroup where id=?", ID)
+	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroup where id=?", ID)
 	if err != nil {
 		datasource.logger.Error("GetSchedules: db.Query(): ", err.Error())
 		return nil, err

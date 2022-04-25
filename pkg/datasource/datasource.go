@@ -2,7 +2,7 @@ package datasource
 
 import (
 	"context"
-	"database/sql"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -50,8 +50,7 @@ func NewMsupplyEresDatasource() *MsupplyEresDatasource {
 
 	_, err := mSupplyEresDatasource.Init()
 	if err != nil {
-		log.DefaultLogger.Error("Failed to initiate mSupplyEresDatasource", err.Error())
-		return nil
+		log.DefaultLogger.Error("Failed to initiate mSupplyEresDatasource", err)
 	}
 
 	return mSupplyEresDatasource
@@ -113,16 +112,15 @@ func (datasource *MsupplyEresDatasource) CheckHealth(ctx context.Context, req *b
 func (datasource *MsupplyEresDatasource) Ping() error {
 	log.DefaultLogger.Info("Pinging Database")
 
-	db, err := sql.Open("sqlite", datasource.DataPath)
+	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		log.DefaultLogger.Error("Ping - sql.Open: ", err.Error())
+		err = fmt.Errorf("Ping: NewSqlClient() : %w", err)
 		return err
 	}
-	defer db.Close()
 
-	err = db.Ping()
+	err = sqlClient.db.Ping()
 	if err != nil {
-		log.DefaultLogger.Warn("Ping - sql.Ping: ", err.Error())
+		err = fmt.Errorf("Ping - sql.Ping : %w", err)
 		return err
 	}
 
@@ -134,44 +132,43 @@ func (datasource *MsupplyEresDatasource) Init() (*bool, error) {
 
 	err := datasource.Ping()
 	if err != nil {
-		datasource.logger.Error("FATAL. Init - Ping. ", err.Error())
+		err = fmt.Errorf("FATAL. Init - Ping. %w", err)
 		return nil, err
 	}
 
-	db, err := sql.Open("sqlite", datasource.DataPath)
+	sqlClient, err := datasource.NewSqlClient()
 	if err != nil {
-		datasource.logger.Error("FATAL. Init - sql.Open : ", err.Error())
+		err = fmt.Errorf("FATAL. Init - sql.Open : %w", err)
 		return nil, err
 	}
-	defer db.Close()
 
-	stmt, err := db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, time TEXT, day INTEGER, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
+	stmt, err := sqlClient.db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, time TEXT, day INTEGER, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
 	stmt.Exec()
 	defer stmt.Close()
 	if err != nil {
-		datasource.logger.Error("FATAL. Could not create Schedule:", err.Error())
+		err = fmt.Errorf("FATAL. Could not create Schedule: %w", err)
 		return nil, err
 	}
 
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroup (id TEXT PRIMARY KEY, name TEXT, description TEXT)")
+	stmt, err = sqlClient.db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroup (id TEXT PRIMARY KEY, name TEXT, description TEXT)")
 	stmt.Exec()
 	if err != nil {
-		datasource.logger.Error("FATAL. Could not create ReportGroup:", err.Error())
+		err = fmt.Errorf("FATAL. Could not create ReportGroup: %w", err)
 		return nil, err
 	}
 
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroupMembership (id TEXT PRIMARY KEY, userID TEXT, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
+	stmt, err = sqlClient.db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroupMembership (id TEXT PRIMARY KEY, userID TEXT, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
 	stmt.Exec()
 
 	if err != nil {
-		datasource.logger.Error("FATAL. Could not create ReportGroupMembership:", err.Error())
+		err = fmt.Errorf("FATAL. Could not create ReportGroupMembership: %w", err)
 		return nil, err
 	}
 
-	stmt, err = db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
+	stmt, err = sqlClient.db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
 	if err != nil {
-		datasource.logger.Error("FATAL. Could not create ReportContent:", err.Error())
+		err = fmt.Errorf("FATAL. Could not create ReportContent: %w", err)
 		return nil, err
 	}
 

@@ -23,7 +23,7 @@ func NewServer(sqliteDatasource *datasource.MsupplyEresDatasource) *HttpServer {
 func (server *HttpServer) ResourceHandler(mSupplyEresDatasource *datasource.MsupplyEresDatasource) backend.CallResourceHandler {
 	mux := mux.NewRouter()
 
-	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.fetchReportGroupsWithMembers)).Methods("GET")
+	mux.HandleFunc("/report-group", server.fetchReportGroupsWithMembers).Methods("GET")
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.fetchSingleReportGroupWithMembers)).Methods("GET")
 	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.CreateReportGroupWithMembers)).Methods("POST")
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.deleteReportGroupsWithMembers)).Methods("DELETE")
