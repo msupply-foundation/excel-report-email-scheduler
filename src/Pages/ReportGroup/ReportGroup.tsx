@@ -3,13 +3,14 @@ import { css, cx } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
 import { Button, Card, ConfirmModal, HorizontalGroup, LinkButton, Spinner, Tag, useStyles2 } from '@grafana/ui';
 import intl from 'react-intl-universal';
+import { useMutation, useQuery } from 'react-query';
+
 import { EmptyListCTA } from 'components/common';
 import { prefixRoute } from '../../utils';
 import { PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { ReportGroupType } from 'types';
-import { useMutation, useQuery } from 'react-query';
-import { deleteReportGroup, getReportGroups } from 'api/ReportGroup';
-import { useToggle } from 'hooks';
+import { deleteReportGroup, getReportGroups } from 'api';
+import { useToggle } from '../../hooks';
 
 const EmptyList = () => {
   return (

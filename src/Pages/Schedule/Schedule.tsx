@@ -1,13 +1,13 @@
 import * as React from 'react';
-import { css } from '@emotion/css';
-import { GrafanaTheme2 } from '@grafana/data';
-import { useStyles2 } from '@grafana/ui';
+// import { css } from '@emotion/css';
+// import { GrafanaTheme2 } from '@grafana/data';
+// import { useStyles2 } from '@grafana/ui';
 import { ROUTES } from '../../constants';
 import { prefixRoute } from '../../utils/navigation';
 import { EmptyListCTA } from 'components/common';
 
 const Schedule = () => {
-  const styles = useStyles2(getStyles);
+  //const styles = useStyles2(getStyles);
 
   return (
     <EmptyListCTA
@@ -20,10 +20,10 @@ const Schedule = () => {
   );
 };
 
-const getStyles = (theme: GrafanaTheme2) => ({
-  marginTop: css`
-    margin-top: ${theme.spacing(2)};
-  `,
-});
+// const getStyles = (theme: GrafanaTheme2) => ({
+//   marginTop: css`
+//     margin-top: ${theme.spacing(2)};
+//   `,
+// });
 
 export { Schedule };

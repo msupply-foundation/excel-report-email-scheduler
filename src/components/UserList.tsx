@@ -189,4 +189,4 @@ const getStyles = (theme: GrafanaTheme2) => ({
   `,
 });
 
-export default UserList;
+export { UserList };

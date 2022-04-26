@@ -1,15 +1,16 @@
 import React from 'react';
 import { Form } from '@grafana/ui';
-import { Page } from 'components/common';
-import { NAVIGATION_TITLE, NAVIGATION_SUBTITLE, ROUTES } from '../../constants';
-import { prefixRoute } from 'utils';
 
-const defaultFormValues: any = {
-  id: '',
-  name: '',
-  description: '',
-  members: [],
-};
+import { NAVIGATION_TITLE, NAVIGATION_SUBTITLE, ROUTES } from '../../constants';
+import { Page } from '../../components';
+import { prefixRoute } from '../../utils';
+
+// const defaultFormValues: any = {
+//   id: '',
+//   name: '',
+//   description: '',
+//   members: [],
+// };
 
 const CreateSchedule: React.FC = ({ history, match }: any) => {
   const submitCreateSchedule = () => {};
