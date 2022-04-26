@@ -17,7 +17,13 @@ type MemberDetail struct {
 
 func GetMemberDeatailsFromUserIDs(authConfig *auth.AuthConfig, userIDs []string, datasourceID int) ([]MemberDetail, error) {
 	frame := trace()
-	url := authConfig.AuthURL() + "/api/ds/query"
+	authUrl, err := authConfig.AuthURL()
+	if err != nil {
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not retrive auth credentials")
+		return nil, err
+	}
+
+	url := *authUrl + "/api/ds/query"
 
 	queryString := "("
 	i := 0

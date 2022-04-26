@@ -1,11 +1,12 @@
 package auth
 
 import (
+	"excel-report-email-scheduler/pkg/ereserror"
 	"excel-report-email-scheduler/pkg/setting"
 	"regexp"
 	"strings"
 
-	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/pkg/errors"
 )
 
 type AuthConfig struct {
@@ -22,17 +23,16 @@ func (config AuthConfig) AuthString() string {
 	return config.Username + ":" + config.Password + "@"
 }
 
-func (config AuthConfig) AuthURL() string {
-	authUrl := config.InjectAuthString()
-
-	authUrl = strings.TrimSuffix(authUrl, "/")
-
-	log.DefaultLogger.Debug("auth url: " + authUrl)
-
-	return authUrl
+func (config AuthConfig) AuthURL() (*string, error) {
+	authUrl, err := config.InjectAuthString()
+	if err != nil {
+		return nil, err
+	}
+	authUrl1 := strings.TrimSuffix(*authUrl, "/")
+	return &authUrl1, nil
 }
 
-func (config AuthConfig) InjectAuthString() string {
+func (config AuthConfig) InjectAuthString() (*string, error) {
 	http := regexp.MustCompile("http://")
 	https := regexp.MustCompile("https://")
 
@@ -40,10 +40,13 @@ func (config AuthConfig) InjectAuthString() string {
 	if index == nil {
 		index = https.FindStringIndex(config.URL)
 		if index == nil {
-			log.DefaultLogger.Info("Error injecting Auth: " + config.URL)
-			return ""
+			err := errors.New("Could not authorise")
+			err = ereserror.New(500, err, err.Error())
+			return nil, err
 		}
 	}
 
-	return config.URL[:index[1]] + config.AuthString() + config.URL[index[1]:]
+	authURL := config.URL[:index[1]] + config.AuthString() + config.URL[index[1]:]
+
+	return &authURL, nil
 }
