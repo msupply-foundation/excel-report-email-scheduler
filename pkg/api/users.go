@@ -2,9 +2,10 @@ package api
 
 import (
 	"excel-report-email-scheduler/pkg/auth"
+	"excel-report-email-scheduler/pkg/ereserror"
 	"net/http"
 
-	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/pkg/errors"
 	"golang.org/x/exp/slices"
 )
 
@@ -15,6 +16,7 @@ type MemberDetail struct {
 }
 
 func GetMemberDeatailsFromUserIDs(authConfig *auth.AuthConfig, userIDs []string, datasourceID int) ([]MemberDetail, error) {
+	frame := trace()
 	url := authConfig.AuthURL() + "/api/ds/query"
 
 	queryString := "("
@@ -27,19 +29,19 @@ func GetMemberDeatailsFromUserIDs(authConfig *auth.AuthConfig, userIDs []string,
 
 	body, err := NewQueryRequest("SELECT id,name,e_mail FROM \"user\" WHERE id IN "+queryString, "0", "0", datasourceID).ToRequestBody()
 	if err != nil {
-		log.DefaultLogger.Error("GetMembersDetailFromGroup: NewQueryRequest: " + err.Error())
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not retrive user(s)")
 		return nil, err
 	}
 
 	response, err := http.Post(url, "application/json", body)
 	if err != nil {
-		log.DefaultLogger.Error("GetMemberDeatailsFromUserIDs: ioutil.ReadAll: " + err.Error())
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not retrive user(s)")
 		return nil, err
 	}
 
 	qr, err := NewQueryResponse(response)
 	if err != nil {
-		log.DefaultLogger.Error("GetMemberDeatailsFromUserIDs: NewQueryResponse: " + err.Error())
+		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not retrive user(s)")
 		return nil, err
 	}
 
