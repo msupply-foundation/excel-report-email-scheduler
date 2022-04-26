@@ -29,9 +29,9 @@ func (datasource *MsupplyEresDatasource) GroupMemberUserIDs(reportGroup *ReportG
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return nil, err
 	}
-	defer sqlClient.db.Close()
+	defer sqlClient.Db.Close()
 
-	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroupMembership WHERE reportGroupID = ?", reportGroup.ID)
+	rows, err := sqlClient.Db.Query("SELECT * FROM ReportGroupMembership WHERE reportGroupID = ?", reportGroup.ID)
 	if err != nil {
 		err = ereserror.New(500, errors.Wrap(err, frame.Function),
 			fmt.Sprintf("Could not find Report Group members for report group with id: %s", reportGroup.ID))
@@ -66,13 +66,13 @@ func (datasource *MsupplyEresDatasource) CreateReportGroupMembership(members []R
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return nil, err
 	}
-	defer sqlClient.db.Close()
+	defer sqlClient.Db.Close()
 
 	var addedMemberships []ReportGroupMembership
 	for _, member := range members {
 		newUuid := uuid.New().String()
 
-		stmt, err := sqlClient.db.Prepare("INSERT INTO ReportGroupMembership (ID, userID, reportGroupID) VALUES (?,?,?)")
+		stmt, err := sqlClient.Db.Prepare("INSERT INTO ReportGroupMembership (ID, userID, reportGroupID) VALUES (?,?,?)")
 		if err != nil {
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not create report group membership")
 			return nil, err
@@ -99,9 +99,9 @@ func (datasource *MsupplyEresDatasource) DeleteReportGroupMembersByGroupID(id st
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return err
 	}
-	defer sqlClient.db.Close()
+	defer sqlClient.Db.Close()
 
-	stmt, err := sqlClient.db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
+	stmt, err := sqlClient.Db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
 	if err != nil {
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not delete report group membership")
 		return err

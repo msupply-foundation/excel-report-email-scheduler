@@ -9,9 +9,9 @@ import (
 )
 
 type SqlClient struct {
-	db  *sql.DB
-	ctx *context.Context
-	tx  *sql.Tx
+	Db  *sql.DB
+	Ctx *context.Context
+	Tx  *sql.Tx
 }
 
 func (datasource *MsupplyEresDatasource) NewSqlClient() (*SqlClient, error) {
@@ -27,17 +27,17 @@ func (datasource *MsupplyEresDatasource) NewSqlClient() (*SqlClient, error) {
 		return nil, err
 	}
 
-	return &SqlClient{db: db}, nil
+	return &SqlClient{Db: db}, nil
 }
 
 func (client *SqlClient) BeginTx() error {
 	ctx := context.Background()
-	client.ctx = &ctx
-	tx, err := client.db.BeginTx(ctx, nil)
+	client.Ctx = &ctx
+	tx, err := client.Db.BeginTx(ctx, nil)
 	if err != nil {
 		err = ereserror.New(500, err, "Begin transaction failed")
 		return err
 	}
-	client.tx = tx
+	client.Tx = tx
 	return nil
 }

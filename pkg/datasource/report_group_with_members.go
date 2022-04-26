@@ -2,6 +2,7 @@ package datasource
 
 import (
 	"excel-report-email-scheduler/pkg/api"
+
 	"excel-report-email-scheduler/pkg/ereserror"
 
 	"github.com/google/uuid"
@@ -29,10 +30,10 @@ func (datasource *MsupplyEresDatasource) CreateReportGroupWithMembers(reportGrou
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return nil, err
 	}
-	defer sqlClient.db.Close()
+	defer sqlClient.Db.Close()
 
 	if reportGroupWithMembers.ID == "" {
-		stmt, err := sqlClient.db.Prepare("INSERT INTO ReportGroup (id, name, description) VALUES (?,?,?) RETURNING *")
+		stmt, err := sqlClient.Db.Prepare("INSERT INTO ReportGroup (id, name, description) VALUES (?,?,?) RETURNING *")
 		if err != nil {
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not create report group record")
 			return nil, err
@@ -47,7 +48,7 @@ func (datasource *MsupplyEresDatasource) CreateReportGroupWithMembers(reportGrou
 			return nil, err
 		}
 	} else {
-		stmt, err := sqlClient.db.Prepare("UPDATE ReportGroup SET name = ?, description = ? where id = ? RETURNING *")
+		stmt, err := sqlClient.Db.Prepare("UPDATE ReportGroup SET name = ?, description = ? where id = ? RETURNING *")
 		if err != nil {
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not update report group record")
 			return nil, err
@@ -89,9 +90,9 @@ func (datasource *MsupplyEresDatasource) DeleteReportGroupsWithMembers(id string
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return err
 	}
-	defer sqlClient.db.Close()
+	defer sqlClient.Db.Close()
 
-	stmt, err := sqlClient.db.Prepare("DELETE FROM ReportGroup WHERE id = ?")
+	stmt, err := sqlClient.Db.Prepare("DELETE FROM ReportGroup WHERE id = ?")
 	if err != nil {
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not delete report group record")
 		return err
@@ -100,7 +101,7 @@ func (datasource *MsupplyEresDatasource) DeleteReportGroupsWithMembers(id string
 
 	stmt.Exec(id)
 
-	stmt, err = sqlClient.db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
+	stmt, err = sqlClient.Db.Prepare("DELETE FROM ReportGroupMembership WHERE reportGroupID = ?")
 	if err != nil {
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not delete report group record")
 		return err

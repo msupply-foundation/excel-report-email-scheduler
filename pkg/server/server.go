@@ -6,6 +6,7 @@ import (
 
 	"excel-report-email-scheduler/pkg/datasource"
 	"excel-report-email-scheduler/pkg/ereserror"
+	"excel-report-email-scheduler/pkg/validation"
 	"net/http"
 
 	"github.com/bugsnag/bugsnag-go"
@@ -17,11 +18,14 @@ import (
 )
 
 type HttpServer struct {
-	db *datasource.MsupplyEresDatasource
+	db        *datasource.MsupplyEresDatasource
+	validator *validation.Validation
 }
 
 func NewServer(sqliteDatasource *datasource.MsupplyEresDatasource) *HttpServer {
-	return &HttpServer{db: sqliteDatasource}
+	validator, _ := validation.New(sqliteDatasource)
+
+	return &HttpServer{db: sqliteDatasource, validator: validator}
 }
 
 func (server *HttpServer) ResourceHandler(mSupplyEresDatasource *datasource.MsupplyEresDatasource) backend.CallResourceHandler {

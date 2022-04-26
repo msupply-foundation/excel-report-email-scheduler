@@ -119,7 +119,7 @@ func (datasource *MsupplyEresDatasource) Ping() error {
 		return err
 	}
 
-	err = sqlClient.db.Ping()
+	err = sqlClient.Db.Ping()
 	if err != nil {
 		err = fmt.Errorf("Ping - sql.Ping : %w", err)
 		return err
@@ -143,7 +143,7 @@ func (datasource *MsupplyEresDatasource) Init() (*bool, error) {
 		return nil, err
 	}
 
-	stmt, err := sqlClient.db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, time TEXT, day INTEGER, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
+	stmt, err := sqlClient.Db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, time TEXT, day INTEGER, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
 	stmt.Exec()
 	defer stmt.Close()
 	if err != nil {
@@ -151,14 +151,14 @@ func (datasource *MsupplyEresDatasource) Init() (*bool, error) {
 		return nil, err
 	}
 
-	stmt, err = sqlClient.db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroup (id TEXT PRIMARY KEY, name TEXT, description TEXT)")
+	stmt, err = sqlClient.Db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroup (id TEXT PRIMARY KEY, name TEXT, description TEXT)")
 	stmt.Exec()
 	if err != nil {
 		err = fmt.Errorf("FATAL. Could not create ReportGroup: %w", err)
 		return nil, err
 	}
 
-	stmt, err = sqlClient.db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroupMembership (id TEXT PRIMARY KEY, userID TEXT, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
+	stmt, err = sqlClient.Db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroupMembership (id TEXT PRIMARY KEY, userID TEXT, reportGroupID TEXT, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
 	stmt.Exec()
 
 	if err != nil {
@@ -166,7 +166,7 @@ func (datasource *MsupplyEresDatasource) Init() (*bool, error) {
 		return nil, err
 	}
 
-	stmt, err = sqlClient.db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
+	stmt, err = sqlClient.Db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
 	if err != nil {
 		err = fmt.Errorf("FATAL. Could not create ReportContent: %w", err)

@@ -92,6 +92,12 @@ func (server *HttpServer) fetchReportGroupsWithMembers(rw http.ResponseWriter, r
 				return
 			}
 
+			err = server.validator.GroupMemberUserIDsMustHaveElements(groupMemberUserIDs)
+			if err != nil {
+				server.Error(rw, errors.Wrap(err, frame.Function))
+				break
+			}
+
 			memberDetails, err := api.GetMemberDeatailsFromUserIDs(authConfig, groupMemberUserIDs, settings.DatasourceID)
 			if err != nil {
 				server.Error(rw, errors.Wrap(err, frame.Function))
@@ -130,6 +136,18 @@ func (server *HttpServer) CreateReportGroupWithMembers(rw http.ResponseWriter, r
 	}
 
 	err = json.Unmarshal(bodyAsBytes, &group)
+	if err != nil {
+		server.Error(rw, errors.Wrap(err, frame.Function))
+		return
+	}
+
+	err = server.validator.ReportGroupDuplicates(group)
+	if err != nil {
+		server.Error(rw, errors.Wrap(err, frame.Function))
+		return
+	}
+
+	err = server.validator.ReportGroupMustHaveMembers(group)
 	if err != nil {
 		server.Error(rw, errors.Wrap(err, frame.Function))
 		return

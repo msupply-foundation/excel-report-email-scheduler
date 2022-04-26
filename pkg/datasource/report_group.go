@@ -30,11 +30,11 @@ func (datasource *MsupplyEresDatasource) GetReportGroups() ([]ReportGroup, error
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return nil, err
 	}
-	defer sqlClient.db.Close()
+	defer sqlClient.Db.Close()
 
 	var reportGroups []ReportGroup
 
-	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroup")
+	rows, err := sqlClient.Db.Query("SELECT * FROM ReportGroup")
 	if err != nil {
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not get report group list")
 		return nil, err
@@ -63,11 +63,11 @@ func (datasource *MsupplyEresDatasource) GetSingleReportGroup(ID string) (*Repor
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not open database")
 		return nil, err
 	}
-	defer sqlClient.db.Close()
+	defer sqlClient.Db.Close()
 
 	var reportGroups []ReportGroup
 
-	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroup where id=?", ID)
+	rows, err := sqlClient.Db.Query("SELECT * FROM ReportGroup where id=?", ID)
 	if err != nil {
 		err = ereserror.New(500, errors.Wrap(err, frame.Function),
 			fmt.Sprintf("Could not find ReportGroup with id: %s", ID))
