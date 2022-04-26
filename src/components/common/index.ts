@@ -1,3 +1,5 @@
-import { SecretInput } from './SecretInput';
-import { EmptyListCTA } from './EmptyListCTA';
-export { SecretInput, EmptyListCTA };
+export * from './SecretInput';
+export * from './EmptyListCTA';
+export * from './Pagination';
+export * from './SecretInput';
+export * from './Page';

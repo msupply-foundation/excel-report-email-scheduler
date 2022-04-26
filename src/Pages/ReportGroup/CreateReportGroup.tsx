@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Field, FieldSet, Form, Input, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
-import { Page } from 'components/common/Page';
-import { ROUTES, NAVIGATION_TITLE, NAVIGATION_SUBTITLE, PLUGIN_BASE_URL } from '../constants';
+import { Page } from 'components/common';
+import { ROUTES, NAVIGATION_TITLE, NAVIGATION_SUBTITLE, PLUGIN_BASE_URL } from '../../constants';
 import { prefixRoute } from 'utils';
 import { useDatasourceID } from 'hooks/useDatasourceID';
 import { useMutation, useQuery } from 'react-query';

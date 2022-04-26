@@ -4,8 +4,8 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { Button, Card, ConfirmModal, HorizontalGroup, LinkButton, Spinner, Tag, useStyles2 } from '@grafana/ui';
 import intl from 'react-intl-universal';
 import { EmptyListCTA } from 'components/common';
-import { prefixRoute } from '../utils';
-import { PLUGIN_BASE_URL, ROUTES } from '../constants';
+import { prefixRoute } from '../../utils';
+import { PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { ReportGroupType } from 'types';
 import { useMutation, useQuery } from 'react-query';
 import { deleteReportGroup, getReportGroups } from 'api/ReportGroup';
@@ -19,9 +19,6 @@ const EmptyList = () => {
       buttonIcon="users-alt"
       buttonLink={`${prefixRoute(ROUTES.REPORT_GROUP)}/create`}
       proTip="Report groups are groups containing users to send the report to."
-      proTipLink=""
-      proTipLinkTitle=""
-      proTipTarget="_blank"
     />
   );
 };
