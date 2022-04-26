@@ -34,7 +34,7 @@ func (datasource *MsupplyEresDatasource) GetReportGroups() ([]ReportGroup, error
 
 	var reportGroups []ReportGroup
 
-	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroups")
+	rows, err := sqlClient.db.Query("SELECT * FROM ReportGroup")
 	if err != nil {
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not get report group list")
 		return nil, err
