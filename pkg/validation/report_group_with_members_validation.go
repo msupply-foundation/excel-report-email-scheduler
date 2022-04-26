@@ -39,8 +39,9 @@ func (validator *Validation) ReportGroupMustHaveMembers(reportGroupWithMembers d
 }
 
 func (validator *Validation) GroupMemberUserIDsMustHaveElements(groupMemberUserIDs []string) error {
-	memberLength := len(groupMemberUserIDs)
 	frame := trace()
+	memberLength := len(groupMemberUserIDs)
+
 	if memberLength <= 0 {
 		err := errors.New("report group must have members")
 		err = ereserror.New(500, errors.Wrap(err, frame.Function), err.Error())
