@@ -97,7 +97,8 @@ export const refreshPanelOptions = async (
   datasourceID: number
 ): Promise<Array<SelectableValue<SelectableVariable>>> => {
   const { definition, name } = variable;
-  const optionsResponse = await getBackendSrv().post('/api/tsdb/query', {
+
+  const optionsResponse = await getBackendSrv().post('/api/ds/query', {
     queries: [
       {
         datasourceId: datasourceID,
@@ -107,7 +108,13 @@ export const refreshPanelOptions = async (
     ],
   });
 
-  const rows = optionsResponse.results?.A?.tables?.[0]?.rows?.flat().map((datum: string) => {
+  const frames = optionsResponse.results.A.frames[0];
+
+  const {
+    data: { values },
+  } = frames;
+
+  const rows = values?.flat().map((datum: string) => {
     const selectableVariable = { name, value: datum } as SelectableVariable;
     const selectableValue = { label: datum, value: selectableVariable } as SelectableValue;
 

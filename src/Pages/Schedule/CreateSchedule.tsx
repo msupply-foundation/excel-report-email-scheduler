@@ -1,15 +1,16 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button, Field, FieldSet, Form, Icon, Input, Select, TimeOfDayPicker } from '@grafana/ui';
 import { Controller } from 'react-hook-form';
 
 import { NAVIGATION_TITLE, NAVIGATION_SUBTITLE, ROUTES, getIntervals } from '../../constants';
 import { Page, PanelList } from '../../components';
 import { prefixRoute } from '../../utils';
-import { Panel, ScheduleType } from 'types';
-import { DateTime } from '@grafana/data';
+import { Panel, ReportGroupType, ScheduleType } from 'types';
+import { DateTime, SelectableValue } from '@grafana/data';
 import { useDatasourceID } from 'hooks';
 import { useQuery } from 'react-query';
 import { getPanels } from 'api/getPanels.api';
+import { getReportGroups } from 'api';
 
 const defaultFormValues: ScheduleType = {
   id: '',
@@ -32,12 +33,15 @@ const CreateSchedule: React.FC = ({ history, match }: any) => {
     retry: 0,
   });
 
-  useEffect(() => {
-    console.log('datasourceID', datasourceID);
-    console.log('panels', panels);
-  }, [panels, datasourceID]);
+  const { data: reportGroups } = useQuery<ReportGroupType[], Error>(`reportGroups`, getReportGroups, {
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    retry: 0,
+  });
 
-  const submitCreateSchedule = () => {};
+  const submitCreateSchedule = (data: ScheduleType) => {
+    console.log(data);
+  };
 
   const [defaultSchedule] = React.useState<ScheduleType>(defaultFormValues);
 
@@ -80,6 +84,20 @@ const CreateSchedule: React.FC = ({ history, match }: any) => {
                   </Field>
                 </FieldSet>
 
+                <Field label="Report Group" description="Select a report group">
+                  <Select
+                    options={reportGroups?.map((reportGroup: ReportGroupType) => ({
+                      label: reportGroup.name,
+                      description: reportGroup.description,
+                      value: reportGroup,
+                    }))}
+                    onChange={(selected: SelectableValue<ReportGroupType>) => {
+                      setValue('reportGroupID', selected?.value?.id ?? '');
+                    }}
+                    prefix={<Icon name="arrow-down" />}
+                  />
+                </Field>
+
                 <FieldSet label={`Schedule time`}>
                   <Field label="Interval" description="Interval to queue the schedule on">
                     <Select
@@ -110,10 +128,10 @@ const CreateSchedule: React.FC = ({ history, match }: any) => {
                         panels={panels}
                         panelListError={errors.panels}
                         checkedPanels={selectedPanels}
-                        onPanelChecked={(event, panelID) => {
-                          const updatedSelectedPanels = selectedPanels.includes(panelID)
-                            ? selectedPanels.filter((el: any) => el !== panelID)
-                            : [...selectedPanels, panelID];
+                        onPanelChecked={(panel: Panel) => {
+                          const updatedSelectedPanels = selectedPanels.includes(panel.id)
+                            ? selectedPanels.filter((el: Number) => el !== panel.id)
+                            : [...selectedPanels, panel.id];
                           onChange(updatedSelectedPanels);
                         }}
                       />

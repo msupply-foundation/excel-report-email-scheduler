@@ -3,8 +3,9 @@ import { Tooltip, Icon, InlineFormLabel, Select } from '@grafana/ui';
 import { getLookbacks } from '../constants';
 import React from 'react';
 import intl from 'react-intl-universal';
-import { ContentVariables, Panel, SelectableVariable, Variable, VariableOption } from 'types';
+import { Panel, SelectableVariable, Variable, VariableOption } from 'types';
 import { PanelVariableOptions } from './PanelVariableOptions';
+import { panelUsesMacro } from 'utils';
 
 type Props = {
   panel: Panel;
@@ -12,7 +13,13 @@ type Props = {
 
 export const PanelVariables: React.FC<Props> = ({ panel }) => {
   const lookbacks = getLookbacks();
-  //const vars = parseOrDefault<ContentVariables>(variables, {});
+
+  const usesMacro = panelUsesMacro(panel.rawSql);
+  const usesVariables = panel.variables.length > 0;
+
+  if (!(usesVariables || usesMacro)) {
+    return null;
+  }
 
   return (
     <div style={{ border: '1px solid grey', padding: '20px' }}>
@@ -21,12 +28,14 @@ export const PanelVariables: React.FC<Props> = ({ panel }) => {
         <Icon name="info-circle" size="sm" style={{ marginLeft: '10px' }} />
       </Tooltip>
 
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
-        <InlineFormLabel tooltip={intl.get('lookback_period_description')}>
-          {intl.get('lookback_period')}
-        </InlineFormLabel>
-        <Select options={lookbacks} onChange={() => {}} />
-      </div>
+      {usesMacro && (
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          <InlineFormLabel tooltip={intl.get('lookback_period_description')}>
+            {intl.get('lookback_period')}
+          </InlineFormLabel>
+          <Select options={lookbacks} onChange={() => {}} />
+        </div>
+      )}
 
       {panel.variables.map((variable: Variable) => {
         const { name, options: variableOptions, multi, label } = variable;
@@ -47,7 +56,7 @@ export const PanelVariables: React.FC<Props> = ({ panel }) => {
           // Pre-fill with either the report content value that has been saved in the msupply sqlite,
           // or what is currently being used in the dashboard, as a default.
           // const value = selected?.[0] ?? options[0]?.value?.value;
-          //return <PanelVariableTextInput onUpdate={onUpdateVariable(name)} name={label ?? name} value={value} />;
+          //return <PanelVariableTextInput onUpdate={() => {}} name={label ?? name} />;
         }
 
         return (

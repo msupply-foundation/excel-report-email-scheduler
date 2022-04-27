@@ -31,9 +31,9 @@ export const PanelVariableOptions: React.FC<Props> = ({ name, multiSelectable, s
     <div style={{ display: 'flex', flexDirection: 'row', marginTop: '5px' }}>
       <InlineFormLabel>{name}</InlineFormLabel>
       {!multiSelectable ? (
-        <Select value={options} onChange={() => {}} options={options} />
+        <Select onChange={() => {}} options={options} />
       ) : (
-        <MultiSelect onChange={() => {}} value={options} closeMenuOnSelect={false} options={options} />
+        <MultiSelect onChange={() => {}} closeMenuOnSelect={false} options={options} />
       )}
     </div>
   );

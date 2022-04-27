@@ -1,25 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { GrafanaTheme2 } from '@grafana/data';
 import { EmptySearchResult, FieldSet, HorizontalGroup, Icon, Legend, Tag, Tooltip, useStyles2 } from '@grafana/ui';
 import { css, cx } from '@emotion/css';
 import { Panel } from 'types';
 import intl from 'react-intl-universal';
-import { useWindowSize } from '../hooks/useWindowResize';
 import { PanelItem } from 'components';
 
-const pageLimit = 20;
+//const pageLimit = 20;
 
 type PanelListProps = {
   panels: any[];
   panelListError: any;
-  onPanelChecked: (event: React.FormEvent<HTMLInputElement>, panelID: number) => void;
+  onPanelChecked: (panel: Panel) => void;
   checkedPanels: number[];
 };
 
 const PanelList: React.FC<PanelListProps> = ({ panels, panelListError, onPanelChecked, checkedPanels }) => {
   const styles = useStyles2(getStyles);
-  const { height } = useWindowSize();
-  const [data, _] = useState<Panel[] | undefined>(panels);
 
   return (
     <>
@@ -49,9 +46,16 @@ const PanelList: React.FC<PanelListProps> = ({ panels, panelListError, onPanelCh
           <Legend>{intl.get('available_panels')}</Legend>
         </div>
 
-        <ol className={styles.list} style={{ maxHeight: `${(height ?? 0) / 2}px`, overflow: 'scroll' }}>
-          {data?.map((panel: any, key) => {
-            return <PanelItem panel={panel} key={`panelItem${key}`} />;
+        <ol className={styles.list}>
+          {panels?.map((panel: any, key) => {
+            return (
+              <PanelItem
+                panel={panel}
+                key={`panelItem${key}`}
+                onToggle={onPanelChecked}
+                checkedPanels={checkedPanels}
+              />
+            );
           })}
         </ol>
       </div>
