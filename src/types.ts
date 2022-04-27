@@ -45,6 +45,76 @@ type ReportGroupTypeWithMembersDetail = {
   members: User[];
 };
 
+type ScheduleType = {
+  id: string;
+  name: string;
+  description?: string;
+  interval: number;
+  timeOfDay: string;
+  day: number;
+  reportGroupID: string;
+  panels: number[];
+};
+
+export type VariableOption = {
+  text: string;
+  value: string;
+};
+
+export type Variable = {
+  label: string;
+  type: string;
+  name: string;
+  definition: string;
+  refresh: number;
+  datasource: string;
+  options: VariableOption[];
+  multi: boolean;
+};
+
+export type RawPanelTarget = {
+  rawSql: string;
+};
+
+export type RawPanel = {
+  targets: RawPanelTarget[];
+  title: string;
+  description: string;
+  id: number;
+  dashboardID: string;
+  type: string;
+  error?: string;
+};
+
+export type Panel = {
+  id: number;
+  dashboardID: string;
+  variables: Variable[];
+  description: string;
+  title: string;
+  rawSql: string;
+  type: string;
+  error?: string;
+};
+
+export type Templating = {
+  list: Variable[];
+};
+
+export type Dashboard = {
+  uid: string;
+  panels: RawPanel[];
+  templating: Templating;
+};
+
+export type DashboardResponse = {
+  dashboard: Dashboard;
+};
+
+export type DashboardMeta = {
+  uid: string;
+};
+
 /**
  * These are options configured for each DataSource instance.
  */
@@ -77,4 +147,13 @@ type AppConfigStateType = Required<AppConfigProps> & {
   selectedDatasource?: SelectableValue | null;
 };
 
-export { AppConfigProps, AppConfigStateType, ReportGroupType, ReportGroupTypeWithMembersDetail };
+export type ContentVariables = {
+  [key: string]: string[];
+};
+
+export type SelectableVariable = {
+  name: string;
+  value: string;
+};
+
+export { AppConfigProps, ScheduleType, AppConfigStateType, ReportGroupType, ReportGroupTypeWithMembersDetail };

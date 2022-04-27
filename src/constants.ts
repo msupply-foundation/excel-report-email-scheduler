@@ -1,5 +1,7 @@
 import pluginJson from './plugin.json';
 import { NavItem } from './types';
+import intl from 'react-intl-universal';
+import { SelectableValue } from '@grafana/data';
 
 export const PLUGIN_ID = `${pluginJson.id}`;
 export const PLUGIN_BASE_URL = `/a/${PLUGIN_ID}`;
@@ -29,3 +31,24 @@ export const NAVIGATION: Record<string, NavItem> = {
     url: `${PLUGIN_BASE_URL}/schedulers`,
   },
 };
+
+export const getIntervals = () => [
+  { label: intl.get('daily'), value: 0 },
+  { label: intl.get('weekly'), value: 1 },
+  { label: intl.get('fortnightly'), value: 2 },
+  { label: intl.get('monthly'), value: 3 },
+  { label: intl.get('quarterly'), value: 4 },
+  { label: intl.get('yearly'), value: 5 },
+];
+
+export const getLookbacks = (): Array<SelectableValue<Number>> => [
+  { label: intl.get('1day'), value: 24 * 60 * 1000 * 60 },
+  { label: intl.get('2days'), value: 2 * 24 * 60 * 1000 * 60 },
+  { label: intl.get('3days'), value: 3 * 24 * 60 * 1000 * 60 },
+  { label: intl.get('1week'), value: 7 * 24 * 60 * 1000 * 60 },
+  { label: intl.get('2weeks'), value: 14 * 24 * 60 * 1000 * 60 },
+  { label: intl.get('4weeks'), value: 28 * 24 * 60 * 1000 * 60 },
+  { label: intl.get('3months'), value: 28 * 3 * 24 * 60 * 1000 * 60 },
+  { label: intl.get('6months'), value: 28 * 6 * 24 * 60 * 1000 * 60 },
+  { label: intl.get('1year'), value: 356 * 24 * 60 * 1000 * 60 },
+];

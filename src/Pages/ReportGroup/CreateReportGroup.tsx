@@ -152,7 +152,7 @@ const CreateReportGroup = ({ history, match }: any) => {
 
                           onChange(updatedSelectedMembers);
                         }}
-                      ></UserList>
+                      />
                     )}
                     name="members"
                     control={control}

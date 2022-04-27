@@ -8,6 +8,7 @@ import { SecretInput } from './common';
 import { css } from '@emotion/css';
 import { locales } from '../locales';
 import { AppConfigProps, AppConfigStateType } from 'types';
+import { getDatasources } from 'api/getDatasource.api';
 
 interface Props extends PluginConfigPageProps<AppPluginMeta<AppConfigProps>> {}
 
@@ -306,10 +307,6 @@ export const updatePlugin = async (pluginId: string, data: Partial<PluginMeta>) 
   });
 
   return response?.data;
-};
-
-export const getDatasources = async () => {
-  return getBackendSrv().get(`./api/datasources`);
 };
 
 export { AppConfigForm };
