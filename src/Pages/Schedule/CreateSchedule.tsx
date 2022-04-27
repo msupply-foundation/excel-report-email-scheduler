@@ -1,12 +1,10 @@
 import React from 'react';
-import { Button, Field, FieldSet, Form, Icon, Input, Select, TimeOfDayPicker } from '@grafana/ui';
-import { Controller } from 'react-hook-form';
+import { Form } from '@grafana/ui';
 
-import { NAVIGATION_TITLE, NAVIGATION_SUBTITLE, ROUTES, getIntervals } from '../../constants';
-import { Page, PanelList } from '../../components';
+import { NAVIGATION_TITLE, NAVIGATION_SUBTITLE, ROUTES } from '../../constants';
+import { CreateScheduleFormPartial, Page } from '../../components';
 import { prefixRoute } from '../../utils';
 import { Panel, ReportGroupType, ScheduleType } from 'types';
-import { DateTime, SelectableValue } from '@grafana/data';
 import { useDatasourceID } from 'hooks';
 import { useQuery } from 'react-query';
 import { getPanels } from 'api/getPanels.api';
@@ -63,91 +61,8 @@ const CreateSchedule: React.FC = ({ history, match }: any) => {
           defaultValues={defaultSchedule}
           validateOn="onSubmit"
         >
-          {({ register, errors, control, setValue, watch }) => {
-            return (
-              <>
-                <FieldSet label={`New Schedule`}>
-                  <Field
-                    invalid={!!errors.name}
-                    error={errors.name && errors.name.message}
-                    label="Name"
-                    description="Name of the schedule"
-                  >
-                    <Input
-                      {...register('name', { required: 'Schedule name is required' })}
-                      id="schedule-name"
-                      width={60}
-                    />
-                  </Field>
-                  <Field label="description" description="Description of the schedule">
-                    <Input {...register('description')} id="schedule-description" width={60} />
-                  </Field>
-                </FieldSet>
-
-                <Field label="Report Group" description="Select a report group">
-                  <Select
-                    options={reportGroups?.map((reportGroup: ReportGroupType) => ({
-                      label: reportGroup.name,
-                      description: reportGroup.description,
-                      value: reportGroup,
-                    }))}
-                    onChange={(selected: SelectableValue<ReportGroupType>) => {
-                      setValue('reportGroupID', selected?.value?.id ?? '');
-                    }}
-                    prefix={<Icon name="arrow-down" />}
-                  />
-                </Field>
-
-                <FieldSet label={`Schedule time`}>
-                  <Field label="Interval" description="Interval to queue the schedule on">
-                    <Select
-                      options={getIntervals()}
-                      prefix={<Icon name="arrow-down" />}
-                      onChange={(option: any) => {
-                        setValue('interval', option.value);
-                      }}
-                    />
-                  </Field>
-                  <Field label="Time of day" description="Time of day to queue the schedule on">
-                    <TimeOfDayPicker
-                      onChange={(selected: DateTime) => {
-                        setValue('timeOfDay', selected.format('HH:mm'));
-                      }}
-                    />
-                  </Field>
-                  {(watch('interval') || 0) > 2 && (
-                    <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
-                      <Input type="number" {...register('day')} id="schedule-day" width={40} />
-                    </Field>
-                  )}
-                </FieldSet>
-                {panels && (
-                  <Controller
-                    render={({ field: { onChange, value: selectedPanels } }) => (
-                      <PanelList
-                        panels={panels}
-                        panelListError={errors.panels}
-                        checkedPanels={selectedPanels}
-                        onPanelChecked={(panel: Panel) => {
-                          const updatedSelectedPanels = selectedPanels.includes(panel.id)
-                            ? selectedPanels.filter((el: Number) => el !== panel.id)
-                            : [...selectedPanels, panel.id];
-                          onChange(updatedSelectedPanels);
-                        }}
-                      />
-                    )}
-                    name="panels"
-                    control={control}
-                  />
-                )}
-
-                <div className="gf-form-button-row">
-                  <Button type="submit" variant="primary">
-                    Create schedule
-                  </Button>
-                </div>
-              </>
-            );
+          {(props) => {
+            return <CreateScheduleFormPartial {...props} panels={panels} reportGroups={reportGroups} />;
           }}
         </Form>
       </Page.Contents>
