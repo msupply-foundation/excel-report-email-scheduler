@@ -79,7 +79,6 @@ const CreateReportGroup = ({ history, match }: any) => {
     (newReportGroup: ReportGroupType) => createReportGroup(newReportGroup),
     {
       onSuccess: () => {
-        console.log('On success called');
         history.push(`${PLUGIN_BASE_URL}/report-groups/`);
         return;
       },

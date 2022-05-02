@@ -14,12 +14,11 @@ export const CreateScheduleFormPartial = ({
   setValue,
   watch,
   reportGroups,
-  panels,
 }: FormAPI<ScheduleType> & any) => {
   useEffect(() => {
-    register('reportGroupID', { required: 'Report group is required' });
-    register('timeOfDay', { required: 'time of day is required' });
-    register('interval', { required: 'Interval is required' });
+    // register('reportGroupID', { required: 'Report group is required' });
+    // register('timeOfDay', { required: 'time of day is required' });
+    // register('interval', { required: 'Interval is required' });
   }, [register]);
 
   return (
@@ -85,31 +84,32 @@ export const CreateScheduleFormPartial = ({
             }}
           />
         </Field>
-        {(watch('interval') || 0) > 2 && (
-          <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
-            <Input type="number" {...register('day')} id="schedule-day" width={40} />
-          </Field>
-        )}
+        {/* {(watch('interval') || 0) > 2 && ( */}
+        <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
+          <Input type="number" {...register('day')} id="schedule-day" width={40} />
+        </Field>
+        {/* )} */}
       </FieldSet>
-      {panels && (
-        <Controller
-          render={({ field: { onChange, value: selectedPanels } }) => (
+
+      <Controller
+        render={({ field: { onChange, value: selectedPanels } }) => {
+          return (
             <PanelList
-              panels={panels}
               panelListError={errors.panels}
               checkedPanels={selectedPanels}
               onPanelChecked={(panel: Panel) => {
                 const updatedSelectedPanels = selectedPanels.includes(panel.id)
                   ? selectedPanels.filter((el: Number) => el !== panel.id)
                   : [...selectedPanels, panel.id];
+
                 onChange(updatedSelectedPanels);
               }}
             />
-          )}
-          name="panels"
-          control={control}
-        />
-      )}
+          );
+        }}
+        name="panels"
+        control={control}
+      />
 
       <div className="gf-form-button-row">
         <Button type="submit" variant="primary">

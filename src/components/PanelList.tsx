@@ -1,22 +1,24 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { GrafanaTheme2 } from '@grafana/data';
 import { EmptySearchResult, FieldSet, HorizontalGroup, Icon, Legend, Tag, Tooltip, useStyles2 } from '@grafana/ui';
 import { css, cx } from '@emotion/css';
-import { Panel } from 'types';
+import { Panel, PanelDetails } from 'types';
 import intl from 'react-intl-universal';
 import { PanelItem } from 'components';
+import { PanelContext } from 'context';
 
 //const pageLimit = 20;
 
 type PanelListProps = {
-  panels: any[];
   panelListError: any;
   onPanelChecked: (panel: Panel) => void;
   checkedPanels: number[];
 };
 
-const PanelList: React.FC<PanelListProps> = ({ panels, panelListError, onPanelChecked, checkedPanels }) => {
+const PanelList: React.FC<PanelListProps> = ({ panelListError, onPanelChecked, checkedPanels }) => {
   const styles = useStyles2(getStyles);
+
+  const { panels, panelDetails } = useContext(PanelContext);
 
   return (
     <>
@@ -24,9 +26,9 @@ const PanelList: React.FC<PanelListProps> = ({ panels, panelListError, onPanelCh
         <FieldSet label="Selected Panels">
           {checkedPanels.length > 0 ? (
             <HorizontalGroup wrap={true} style={{ marginBottom: '25px' }} align="flex-start" justify="flex-start">
-              {checkedPanels.map((panelID) => {
-                const panel = panels.find((panel: Panel) => panel.id === panelID);
-                return <Tag key={panelID} icon="user" name={panel?.title} />;
+              {checkedPanels.map((checkedPanel) => {
+                const panel = panels.find((panel: Panel) => panel.id === checkedPanel);
+                return <Tag key={checkedPanel} icon="user" name={panel?.title} />;
               })}
             </HorizontalGroup>
           ) : (
@@ -45,18 +47,20 @@ const PanelList: React.FC<PanelListProps> = ({ panels, panelListError, onPanelCh
           </Tooltip>
           <Legend>{intl.get('available_panels')}</Legend>
         </div>
-
         <ol className={styles.list}>
-          {panels?.map((panel: any, key) => {
-            return (
+          {panels &&
+            panelDetails &&
+            panels?.map((panel: Panel, key: any) => (
               <PanelItem
                 panel={panel}
                 key={`panelItem${key}`}
-                onToggle={onPanelChecked}
+                onPanelChecked={onPanelChecked}
                 checkedPanels={checkedPanels}
+                panelDetail={panelDetails.find(
+                  (detail: PanelDetails) => detail.panelID === panel.id && detail.dashboardID === panel.dashboardID
+                )}
               />
-            );
-          })}
+            ))}
         </ol>
       </div>
     </>

@@ -32,7 +32,6 @@ const ReportGroup = () => {
 
   const { mutate: deleteGroup } = useMutation(deleteReportGroup, {
     onSuccess: () => {
-      console.log('deleted success');
       refetchReportGroups();
       return;
     },

@@ -7,15 +7,21 @@ import { useQuery } from 'react-query';
 import { SelectableVariable, Variable } from 'types';
 
 type Props = {
-  //onUpdate: (selected: SelectableValue) => void;
+  onUpdate: (selected: SelectableValue) => void;
   name: string;
   multiSelectable: boolean;
-  //selectedOptions: string[];
+
   selectableOptions: Array<SelectableValue<SelectableVariable>>;
   variable: Variable;
 };
 
-export const PanelVariableOptions: React.FC<Props> = ({ name, multiSelectable, selectableOptions, variable }) => {
+export const PanelVariableOptions: React.FC<Props> = ({
+  onUpdate,
+  name,
+  multiSelectable,
+  selectableOptions,
+  variable,
+}) => {
   const { refresh } = variable;
   const datasourceID = useDatasourceID();
 
@@ -30,10 +36,31 @@ export const PanelVariableOptions: React.FC<Props> = ({ name, multiSelectable, s
   return (
     <div style={{ display: 'flex', flexDirection: 'row', marginTop: '5px' }}>
       <InlineFormLabel>{name}</InlineFormLabel>
-      {!multiSelectable ? (
-        <Select onChange={() => {}} options={options} />
+      {multiSelectable ? (
+        <Select
+          //value={options?.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
+          onChange={(selected: SelectableValue<SelectableVariable>) => {
+            if (selected.value?.value === '$__all') {
+              return onUpdate(selectableOptions);
+            }
+
+            onUpdate([selected]);
+          }}
+          options={options}
+        />
       ) : (
-        <MultiSelect onChange={() => {}} closeMenuOnSelect={false} options={options} />
+        <MultiSelect
+          onChange={(selected: SelectableValue<SelectableVariable>) => {
+            const isAll = selected.some(({ value }: SelectableValue<SelectableVariable>) => value?.value === '$__all');
+            if (isAll) {
+              return onUpdate(selectableOptions);
+            }
+
+            onUpdate(selected);
+          }}
+          closeMenuOnSelect={false}
+          options={options}
+        />
       )}
     </div>
   );

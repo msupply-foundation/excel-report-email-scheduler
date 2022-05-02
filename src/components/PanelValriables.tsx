@@ -6,12 +6,16 @@ import intl from 'react-intl-universal';
 import { Panel, SelectableVariable, Variable, VariableOption } from 'types';
 import { PanelVariableOptions } from './PanelVariableOptions';
 import { panelUsesMacro } from 'utils';
+import { PanelVariableTextInput } from 'components';
 
 type Props = {
   panel: Panel;
+  checkedPanels: number[];
+  onUpdateLookback: (selectedValue: SelectableValue) => void;
+  onUpdateVariable: (variableName: string) => (selectedValue: SelectableValue) => void;
 };
 
-export const PanelVariables: React.FC<Props> = ({ panel }) => {
+export const PanelVariables: React.FC<Props> = ({ panel, onUpdateVariable, onUpdateLookback }) => {
   const lookbacks = getLookbacks();
 
   const usesMacro = panelUsesMacro(panel.rawSql);
@@ -28,14 +32,14 @@ export const PanelVariables: React.FC<Props> = ({ panel }) => {
         <Icon name="info-circle" size="sm" style={{ marginLeft: '10px' }} />
       </Tooltip>
 
-      {usesMacro && (
-        <div style={{ display: 'flex', flexDirection: 'row' }}>
-          <InlineFormLabel tooltip={intl.get('lookback_period_description')}>
-            {intl.get('lookback_period')}
-          </InlineFormLabel>
-          <Select options={lookbacks} onChange={() => {}} />
-        </div>
-      )}
+      {/* {usesMacro && ( */}
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        <InlineFormLabel tooltip={intl.get('lookback_period_description')}>
+          {intl.get('lookback_period')}
+        </InlineFormLabel>
+        <Select options={lookbacks} onChange={(selected: SelectableValue<Number>) => onUpdateLookback(selected)} />
+      </div>
+      {/* )} */}
 
       {panel.variables.map((variable: Variable) => {
         const { name, options: variableOptions, multi, label } = variable;
@@ -56,11 +60,12 @@ export const PanelVariables: React.FC<Props> = ({ panel }) => {
           // Pre-fill with either the report content value that has been saved in the msupply sqlite,
           // or what is currently being used in the dashboard, as a default.
           // const value = selected?.[0] ?? options[0]?.value?.value;
-          //return <PanelVariableTextInput onUpdate={() => {}} name={label ?? name} />;
+          return <PanelVariableTextInput onUpdate={onUpdateVariable(name)} name={label ?? name} value={''} />;
         }
 
         return (
           <PanelVariableOptions
+            onUpdate={onUpdateVariable(name)}
             key={name}
             multiSelectable={multi}
             name={label ?? name}

@@ -54,6 +54,7 @@ type ScheduleType = {
   day: number;
   reportGroupID: string;
   panels: number[];
+  panelDetails: PanelDetails[];
 };
 
 export type VariableOption = {
@@ -154,6 +155,16 @@ export type ContentVariables = {
 export type SelectableVariable = {
   name: string;
   value: string;
+};
+
+export type JSONValue = string | number | boolean | { [x: string]: JSONValue } | JSONValue[];
+
+export type PanelDetails = {
+  id: string;
+  panelID: number;
+  lookback: number;
+  dashboardID: string;
+  variables: string;
 };
 
 export { AppConfigProps, ScheduleType, AppConfigStateType, ReportGroupType, ReportGroupTypeWithMembersDetail };
