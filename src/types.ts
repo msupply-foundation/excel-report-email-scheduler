@@ -50,7 +50,7 @@ type ScheduleType = {
   name: string;
   description?: string;
   interval: number;
-  timeOfDay: string;
+  time: string;
   day: number;
   reportGroupID: string;
   panels: number[];
@@ -161,6 +161,7 @@ export type JSONValue = string | number | boolean | { [x: string]: JSONValue } |
 
 export type PanelDetails = {
   id: string;
+  scheduleID: string;
   panelID: number;
   lookback: number;
   dashboardID: string;

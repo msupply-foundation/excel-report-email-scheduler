@@ -26,10 +26,10 @@ const PanelProvider: React.FC = ({ children }) => {
         const usesVariables = panel.variables.length > 0;
 
         return {
+          id: '',
+          scheduleID: '',
           panelID: panel.id,
           dashboardID: panel.dashboardID,
-          isLookbackActive: usesMacro,
-          isVariablesActive: usesVariables,
           lookback: usesMacro ? 1 : 0,
           variables: usesVariables ? '' : null,
         };
@@ -38,10 +38,6 @@ const PanelProvider: React.FC = ({ children }) => {
       setPanelDetails(newPanelDetails);
     }
   }, [panels]);
-
-  useEffect(() => {
-    console.log('panelDetails', panelDetails);
-  }, [panelDetails]);
 
   return (
     <PanelContext.Provider

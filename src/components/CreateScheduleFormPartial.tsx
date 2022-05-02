@@ -14,10 +14,10 @@ export const CreateScheduleFormPartial = ({
   setValue,
   watch,
   reportGroups,
-}: FormAPI<ScheduleType> & any) => {
+}: FormAPI<ScheduleType> & { reportGroups: ReportGroupType[] | undefined }) => {
   useEffect(() => {
     // register('reportGroupID', { required: 'Report group is required' });
-    // register('timeOfDay', { required: 'time of day is required' });
+    // register('time', { required: 'time of day is required' });
     // register('interval', { required: 'Interval is required' });
   }, [register]);
 
@@ -72,21 +72,21 @@ export const CreateScheduleFormPartial = ({
           />
         </Field>
         <Field
-          invalid={!!errors.timeOfDay}
-          error={errors.timeOfDay && errors.timeOfDay.message}
+          invalid={!!errors.time}
+          error={errors.time && errors.time.message}
           label="Time of day"
           description="Time of day to queue the schedule on"
         >
           <TimeOfDayPicker
-            value={formatTimeToDate(watch('timeOfDay'))}
+            value={formatTimeToDate(watch('time'))}
             onChange={(selected: DateTime) => {
-              setValue('timeOfDay', selected.format('HH:mm'));
+              setValue('time', selected.format('HH:mm'));
             }}
           />
         </Field>
         {/* {(watch('interval') || 0) > 2 && ( */}
         <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
-          <Input type="number" {...register('day')} id="schedule-day" width={40} />
+          <Input type="number" {...register('day', { valueAsNumber: true })} id="schedule-day" width={40} />
         </Field>
         {/* )} */}
       </FieldSet>

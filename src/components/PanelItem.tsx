@@ -27,8 +27,6 @@ export const PanelItem: React.FC<Props> = ({ panel, onPanelChecked, panelDetail,
         (el: any) => el.panelID === content.panelID && el.dashboardID === content.dashboardID
       );
 
-      console.log(myIndex);
-
       return [
         ...prevPanels.slice(0, myIndex),
         { ...prevPanels[myIndex], lookback: selectableValue.value },
