@@ -5,8 +5,9 @@ import { Page } from '../../components';
 import { prefixRoute } from '../../utils';
 import { PanelProvider } from 'context';
 import { CreateScheduleForm } from 'components/schedule/CreateScheduleForm';
+import { RouteComponentProps } from 'react-router-dom';
 
-const CreateSchedule: React.FC = ({ history, match }: any) => (
+const CreateSchedule: React.FC<RouteComponentProps> = () => (
   <Page
     headerProps={{
       title: NAVIGATION_TITLE,

@@ -78,6 +78,7 @@ func (datasource *MsupplyEresDatasource) GetSchedules() ([]Schedule, error) {
 }
 
 func (datasource *MsupplyEresDatasource) GetSchedule(id string) (*Schedule, error) {
+	frame := trace()
 	db, err := sql.Open("sqlite", datasource.DataPath)
 	defer db.Close()
 	if err != nil {
@@ -104,6 +105,12 @@ func (datasource *MsupplyEresDatasource) GetSchedule(id string) (*Schedule, erro
 			return nil, err
 		}
 
+		reportContent, err := datasource.GetReportContent(ID)
+		if err != nil {
+			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not get panel details")
+			return nil, err
+		}
+
 		schedule := Schedule{
 			ID:             id,
 			Interval:       Interval,
@@ -114,7 +121,7 @@ func (datasource *MsupplyEresDatasource) GetSchedule(id string) (*Schedule, erro
 			ReportGroupID:  ReportGroupID,
 			Time:           Time,
 			Day:            Day,
-			PanelDetails:   []ReportContent{},
+			PanelDetails:   reportContent,
 		}
 		schedules = append(schedules, schedule)
 	}

@@ -34,6 +34,7 @@ func (server *HttpServer) ResourceHandler(mSupplyEresDatasource *datasource.Msup
 	mux.HandleFunc("/settings", bugsnag.HandlerFunc(server.updateSettings)).Methods("POST")
 
 	mux.HandleFunc("/schedule", bugsnag.HandlerFunc(server.fetchSchedules)).Methods("GET")
+	mux.HandleFunc("/schedule/{id}", bugsnag.HandlerFunc(server.fetchSingleSchedule)).Methods("GET")
 	mux.HandleFunc("/schedule", bugsnag.HandlerFunc(server.createSchedule)).Methods("POST")
 	mux.HandleFunc("/schedule/{id}", bugsnag.HandlerFunc(server.deleteSchedule)).Methods("DELETE")
 

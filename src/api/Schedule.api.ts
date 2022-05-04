@@ -17,4 +17,10 @@ const deleteSchedule = async (scheduleID: string) => {
   );
 };
 
-export { createSchedule, getSchedules, deleteSchedule };
+const getScheduleByID = (scheduleID: string) => {
+  return getBackendSrv().get(
+    `/api/plugins/msupplyfoundation-excelreportemailscheduler-app/resources/schedule/${scheduleID}`
+  );
+};
+
+export { createSchedule, getSchedules, deleteSchedule, getScheduleByID };

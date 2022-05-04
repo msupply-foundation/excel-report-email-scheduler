@@ -30,6 +30,26 @@ func (server *HttpServer) fetchSchedules(rw http.ResponseWriter, request *http.R
 	rw.WriteHeader(http.StatusOK)
 }
 
+func (server *HttpServer) fetchSingleSchedule(rw http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	id := vars["id"]
+	frame := trace()
+
+	schedule, err := server.db.GetSchedule(id)
+	if err != nil {
+		server.Error(rw, errors.Wrap(err, frame.Function))
+		return
+	}
+
+	err = json.NewEncoder(rw).Encode(schedule)
+	if err != nil {
+		server.Error(rw, errors.Wrap(err, frame.Function))
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+}
+
 func (server *HttpServer) createSchedule(rw http.ResponseWriter, request *http.Request) {
 	frame := trace()
 	var schedule datasource.Schedule

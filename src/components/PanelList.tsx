@@ -24,7 +24,7 @@ const PanelList: React.FC<PanelListProps> = ({ panelListError, onPanelChecked, c
     <>
       <div className="page-action-bar">
         <FieldSet label="Selected Panels">
-          {checkedPanels.length > 0 ? (
+          {!!checkedPanels && checkedPanels.length > 0 ? (
             <HorizontalGroup wrap={true} style={{ marginBottom: '25px' }} align="flex-start" justify="flex-start">
               {checkedPanels.map((checkedPanel) => {
                 const panel = panels.find((panel: Panel) => panel.id === checkedPanel);

@@ -14,7 +14,13 @@ export const CreateScheduleFormPartial = ({
   setValue,
   watch,
   reportGroups,
-}: FormAPI<ScheduleType> & { reportGroups: ReportGroupType[] | undefined }) => {
+  isEditMode,
+  defaultSchedule,
+}: FormAPI<ScheduleType> & {
+  reportGroups: ReportGroupType[] | undefined;
+  isEditMode: boolean;
+  defaultSchedule: ScheduleType;
+}) => {
   useEffect(() => {
     // register('reportGroupID', { required: 'Report group is required' });
     // register('time', { required: 'time of day is required' });
@@ -23,7 +29,7 @@ export const CreateScheduleFormPartial = ({
 
   return (
     <>
-      <FieldSet label={`New Schedule`}>
+      <FieldSet label={`${isEditMode ? 'Edit "' + defaultSchedule?.name + '"' : 'New'} Schedule`}>
         <Field
           invalid={!!errors.name}
           error={errors.name && errors.name.message}
@@ -93,6 +99,7 @@ export const CreateScheduleFormPartial = ({
 
       <Controller
         render={({ field: { onChange, value: selectedPanels } }) => {
+          console.log('selectedPanels', selectedPanels);
           return (
             <PanelList
               panelListError={errors.panels}

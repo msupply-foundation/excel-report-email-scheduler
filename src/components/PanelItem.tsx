@@ -70,7 +70,9 @@ export const PanelItem: React.FC<Props> = ({ panel, onPanelChecked, panelDetail,
         >
           <div className={styles.marginForCheckbox}>
             {!error ? (
-              <Checkbox value={!!checkedPanels.some((checkedPanelID: number) => checkedPanelID === panel.id)} />
+              <Checkbox
+                value={!!checkedPanels && !!checkedPanels.some((checkedPanelID: number) => checkedPanelID === panel.id)}
+              />
             ) : null}
           </div>
           <div className="card-item-details">
