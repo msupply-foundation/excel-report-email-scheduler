@@ -151,6 +151,13 @@ func (datasource *MsupplyEresDatasource) Init() (*bool, error) {
 		return nil, err
 	}
 
+	stmt, err = sqlClient.Db.Prepare("CREATE TABLE IF NOT EXISTS Config (id TEXT PRIMARY KEY, grafanaUsername TEXT, grafanaPassword TEXT, emailPassword TEXT, email TEXT, datasourceID INTEGER, emailHost TEXT, emailPort INTEGER, grafanaURL TEXT)")
+	stmt.Exec()
+	if err != nil {
+		log.DefaultLogger.Error("FATAL. Could not create Config:", err.Error())
+		return nil, err
+	}
+
 	stmt, err = sqlClient.Db.Prepare("CREATE TABLE IF NOT EXISTS ReportGroup (id TEXT PRIMARY KEY, name TEXT, description TEXT)")
 	stmt.Exec()
 	if err != nil {

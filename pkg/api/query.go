@@ -24,10 +24,6 @@ type QueryRequest struct {
 	Queries []Query `json:"queries"`
 }
 
-type Column struct {
-	Text string `json:"text"`
-}
-
 func NewQuery(rawSql string, datasource int) *Query {
 	return &Query{RawSQL: rawSql, DatasourceID: datasource, Format: "table", RefID: "A"}
 }

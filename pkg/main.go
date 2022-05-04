@@ -2,6 +2,7 @@ package main
 
 import (
 	"excel-report-email-scheduler/pkg/datasource"
+	reportEmailer "excel-report-email-scheduler/pkg/report-emailer"
 	"excel-report-email-scheduler/pkg/server"
 
 	"github.com/bugsnag/bugsnag-go"
@@ -26,6 +27,8 @@ func main() {
 		pluginLogger.Error("Error starting mSupply Excel report e-mail scheduler datasource", "error", err.Error())
 		return
 	}
+
+	reportEmailer.NewReportEmailer(ds)
 
 	pluginLogger.Debug("Starting mSupply Excel report e-mail scheduler datasource")
 	err = backend.Serve(backend.ServeOpts{

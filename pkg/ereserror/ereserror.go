@@ -26,6 +26,7 @@ func (err EresError) Error() string {
 	if err.Err != nil {
 		return err.Err.Error()
 	}
+
 	return err.Message
 }
 

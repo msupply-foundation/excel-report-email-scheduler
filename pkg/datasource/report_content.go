@@ -1,11 +1,46 @@
 package datasource
 
 import (
+	"database/sql"
 	"excel-report-email-scheduler/pkg/ereserror"
 
 	"github.com/google/uuid"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/pkg/errors"
 )
+
+func (datasource *MsupplyEresDatasource) GetReportContent(scheduleID string) ([]ReportContent, error) {
+	var reportContent []ReportContent
+
+	db, err := sql.Open("sqlite", datasource.DataPath)
+	if err != nil {
+		log.DefaultLogger.Error("GetReportContent: sql.Open: ", err.Error())
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT * FROM ReportContent WHERE scheduleID = ?", scheduleID)
+	if err != nil {
+		log.DefaultLogger.Error("GetReportContent: db.Query()", err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ID, ScheduleID, DashboardID, Variables string
+		var Lookback, PanelID int
+		err = rows.Scan(&ID, &ScheduleID, &PanelID, &DashboardID, &Lookback, &Variables)
+		if err != nil {
+			log.DefaultLogger.Error("GetReportContent: rows.Scan() ", err.Error())
+			return nil, err
+		}
+
+		content := ReportContent{ID, ScheduleID, PanelID, DashboardID, Lookback, Variables}
+		reportContent = append(reportContent, content)
+	}
+
+	return reportContent, nil
+}
 
 func (datasource *MsupplyEresDatasource) CreateReportContents(reportContents []ReportContent) (*[]ReportContent, error) {
 	frame := trace()

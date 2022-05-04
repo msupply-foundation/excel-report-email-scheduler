@@ -1,9 +1,11 @@
 package datasource
 
 import (
+	"database/sql"
 	"excel-report-email-scheduler/pkg/ereserror"
 	"fmt"
 
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/pkg/errors"
 )
 
@@ -93,4 +95,24 @@ func (datasource *MsupplyEresDatasource) GetSingleReportGroup(ID string) (*Repor
 	} else {
 		return nil, ereserror.New(500, errors.Wrap(err, frame.Function), fmt.Sprintf("Could not find of ReportGroup with id: %s", ID))
 	}
+}
+
+func (datasource *MsupplyEresDatasource) ReportGroupFromSchedule(schedule Schedule) (*ReportGroup, error) {
+	db, err := sql.Open("sqlite", datasource.DataPath)
+	defer db.Close()
+	if err != nil {
+		log.DefaultLogger.Error("ReportGroupFromSchedule: sql.Open", err.Error())
+		return nil, err
+	}
+
+	row := db.QueryRow("SELECT * FROM ReportGroup WHERE ID = ?", schedule.ReportGroupID)
+
+	var ID, name, description string
+	err = row.Scan(&ID, &name, &description)
+	if err != nil {
+		log.DefaultLogger.Error("ReportGroupFromSchedule: rows.Scan(): ", err.Error())
+		return nil, err
+	}
+
+	return NewReportGroup(ID, name, description), nil
 }

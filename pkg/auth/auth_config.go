@@ -9,12 +9,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type AuthConfig struct {
-	Username string
-	Password string
-	URL      string
-}
-
 func NewAuthConfig(settings *setting.Settings) (*AuthConfig, error) {
 	return &AuthConfig{Username: settings.GrafanaUsername, Password: settings.GrafanaPassword, URL: settings.GrafanaURL}, nil
 }

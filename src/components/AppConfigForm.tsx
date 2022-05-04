@@ -30,7 +30,6 @@ const AppConfigForm = ({ plugin }: Props) => {
     senderEmailHost: jsonData?.senderEmailHost || '',
     senderEmailPort: jsonData?.senderEmailPort || 0,
     datasourceID: jsonData?.datasourceID || 0,
-    //    selectedDatasource: null,
   });
 
   const [loading, setLoading] = useState(true);
@@ -300,12 +299,11 @@ const updatePluginAndReload = async (pluginId: string, data: Partial<PluginMeta<
 };
 
 export const updatePlugin = async (pluginId: string, data: Partial<PluginMeta>) => {
-  const response = await getBackendSrv().datasourceRequest({
-    url: `/api/plugins/${pluginId}/settings`,
-    method: 'POST',
-    data,
+  await getBackendSrv().post(`/api/plugins/${pluginId}/resources/settings`, {
+    ...data.jsonData,
+    ...data.secureJsonData,
   });
-
+  const response = await getBackendSrv().post(`/api/plugins/${pluginId}/settings`, data);
   return response?.data;
 };
 

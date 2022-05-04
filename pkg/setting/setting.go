@@ -10,17 +10,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-func SettingsFields() string {
-	return "\n{\n\tgrafanaUsername string" +
-		"\n\tgrafanaPassword string" +
-		"\n\tgrafanaURL string" +
-		"\n\tsenderEmailAddress string\n}" +
-		"\n\tSenderEmailPassword string\n}" +
-		"\n\tsenderEmailPort int\n}" +
-		"\n\tsenderEmailHost string\n}" +
-		"\n\tdatasourceID int\n}"
-}
-
 func NewSettings(ctx context.Context) (*Settings, error) {
 	frame := trace()
 	pluginCxt := httpadapter.PluginConfigFromContext(ctx)
@@ -54,7 +43,7 @@ func NewSettings(ctx context.Context) (*Settings, error) {
 		emailPassword = jsonData.Get("senderEmailPassword").MustString()
 	}
 
-	return &Settings{GrafanaUsername: grafanaUsername, GrafanaPassword: grafanaPassword, GrafanaURL: grafanaURL, SenderEmailAddress: senderEmailAddress, SenderEmailPort: senderEmailPort, SenderEmailPassword: emailPassword, SenderEmailHost: senderEmailHost, DatasourceID: datasourceID}, nil
+	return &Settings{GrafanaUsername: grafanaUsername, GrafanaPassword: grafanaPassword, GrafanaURL: grafanaURL, Email: senderEmailAddress, EmailPort: senderEmailPort, EmailPassword: emailPassword, EmailHost: senderEmailHost, DatasourceID: datasourceID}, nil
 }
 
 func trace() *runtime.Frame {
