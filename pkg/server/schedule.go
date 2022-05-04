@@ -6,8 +6,29 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/gorilla/mux"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/pkg/errors"
 )
+
+func (server *HttpServer) fetchSchedules(rw http.ResponseWriter, request *http.Request) {
+	frame := trace()
+	var schedules []datasource.Schedule
+
+	schedules, err := server.db.GetSchedules()
+	if err != nil {
+		server.Error(rw, errors.Wrap(err, frame.Function))
+		return
+	}
+
+	err = json.NewEncoder(rw).Encode(schedules)
+	if err != nil {
+		server.Error(rw, errors.Wrap(err, frame.Function))
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+}
 
 func (server *HttpServer) createSchedule(rw http.ResponseWriter, request *http.Request) {
 	frame := trace()
@@ -63,4 +84,18 @@ func (server *HttpServer) createSchedule(rw http.ResponseWriter, request *http.R
 	}
 
 	server.Success(rw, "Schedule successfully "+successMessageChunk)
+}
+
+func (server *HttpServer) deleteSchedule(rw http.ResponseWriter, request *http.Request) {
+	vars := mux.Vars(request)
+	id := vars["id"]
+
+	err := server.db.DeleteSchedule(id)
+	if err != nil {
+		log.DefaultLogger.Error("deleteSchedule: db.DeleteSchedule(): " + id + " : " + err.Error())
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		panic(err)
+	}
+
+	rw.WriteHeader(http.StatusOK)
 }
