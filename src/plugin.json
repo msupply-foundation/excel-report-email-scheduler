@@ -45,9 +45,9 @@
     },
     {
       "type": "page",
-      "name": "Schedulers",
+      "name": "Schedules",
       "icon": "fa fa-calendar",
-      "path": "/a/%PLUGIN_ID%/schedulers",
+      "path": "/a/%PLUGIN_ID%/schedules",
       "role": "Admin",
       "addToNav": true
     },

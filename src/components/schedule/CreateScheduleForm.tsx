@@ -42,7 +42,7 @@ const CreateScheduleForm: React.FC = () => {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     onError: () => {
-      history.push(`${PLUGIN_BASE_URL}/schedulers/`);
+      history.push(`${PLUGIN_BASE_URL}/schedules/`);
       return;
     },
   });
@@ -73,7 +73,7 @@ const CreateScheduleForm: React.FC = () => {
 
   const createScheduleMutation = useMutation((newSchedule: ScheduleType) => createSchedule(newSchedule), {
     onSuccess: () => {
-      history.push(`${PLUGIN_BASE_URL}/schedulers/`);
+      history.push(`${PLUGIN_BASE_URL}/schedules/`);
       return;
     },
   });

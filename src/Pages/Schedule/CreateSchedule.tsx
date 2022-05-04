@@ -14,7 +14,7 @@ const CreateSchedule: React.FC<RouteComponentProps> = () => (
       subTitle: NAVIGATION_SUBTITLE,
       backButton: {
         icon: 'arrow-left',
-        href: prefixRoute(ROUTES.SCHEDULERS),
+        href: prefixRoute(ROUTES.SCHEDULES),
       },
     }}
   >

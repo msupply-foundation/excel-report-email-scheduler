@@ -56,7 +56,7 @@ const Schedule: React.FC = () => {
   return (
     <div>
       <div className={styles.adjustButtonToRight}>
-        <LinkButton icon="plus-circle" key="create" variant="primary" href={`${PLUGIN_BASE_URL}/schedulers/create`}>
+        <LinkButton icon="plus-circle" key="create" variant="primary" href={`${PLUGIN_BASE_URL}/schedules/create`}>
           {intl.get('add_report_group')}
         </LinkButton>
       </div>
@@ -66,7 +66,7 @@ const Schedule: React.FC = () => {
             <li key={schedule.id}>
               <Card
                 className={cx(styles.card, 'card-parent')}
-                href={`${PLUGIN_BASE_URL}/schedulers/edit/${schedule.id}`}
+                href={`${PLUGIN_BASE_URL}/schedules/edit/${schedule.id}`}
               >
                 <Card.Heading className={styles.heading}>{schedule.name}</Card.Heading>
                 <Card.Description className={styles.description}>{schedule.description}</Card.Description>
@@ -116,7 +116,7 @@ const Schedule: React.FC = () => {
                     icon="cog"
                     key="edit"
                     variant="secondary"
-                    href={`${PLUGIN_BASE_URL}/schedulers/edit/${schedule.id}`}
+                    href={`${PLUGIN_BASE_URL}/schedules/edit/${schedule.id}`}
                   >
                     Edit
                   </LinkButton>
@@ -153,7 +153,7 @@ const EmptyList = () => {
       title="You haven't created any schedule(s) yet."
       buttonTitle={'Create new schedule'}
       buttonIcon="calendar-alt"
-      buttonLink={`${prefixRoute(ROUTES.SCHEDULERS)}/create`}
+      buttonLink={`${prefixRoute(ROUTES.SCHEDULES)}/create`}
       proTip="Schedules are set with report groups and panels. They run on fixed schedules recursively sending excel reports through email."
     />
   );

@@ -8,7 +8,7 @@ export const PLUGIN_BASE_URL = `/a/${PLUGIN_ID}`;
 
 export enum ROUTES {
   REPORT_GROUP = 'report-groups',
-  SCHEDULERS = 'schedulers',
+  SCHEDULES = 'schedules',
 }
 
 export const NAVIGATION_TITLE = 'Excel report e-mail scheduler';
@@ -23,12 +23,12 @@ export const NAVIGATION: Record<string, NavItem> = {
     icon: 'users-alt',
     url: `${PLUGIN_BASE_URL}/report-groups`,
   },
-  [ROUTES.SCHEDULERS]: {
-    id: ROUTES.SCHEDULERS,
-    text: 'Schedulers',
+  [ROUTES.SCHEDULES]: {
+    id: ROUTES.SCHEDULES,
+    text: 'Schedules',
     sub: "Schedules to send emails with selected panels's data to the selected user groups",
     icon: 'schedule',
-    url: `${PLUGIN_BASE_URL}/schedulers`,
+    url: `${PLUGIN_BASE_URL}/schedules`,
   },
 };
 
