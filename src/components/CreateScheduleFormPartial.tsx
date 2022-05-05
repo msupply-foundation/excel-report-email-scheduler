@@ -27,6 +27,13 @@ export const CreateScheduleFormPartial = ({
     // register('interval', { required: 'Interval is required' });
   }, [register]);
 
+  const getReportGroupOptions = (reportGroups: ReportGroupType[] | undefined) =>
+    reportGroups?.map((reportGroup: ReportGroupType) => ({
+      label: reportGroup.name,
+      description: reportGroup.description,
+      value: reportGroup,
+    }));
+
   return (
     <>
       <FieldSet label={`${isEditMode ? 'Edit "' + defaultSchedule?.name + '"' : 'New'} Schedule`}>
@@ -50,11 +57,14 @@ export const CreateScheduleFormPartial = ({
         description="Select a report group"
       >
         <Select
-          options={reportGroups?.map((reportGroup: ReportGroupType) => ({
-            label: reportGroup.name,
-            description: reportGroup.description,
-            value: reportGroup,
-          }))}
+          value={reportGroups
+            ?.filter((reportGroup: ReportGroupType) => reportGroup.id === watch('reportGroupID'))
+            .map((reportGroup: ReportGroupType) => ({
+              label: reportGroup.name,
+              description: reportGroup.description,
+              value: reportGroup,
+            }))}
+          options={getReportGroupOptions(reportGroups)}
           onChange={(selected: SelectableValue<ReportGroupType>) => {
             setValue('reportGroupID', selected?.value?.id ?? '');
           }}
@@ -70,6 +80,7 @@ export const CreateScheduleFormPartial = ({
           description="Interval to queue the schedule on"
         >
           <Select
+            value={getIntervals().filter((interval: any) => interval.value === watch('interval'))}
             options={getIntervals()}
             prefix={<Icon name="arrow-down" />}
             onChange={(option: any) => {
@@ -99,7 +110,6 @@ export const CreateScheduleFormPartial = ({
 
       <Controller
         render={({ field: { onChange, value: selectedPanels } }) => {
-          console.log('selectedPanels', selectedPanels);
           return (
             <PanelList
               panelListError={errors.panels}
@@ -116,6 +126,7 @@ export const CreateScheduleFormPartial = ({
         }}
         name="panels"
         control={control}
+        defaultValue={defaultSchedule.panelDetails.map((panelDetail) => panelDetail.panelID)}
       />
 
       <div className="gf-form-button-row">
