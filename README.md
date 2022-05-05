@@ -27,7 +27,7 @@ The plugin takes data from panels of mSupply dashboard to generate excel reports
   - After the above command the dist folder is ready.
 - Run `docker-compose up`
   - At first run this command will build the docker container.
-  - It will sync the dist folder inside the container.
+  - It will sync the dist folder inside the container, adding it to grafana plugins folder.
   - It will set the config from `config/grafana.ini` and `config.env` and run grafana in development mode.
 - When you open the Grafana at `http://localhost:3000` and login. You should see the plugin in the Plugin catalogue.
   - Select and enable it.
