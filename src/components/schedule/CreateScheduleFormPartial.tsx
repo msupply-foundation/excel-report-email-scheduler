@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { SelectableValue, DateTime } from '@grafana/data';
 import { Button, Field, FieldSet, FormAPI, Icon, Input, Select, TimeOfDayPicker } from '@grafana/ui';
-import { getIntervals } from '../constants';
+import { getIntervals } from '../../constants';
 import { Panel, ReportGroupType, ScheduleType } from 'types';
 import { formatTimeToDate } from 'utils';
 import { PanelList } from 'components';

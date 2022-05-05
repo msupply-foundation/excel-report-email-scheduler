@@ -1,7 +1,7 @@
 import React from 'react';
 import { SelectableValue } from '@grafana/data';
 import { Tooltip, Icon, InlineFormLabel, Select } from '@grafana/ui';
-import { getLookbacks } from '../constants';
+import { getLookbacks } from '../../../constants';
 
 import intl from 'react-intl-universal';
 import { ContentVariables, Panel, PanelDetails, SelectableVariable, Variable, VariableOption } from 'types';
