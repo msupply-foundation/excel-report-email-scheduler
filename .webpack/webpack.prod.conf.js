@@ -6,7 +6,7 @@ const { getPackageJson, getPluginId, hasReadme } = require('./utils');
 const { SOURCE_DIR, DIST_DIR, ENTRY_FILE } = require('./constants');
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
 
   // Compile for browsers
   target: 'web',
