@@ -1,22 +1,26 @@
+import React from 'react';
 import { SelectableValue } from '@grafana/data';
 import { Tooltip, Icon, InlineFormLabel, Select } from '@grafana/ui';
 import { getLookbacks } from '../constants';
-import React from 'react';
+
 import intl from 'react-intl-universal';
-import { Panel, SelectableVariable, Variable, VariableOption } from 'types';
+import { ContentVariables, Panel, PanelDetails, SelectableVariable, Variable, VariableOption } from 'types';
 import { PanelVariableOptions } from './PanelVariableOptions';
-import { panelUsesMacro } from 'utils';
+import { panelUsesMacro, parseOrDefault } from 'utils';
 import { PanelVariableTextInput } from 'components';
 
 type Props = {
   panel: Panel;
   checkedPanels: number[];
+  panelDetail: PanelDetails;
   onUpdateLookback: (selectedValue: SelectableValue) => void;
   onUpdateVariable: (variableName: string) => (selectedValue: SelectableValue) => void;
 };
 
-export const PanelVariables: React.FC<Props> = ({ panel, onUpdateVariable, onUpdateLookback }) => {
+export const PanelVariables: React.FC<Props> = ({ panel, onUpdateVariable, panelDetail, onUpdateLookback }) => {
   const lookbacks = getLookbacks();
+
+  const vars = parseOrDefault<ContentVariables>(panelDetail?.variables, {});
 
   const usesMacro = panelUsesMacro(panel.rawSql);
   const usesVariables = panel.variables.length > 0;
@@ -37,7 +41,11 @@ export const PanelVariables: React.FC<Props> = ({ panel, onUpdateVariable, onUpd
         <InlineFormLabel tooltip={intl.get('lookback_period_description')}>
           {intl.get('lookback_period')}
         </InlineFormLabel>
-        <Select options={lookbacks} onChange={(selected: SelectableValue<Number>) => onUpdateLookback(selected)} />
+        <Select
+          options={lookbacks}
+          value={!!panelDetail && panelDetail.lookback}
+          onChange={(selected: SelectableValue<Number>) => onUpdateLookback(selected)}
+        />
       </div>
       {/* )} */}
 
@@ -49,7 +57,7 @@ export const PanelVariables: React.FC<Props> = ({ panel, onUpdateVariable, onUpd
         // of { [variable.name]: [Array of chosen options as strings] }
         // For example, a variable ${VEN} could have the `ReportContent.variables`
         // field { VEN: ['V', 'E'] }.
-        //const selected = vars[variable.name];
+        const selected = vars[variable.name];
 
         // As well as mapping the current available options into a SelectedValue to
         const options: Array<SelectableValue<SelectableVariable>> = variableOptions.map((option: VariableOption) => {
@@ -59,8 +67,8 @@ export const PanelVariables: React.FC<Props> = ({ panel, onUpdateVariable, onUpd
         if (variable.type === 'textbox') {
           // Pre-fill with either the report content value that has been saved in the msupply sqlite,
           // or what is currently being used in the dashboard, as a default.
-          // const value = selected?.[0] ?? options[0]?.value?.value;
-          return <PanelVariableTextInput onUpdate={onUpdateVariable(name)} name={label ?? name} value={''} />;
+          const value = selected?.[0] ?? options[0]?.value?.value;
+          return <PanelVariableTextInput onUpdate={onUpdateVariable(name)} name={label ?? name} value={value} />;
         }
 
         return (
@@ -70,6 +78,7 @@ export const PanelVariables: React.FC<Props> = ({ panel, onUpdateVariable, onUpd
             multiSelectable={multi}
             name={label ?? name}
             variable={variable}
+            selectedOptions={selected}
             selectableOptions={options}
           />
         );

@@ -27,6 +27,8 @@ const CreateScheduleForm: React.FC = () => {
 
   const [defaultSchedule, setDefaultSchedule] = React.useState<ScheduleType>(defaultFormValues);
 
+  const { setPanelDetails } = useContext(PanelContext);
+
   const history = useHistory();
 
   const { id: scheduleIdToEdit } = useParams<{ id: string }>();
@@ -52,8 +54,18 @@ const CreateScheduleForm: React.FC = () => {
       setDefaultSchedule({
         ...defaultScheduleFetched,
       });
+
+      setPanelDetails((prevDetails: PanelDetails[]) => {
+        const newPanelDetails = prevDetails.map((prevDetail: PanelDetails) => {
+          return defaultScheduleFetched.panelDetails.find(
+            (defaultDetail) => defaultDetail.panelID === prevDetail.panelID || prevDetail
+          );
+        });
+
+        return newPanelDetails;
+      });
     }
-  }, [defaultScheduleFetched]);
+  }, [defaultScheduleFetched, setPanelDetails]);
 
   React.useEffect(() => {
     if (!isEditMode) {

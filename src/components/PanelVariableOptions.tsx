@@ -10,7 +10,7 @@ type Props = {
   onUpdate: (selected: SelectableValue) => void;
   name: string;
   multiSelectable: boolean;
-
+  selectedOptions: string[];
   selectableOptions: Array<SelectableValue<SelectableVariable>>;
   variable: Variable;
 };
@@ -21,6 +21,7 @@ export const PanelVariableOptions: React.FC<Props> = ({
   multiSelectable,
   selectableOptions,
   variable,
+  selectedOptions,
 }) => {
   const { refresh } = variable;
   const datasourceID = useDatasourceID();
@@ -38,7 +39,7 @@ export const PanelVariableOptions: React.FC<Props> = ({
       <InlineFormLabel>{name}</InlineFormLabel>
       {multiSelectable ? (
         <Select
-          //value={options?.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
+          value={options?.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
           onChange={(selected: SelectableValue<SelectableVariable>) => {
             if (selected.value?.value === '$__all') {
               return onUpdate(selectableOptions);
@@ -58,6 +59,13 @@ export const PanelVariableOptions: React.FC<Props> = ({
 
             onUpdate(selected);
           }}
+          value={options?.filter(
+            (option: SelectableValue<SelectableVariable>) =>
+              !!selectedOptions?.find((selected: string) => selected === option?.value?.value)
+          )}
+          filterOption={(option: SelectableValue<SelectableVariable>, searchQuery: string) =>
+            !!option?.label?.toLowerCase().includes(searchQuery.toLowerCase())
+          }
           closeMenuOnSelect={false}
           options={options}
         />

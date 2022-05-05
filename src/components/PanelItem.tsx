@@ -84,6 +84,7 @@ export const PanelItem: React.FC<Props> = ({ panel, onPanelChecked, panelDetail,
         <PanelVariables
           panel={panel}
           checkedPanels={checkedPanels}
+          panelDetail={panelDetail}
           onUpdateVariable={onUpdateVariable(panelDetail)}
           onUpdateLookback={onUpdateLookback(panelDetail)}
         />
