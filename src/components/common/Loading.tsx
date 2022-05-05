@@ -2,7 +2,7 @@ import React, { HTMLAttributes } from 'react';
 import { css } from '@emotion/css';
 import { LoadingPlaceholder, useStyles2 } from '@grafana/ui';
 
-export interface LoadingPlaceholderProps extends HTMLAttributes<HTMLDivElement> {
+interface LoadingPlaceholderProps extends HTMLAttributes<HTMLDivElement> {
   text?: React.ReactNode;
 }
 
@@ -25,4 +25,4 @@ const getStyles = () => ({
   `,
 });
 
-export { Loading };
+export { Loading, LoadingPlaceholderProps };
