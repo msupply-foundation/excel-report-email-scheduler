@@ -4,7 +4,7 @@ import intl from 'react-intl-universal';
 import { GrafanaTheme2 } from '@grafana/data';
 import { getLookbacks, PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { prefixRoute } from '../../utils/navigation';
-import { EmptyListCTA } from 'components/common';
+import { EmptyListCTA, Loading } from 'components/common';
 import { ScheduleType } from 'types';
 import { useQuery, useMutation } from 'react-query';
 import { deleteSchedule, getSchedules } from 'api';
@@ -57,7 +57,7 @@ const Schedule: React.FC = () => {
     <div>
       <div className={styles.adjustButtonToRight}>
         <LinkButton icon="plus-circle" key="create" variant="primary" href={`${PLUGIN_BASE_URL}/schedules/create`}>
-          {intl.get('add_report_group')}
+          {intl.get('add_schedule')}
         </LinkButton>
       </div>
       <ul className={styles.list}>
@@ -84,21 +84,30 @@ const Schedule: React.FC = () => {
                           <PanelContext.Consumer>
                             {({ panels }) => {
                               const lookbacks = getLookbacks();
+
+                              if (!panels || !panels.length) {
+                                return <Loading />;
+                              }
+
                               return (
                                 !!panels &&
                                 schedule.panelDetails.map(({ id, panelID, lookback, variables }: any) => {
                                   const panel = panels.find((panel: any) => panel.id === panelID);
                                   const lookbackLabel = lookbacks.find((el) => el.value === lookback)?.label;
-                                  console.log('lookbackLabel', lookbackLabel);
+
+                                  if (!panel) {
+                                    return false;
+                                  }
 
                                   return (
                                     <Tag
                                       key={id}
                                       icon="user"
+                                      className={styles.tag}
                                       name={
                                         `Panel: ${panel.title}` +
-                                        (!!lookback && ` | Lookback: ${lookbackLabel}`) +
-                                        (!!variables && ` | Variables: ${variables}`)
+                                        (!!lookback ? ` | Lookback: ${lookbackLabel}` : '') +
+                                        (!!variables ? ` | Variables: ${variables}` : '')
                                       }
                                     />
                                   );
@@ -162,6 +171,9 @@ const EmptyList = () => {
 const getStyles = (theme: GrafanaTheme2) => ({
   marginTop: css`
     margin-top: ${theme.spacing(2)};
+  `,
+  tag: css`
+    margin-right: 5px;
   `,
   list: css({
     listStyle: 'none',

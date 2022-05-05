@@ -165,7 +165,7 @@ export type PanelDetails = {
   panelID: number;
   lookback: number;
   dashboardID: string;
-  variables: string;
+  variables: string | null;
 };
 
 export { AppConfigProps, ScheduleType, AppConfigStateType, ReportGroupType, ReportGroupTypeWithMembersDetail };

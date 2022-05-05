@@ -9,10 +9,13 @@ export const formatTimeToDate = (time?: string) => {
   return d.isValid() ? d : undefined;
 };
 
-export const parseOrDefault = <T>(value: string, defaultValue: T) => {
+export const parseOrDefault = <T>(value: string | null, defaultValue: T) => {
   try {
-    return JSON.parse(value) as T;
+    if (!!value) {
+      return JSON.parse(value) as T;
+    }
   } catch {
     return defaultValue;
   }
+  return defaultValue;
 };

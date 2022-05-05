@@ -32,7 +32,11 @@ const PanelList: React.FC<PanelListProps> = ({ panelListError, onPanelChecked, c
             <HorizontalGroup wrap={true} style={{ marginBottom: '25px' }} align="flex-start" justify="flex-start">
               {checkedPanels.map((checkedPanel) => {
                 const panel = panels.find((panel: Panel) => panel.id === checkedPanel);
-                return <Tag key={checkedPanel} icon="user" name={panel?.title} />;
+                if (!panel) {
+                  return false;
+                }
+
+                return <Tag key={checkedPanel} icon="user" name={panel.title} />;
               })}
             </HorizontalGroup>
           ) : (
@@ -60,9 +64,11 @@ const PanelList: React.FC<PanelListProps> = ({ panelListError, onPanelChecked, c
                 key={`panelItem${key}`}
                 onPanelChecked={onPanelChecked}
                 checkedPanels={checkedPanels}
-                panelDetail={panelDetails?.find(
-                  (detail: PanelDetails) => detail.panelID === panel.id && detail.dashboardID === panel.dashboardID
-                )}
+                panelDetail={
+                  panelDetails.find(
+                    (detail: PanelDetails) => detail.panelID === panel.id && detail.dashboardID === panel.dashboardID
+                  )!
+                }
               />
             ))}
         </ol>

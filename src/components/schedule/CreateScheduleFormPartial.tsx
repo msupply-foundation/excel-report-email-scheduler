@@ -101,11 +101,11 @@ export const CreateScheduleFormPartial = ({
             }}
           />
         </Field>
-        {/* {(watch('interval') || 0) > 2 && ( */}
-        <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
-          <Input type="number" {...register('day', { valueAsNumber: true })} id="schedule-day" width={40} />
-        </Field>
-        {/* )} */}
+        {(watch('interval') || 0) > 2 && (
+          <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
+            <Input type="number" {...register('day', { valueAsNumber: true })} id="schedule-day" width={40} />
+          </Field>
+        )}
       </FieldSet>
 
       <Controller
@@ -131,7 +131,7 @@ export const CreateScheduleFormPartial = ({
 
       <div className="gf-form-button-row">
         <Button type="submit" variant="primary">
-          Create schedule
+          {isEditMode ? 'Update' : 'Create'} schedule
         </Button>
       </div>
     </>

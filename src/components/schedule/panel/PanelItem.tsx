@@ -1,12 +1,10 @@
 import React, { useContext } from 'react';
-import { ContentVariables, Panel, PanelDetails, SelectableVariable } from 'types';
-import { GrafanaTheme2, SelectableValue } from '@grafana/data';
+import { Panel, PanelDetails } from 'types';
+import { GrafanaTheme2 } from '@grafana/data';
 import { Checkbox, useStyles2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import { PanelContext } from 'context';
 import { PanelVariables } from 'components';
-import { parseOrDefault } from 'utils';
-//import { PanelVariablesContext } from 'context';
 
 type Props = {
   panel: Panel;
@@ -19,41 +17,7 @@ export const PanelItem: React.FC<Props> = ({ panel, onPanelChecked, panelDetail,
   const styles = useStyles2(getStyles);
   const { title, description, error } = panel;
 
-  const { setPanelDetails } = useContext(PanelContext);
-
-  const onUpdateLookback = (content: PanelDetails) => (selectableValue: SelectableValue) => {
-    setPanelDetails((prevPanels: any) => {
-      const myIndex = prevPanels.findIndex(
-        (el: any) => el.panelID === content.panelID && el.dashboardID === content.dashboardID
-      );
-
-      return [
-        ...prevPanels.slice(0, myIndex),
-        { ...prevPanels[myIndex], lookback: selectableValue.value },
-        ...prevPanels.slice(myIndex + 1),
-      ];
-    });
-  };
-
-  const onUpdateVariable =
-    (content: PanelDetails) => (variableName: string) => (selectableValue: SelectableValue<SelectableVariable[]>) => {
-      const newVariable = selectableValue.map(({ value }: SelectableValue) => value.value);
-      const newVariables = parseOrDefault<ContentVariables>(content.variables, {});
-
-      newVariables[variableName] = newVariable;
-
-      setPanelDetails((prevPanels: any) => {
-        const myIndex = prevPanels.findIndex(
-          (el: any) => el.panelID === panel.id && el.dashboardID === panel.dashboardID
-        );
-
-        return [
-          ...prevPanels.slice(0, myIndex),
-          { ...prevPanels[myIndex], variables: JSON.stringify(newVariables) },
-          ...prevPanels.slice(myIndex + 1),
-        ];
-      });
-    };
+  const { onUpdateLookback, onUpdateVariable } = useContext(PanelContext);
 
   return (
     <li className="card-item-wrapper" style={{ cursor: !error ? 'pointer' : '' }}>
@@ -85,7 +49,7 @@ export const PanelItem: React.FC<Props> = ({ panel, onPanelChecked, panelDetail,
           panel={panel}
           checkedPanels={checkedPanels}
           panelDetail={panelDetail}
-          onUpdateVariable={onUpdateVariable(panelDetail)}
+          onUpdateVariable={onUpdateVariable(panelDetail, panel)}
           onUpdateLookback={onUpdateLookback(panelDetail)}
         />
       </div>

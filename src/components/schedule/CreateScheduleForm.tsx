@@ -53,15 +53,13 @@ const CreateScheduleForm: React.FC = () => {
         ...defaultScheduleFetched,
       });
 
-      setPanelDetails((prevDetails: PanelDetails[]) => {
-        const newPanelDetails = prevDetails.map((prevDetail: PanelDetails) => {
-          return defaultScheduleFetched.panelDetails.find(
-            (defaultDetail) => defaultDetail.panelID === prevDetail.panelID || prevDetail
-          );
-        });
-
-        return newPanelDetails;
-      });
+      setPanelDetails((prevDetails: PanelDetails[]) =>
+        prevDetails.map(
+          (prevDetail: PanelDetails) =>
+            defaultScheduleFetched.panelDetails.find((defaultDetail) => defaultDetail.panelID === prevDetail.panelID) ||
+            prevDetail
+        )
+      );
     }
   }, [defaultScheduleFetched, setPanelDetails]);
 
@@ -89,11 +87,9 @@ const CreateScheduleForm: React.FC = () => {
   });
 
   const submitCreateSchedule = (data: ScheduleType) => {
-    console.log(data);
     const selectedPanels = panelDetails.filter((detail: PanelDetails) => data.panels.includes(detail.panelID));
     data.panelDetails = selectedPanels;
 
-    console.log(data);
     createScheduleMutation.mutate(data);
   };
 
