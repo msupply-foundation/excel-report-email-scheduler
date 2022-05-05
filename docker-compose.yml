@@ -1,0 +1,28 @@
+version: '3.3'
+services:
+  grafana-msupply:
+    image: grafana/grafana:8.4.4
+    container_name: msupply-dashboard-app
+    ports:
+      - 3000:3000
+    networks:
+      - grafana
+    restart: always
+    volumes:
+      - ./config/grafana.ini:/etc/grafana/grafana.ini
+      - ./dist:/var/lib/grafana/plugins/excel-report-email-scheduler
+      - grafana_data:/var/lib/grafana
+      - ./data:/var/lib/grafana/plugins/data
+    env_file:
+      - ./config.env
+    logging:
+      driver: json-file
+      options:
+        max-size: '200k'
+        max-file: '10'
+volumes:
+  grafana_data: {}
+
+networks:
+  grafana:
+    driver: bridge

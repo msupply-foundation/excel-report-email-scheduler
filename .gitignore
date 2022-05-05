@@ -34,3 +34,7 @@ e2e-results/
 .idea
 
 .github
+
+# Docker config, rename config.env.example to config.env and change config accrding
+# to your machine
+config.env
