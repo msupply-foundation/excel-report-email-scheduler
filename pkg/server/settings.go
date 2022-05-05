@@ -6,45 +6,41 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/pkg/errors"
 )
 
 func (server *HttpServer) updateSettings(rw http.ResponseWriter, request *http.Request) {
+	frame := trace()
 	var settings setting.Settings
 	requestBody, err := request.GetBody()
 	if err != nil {
-		log.DefaultLogger.Error("updateSettings: request.GetBody(): " + err.Error())
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		server.Error(rw, errors.Wrap(err, frame.Function))
 		return
 	}
 
 	bodyAsBytes, err := ioutil.ReadAll(requestBody)
 	if err != nil {
-		log.DefaultLogger.Error("updateSettings: ioutil.ReadAll(): " + err.Error())
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		server.Error(rw, errors.Wrap(err, frame.Function))
 		return
 	}
 
 	err = json.Unmarshal(bodyAsBytes, &settings)
 	if err != nil {
-		log.DefaultLogger.Error("updateSettings: json.Unmarshal: " + err.Error())
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		server.Error(rw, errors.Wrap(err, frame.Function))
 		return
 	}
 
 	err = server.db.CreateOrUpdateSettings(settings)
 	if err != nil {
-		log.DefaultLogger.Error("updateSettings: db.CreateOrUpdateSettings: " + err.Error())
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		server.Error(rw, errors.Wrap(err, frame.Function))
 		return
 	}
 
 	err = json.NewEncoder(rw).Encode(settings)
 	if err != nil {
-		log.DefaultLogger.Error("updateSettings: json.NewEncoder().Encode(): " + err.Error())
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		server.Error(rw, errors.Wrap(err, frame.Function))
 		return
 	}
 
-	rw.WriteHeader(http.StatusOK)
+	server.Success(rw, "Setting successfully deleted")
 }

@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/pkg/errors"
 )
 
@@ -107,15 +106,15 @@ func (server *HttpServer) createSchedule(rw http.ResponseWriter, request *http.R
 }
 
 func (server *HttpServer) deleteSchedule(rw http.ResponseWriter, request *http.Request) {
+	frame := trace()
 	vars := mux.Vars(request)
 	id := vars["id"]
 
 	err := server.db.DeleteSchedule(id)
 	if err != nil {
-		log.DefaultLogger.Error("deleteSchedule: db.DeleteSchedule(): " + id + " : " + err.Error())
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		server.Error(rw, errors.Wrap(err, frame.Function))
 		panic(err)
 	}
 
-	rw.WriteHeader(http.StatusOK)
+	server.Success(rw, "Schedule successfully deleted")
 }
