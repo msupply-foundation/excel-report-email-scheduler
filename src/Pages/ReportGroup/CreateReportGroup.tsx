@@ -1,10 +1,9 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
-import { Button, Field, FieldSet, Form, Input, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
-import { css } from '@emotion/css';
+import { Button, Field, FieldSet, Form, Input } from '@grafana/ui';
 import { useMutation, useQuery } from 'react-query';
 
-import { Page, UserList } from '../../components';
+import { Loading, Page, UserList } from '../../components';
 import { ROUTES, NAVIGATION_TITLE, NAVIGATION_SUBTITLE, PLUGIN_BASE_URL } from '../../constants';
 import { prefixRoute } from '../../utils';
 import { useDatasourceID } from '../../hooks';
@@ -19,7 +18,6 @@ const defaultFormValues: ReportGroupType = {
 };
 
 const CreateReportGroup = ({ history, match }: any) => {
-  const style = useStyles2(getStyles);
   const datasourceID = useDatasourceID();
   const { id: reportGroupIdToEdit } = match.params;
   const isEditMode = !!reportGroupIdToEdit;
@@ -90,11 +88,7 @@ const CreateReportGroup = ({ history, match }: any) => {
   };
 
   if (!ready) {
-    return (
-      <div className={style.loadingWrapper}>
-        <LoadingPlaceholder text="Loading..." />
-      </div>
-    );
+    return <Loading text="Loading..." />;
   }
 
   return (
@@ -171,14 +165,5 @@ const CreateReportGroup = ({ history, match }: any) => {
     </Page>
   );
 };
-
-const getStyles = () => ({
-  loadingWrapper: css`
-    display: flex;
-    height: 50vh;
-    align-items: center;
-    justify-content: center;
-  `,
-});
 
 export { CreateReportGroup };

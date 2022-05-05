@@ -1,10 +1,10 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
-import { Field, Input, FieldSet, Button, useStyles2, LoadingPlaceholder, Select } from '@grafana/ui';
+import { Field, Input, FieldSet, Button, useStyles2, Select } from '@grafana/ui';
 import { PluginConfigPageProps, AppPluginMeta, GrafanaTheme2, PluginMeta, SelectableValue } from '@grafana/data';
 import { getBackendSrv, locationService } from '@grafana/runtime';
 import intl from 'react-intl-universal';
 import { useQuery } from 'react-query';
-import { SecretInput } from './common';
+import { Loading, SecretInput } from './common';
 import { css } from '@emotion/css';
 import { locales } from '../locales';
 import { AppConfigProps, AppConfigStateType } from 'types';
@@ -105,11 +105,7 @@ const AppConfigForm = ({ plugin }: Props) => {
   };
 
   if (loading || isDatasourceListLoading) {
-    return (
-      <div className={style.loadingWrapper}>
-        <LoadingPlaceholder text="Loading..." />
-      </div>
-    );
+    return <Loading text="Loading..." />;
   }
 
   return (
@@ -277,12 +273,6 @@ const getStyles = (theme: GrafanaTheme2) => ({
   `,
   marginTopXl: css`
     margin-top: ${theme.spacing(6)};
-  `,
-  loadingWrapper: css`
-    display: flex;
-    height: 50vh;
-    align-items: center;
-    justify-content: center;
   `,
 });
 

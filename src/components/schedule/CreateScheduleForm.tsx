@@ -1,13 +1,12 @@
-import { Form, FormAPI, LoadingPlaceholder, useStyles2 } from '@grafana/ui';
+import { Form, FormAPI } from '@grafana/ui';
 import { createSchedule, getReportGroups, getScheduleByID } from 'api';
-import { CreateScheduleFormPartial } from 'components';
+import { CreateScheduleFormPartial, Loading } from 'components';
 import { PLUGIN_BASE_URL } from '../../constants';
 import { PanelContext } from 'context';
 import React, { useContext } from 'react';
 import { useMutation, useQuery } from 'react-query';
 import { ScheduleType, ReportGroupType, PanelDetails } from 'types';
 import { useHistory, useParams } from 'react-router-dom';
-import { css } from '@emotion/css';
 
 const defaultFormValues: ScheduleType = {
   id: '',
@@ -23,7 +22,6 @@ const defaultFormValues: ScheduleType = {
 
 const CreateScheduleForm: React.FC = () => {
   const { panelDetails } = useContext(PanelContext);
-  const style = useStyles2(getStyles);
 
   const [defaultSchedule, setDefaultSchedule] = React.useState<ScheduleType>(defaultFormValues);
 
@@ -100,11 +98,7 @@ const CreateScheduleForm: React.FC = () => {
   };
 
   if (!ready) {
-    return (
-      <div className={style.loadingWrapper}>
-        <LoadingPlaceholder text="Loading..." />
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
@@ -122,14 +116,5 @@ const CreateScheduleForm: React.FC = () => {
     </Form>
   );
 };
-
-const getStyles = () => ({
-  loadingWrapper: css`
-    display: flex;
-    height: 50vh;
-    align-items: center;
-    justify-content: center;
-  `,
-});
 
 export { CreateScheduleForm };

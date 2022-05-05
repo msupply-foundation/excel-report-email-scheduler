@@ -2,7 +2,6 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import intl from 'react-intl-universal';
 
-import { LoadingPlaceholder } from '@grafana/ui';
 import { AppRootProps, getLocale } from '@grafana/data';
 
 import { PluginPropsContext } from '../context';
@@ -11,6 +10,7 @@ import { AppRoutes } from './AppRoutes';
 import { AppSettings } from 'types';
 
 import { locales } from '../locales';
+import { Loading } from 'components';
 
 const queryClient = new QueryClient();
 
@@ -50,7 +50,7 @@ class App extends React.PureComponent<AppRootProps<AppSettings>, AppRootState> {
       </PluginPropsContext.Provider>
     ) : (
       <div>
-        <LoadingPlaceholder text="Loading..." />
+        <Loading text="Loading application..." />
       </div>
     );
   }

@@ -4,7 +4,7 @@ import { EmptySearchResult, FieldSet, HorizontalGroup, Icon, Legend, Tag, Toolti
 import { css, cx } from '@emotion/css';
 import { Panel, PanelDetails } from 'types';
 import intl from 'react-intl-universal';
-import { PanelItem } from 'components';
+import { Loading, PanelItem } from 'components';
 import { PanelContext } from 'context';
 
 //const pageLimit = 20;
@@ -19,6 +19,10 @@ const PanelList: React.FC<PanelListProps> = ({ panelListError, onPanelChecked, c
   const styles = useStyles2(getStyles);
 
   const { panels, panelDetails } = useContext(PanelContext);
+
+  if (!panels) {
+    return <Loading />;
+  }
 
   return (
     <>
