@@ -1,12 +1,10 @@
 import React from 'react';
 
-import { NAVIGATION_TITLE, NAVIGATION_SUBTITLE, ROUTES } from '../../constants';
+import { NAVIGATION_TITLE, NAVIGATION_SUBTITLE } from '../../constants';
 import { Page } from '../../components';
-import { prefixRoute } from '../../utils';
 import { PanelProvider } from 'context';
 import { CreateScheduleForm } from 'components/schedule/CreateScheduleForm';
 import { RouteComponentProps } from 'react-router-dom';
-import { PageToolbar } from '@grafana/ui';
 
 const CreateSchedule: React.FC<RouteComponentProps> = () => (
   <Page

@@ -44,7 +44,6 @@ const PanelProvider: React.FC = ({ children }) => {
     if (panels) {
       const newPanelDetails = panels.map((panel) => {
         const usesMacro = panelUsesMacro(panel.rawSql);
-        const usesVariables = panel.variables.length > 0;
 
         return {
           id: '',
@@ -52,7 +51,7 @@ const PanelProvider: React.FC = ({ children }) => {
           panelID: panel.id,
           dashboardID: panel.dashboardID,
           lookback: usesMacro ? 1 : 0,
-          variables: usesVariables ? '' : null,
+          variables: '',
         };
       });
 

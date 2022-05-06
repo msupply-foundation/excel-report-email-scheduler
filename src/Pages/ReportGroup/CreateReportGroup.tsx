@@ -1,6 +1,6 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
-import { Alert, Button, Field, FieldSet, Form, Input, PageToolbar, ToolbarButton } from '@grafana/ui';
+import { Alert, Button, Field, FieldSet, Form, Input, PageToolbar } from '@grafana/ui';
 import { useMutation, useQuery } from 'react-query';
 
 import { Loading, Page, UserList } from '../../components';

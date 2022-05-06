@@ -1,11 +1,11 @@
 export const panelUsesVariable = (sql: string, variableName: string): boolean => {
-  return sql.includes(`\${${variableName}`);
+  return sql.includes(`\${${variableName}`) || sql.includes(`\[[${variableName}]]`);
 };
 
 export const panelUsesMacro = (sql: string): boolean => {
   const timeToRegEx = RegExp(/\$__timeTo()/g);
   const timeFromRegEx = RegExp(/\$__timeFrom()/g);
-  const timeFilterRegEx = RegExp(/\$__timeFilter\([a-zA-Z]+\)/g);
+  const timeFilterRegEx = RegExp(/\$__timeFilter\([a-zA-Z-_.]+\)/g);
 
   return timeToRegEx.test(sql) || timeFromRegEx.test(sql) || timeFilterRegEx.test(sql);
 };

@@ -1,16 +1,6 @@
 import React, { useContext } from 'react';
 import { GrafanaTheme2 } from '@grafana/data';
-import {
-  Alert,
-  EmptySearchResult,
-  FieldSet,
-  HorizontalGroup,
-  Icon,
-  Legend,
-  Tag,
-  Tooltip,
-  useStyles2,
-} from '@grafana/ui';
+import { Card, FieldSet, HorizontalGroup, Icon, Legend, Tag, Tooltip, useStyles2 } from '@grafana/ui';
 import { css, cx } from '@emotion/css';
 import { Panel, PanelDetails } from 'types';
 import intl from 'react-intl-universal';
@@ -34,34 +24,33 @@ const PanelList: React.FC<PanelListProps> = ({ panelListError, onPanelChecked, c
     return <Loading />;
   }
 
-  if (panels.length >= 0) {
-    return (
-      <Alert title="Panel(s) not found" severity="warning">
-        Schedule must have panels to be assigned from mSupply dashboard. Please make sure you have created dashboard
-        panels.
-      </Alert>
-    );
-  }
-
   return (
     <>
       <div className="page-action-bar">
-        <FieldSet label="Selected Panels">
-          {!!checkedPanels && checkedPanels.length > 0 ? (
-            <HorizontalGroup wrap={true} style={{ marginBottom: '25px' }} align="flex-start" justify="flex-start">
-              {checkedPanels.map((checkedPanel) => {
-                const panel = panels.find((panel: Panel) => panel.id === checkedPanel);
-                if (!panel) {
-                  return false;
-                }
+        <Card disabled={true}>
+          <Card.Heading>Selected panel(s)</Card.Heading>
+          <Card.Figure>
+            <Icon size="xxxl" name="bell" />
+          </Card.Figure>
+          <Card.Description>
+            <FieldSet>
+              {!!checkedPanels && checkedPanels.length > 0 ? (
+                <HorizontalGroup wrap={true} style={{ marginBottom: '25px' }} align="flex-start" justify="flex-start">
+                  {checkedPanels.map((checkedPanel) => {
+                    const panel = panels.find((panel: Panel) => panel.id === checkedPanel);
+                    if (!panel) {
+                      return false;
+                    }
 
-                return <Tag key={checkedPanel} icon="user" name={panel.title} />;
-              })}
-            </HorizontalGroup>
-          ) : (
-            <EmptySearchResult>You have not selected any panels(s) yet</EmptySearchResult>
-          )}
-        </FieldSet>
+                    return <Tag key={checkedPanel} icon="user" name={panel.title} />;
+                  })}
+                </HorizontalGroup>
+              ) : (
+                <div>You have not selected any panels(s) yet. Please select one or more panels from the list below</div>
+              )}
+            </FieldSet>
+          </Card.Description>
+        </Card>
       </div>
       <div style={{ marginTop: '25px' }}>
         <div style={{ display: 'flex', flex: 1, alignItems: 'center' }}>
