@@ -1,6 +1,16 @@
 import React, { useContext } from 'react';
 import { GrafanaTheme2 } from '@grafana/data';
-import { EmptySearchResult, FieldSet, HorizontalGroup, Icon, Legend, Tag, Tooltip, useStyles2 } from '@grafana/ui';
+import {
+  Alert,
+  EmptySearchResult,
+  FieldSet,
+  HorizontalGroup,
+  Icon,
+  Legend,
+  Tag,
+  Tooltip,
+  useStyles2,
+} from '@grafana/ui';
 import { css, cx } from '@emotion/css';
 import { Panel, PanelDetails } from 'types';
 import intl from 'react-intl-universal';
@@ -22,6 +32,15 @@ const PanelList: React.FC<PanelListProps> = ({ panelListError, onPanelChecked, c
 
   if (!panels) {
     return <Loading />;
+  }
+
+  if (panels.length >= 0) {
+    return (
+      <Alert title="Panel(s) not found" severity="warning">
+        Schedule must have panels to be assigned from mSupply dashboard. Please make sure you have created dashboard
+        panels.
+      </Alert>
+    );
   }
 
   return (

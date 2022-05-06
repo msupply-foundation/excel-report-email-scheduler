@@ -1,6 +1,17 @@
 import React, { useEffect } from 'react';
 import { SelectableValue, DateTime } from '@grafana/data';
-import { Button, Field, FieldSet, FormAPI, Icon, Input, Select, TimeOfDayPicker } from '@grafana/ui';
+import {
+  Button,
+  Field,
+  FieldSet,
+  FormAPI,
+  Icon,
+  InlineField,
+  InlineFieldRow,
+  Input,
+  Select,
+  TimeOfDayPicker,
+} from '@grafana/ui';
 import { getIntervals } from '../../constants';
 import { Panel, ReportGroupType, ScheduleType } from 'types';
 import { formatTimeToDate } from 'utils';
@@ -36,17 +47,17 @@ export const CreateScheduleFormPartial = ({
 
   return (
     <>
-      <FieldSet label={`${isEditMode ? 'Edit "' + defaultSchedule?.name + '"' : 'New'} Schedule`}>
+      <FieldSet>
         <Field
           invalid={!!errors.name}
           error={errors.name && errors.name.message}
           label="Name"
           description="Name of the schedule"
         >
-          <Input {...register('name', { required: 'Schedule name is required' })} id="schedule-name" width={60} />
+          <Input {...register('name', { required: 'Schedule name is required' })} id="schedule-name" />
         </Field>
         <Field label="description" description="Description of the schedule">
-          <Input {...register('description')} id="schedule-description" width={60} />
+          <Input {...register('description')} id="schedule-description" />
         </Field>
       </FieldSet>
 
@@ -72,12 +83,13 @@ export const CreateScheduleFormPartial = ({
         />
       </Field>
 
-      <FieldSet label={`Schedule time`}>
-        <Field
+      <InlineFieldRow label={`Schedule time`} style={{ marginBottom: '30px' }}>
+        <InlineField
           invalid={!!errors.interval}
           error={errors.interval && errors.interval.message}
           label="Interval"
-          description="Interval to queue the schedule on"
+          grow
+          tooltip="Interval to queue the schedule on"
         >
           <Select
             value={getIntervals().filter((interval: any) => interval.value === watch('interval'))}
@@ -87,12 +99,13 @@ export const CreateScheduleFormPartial = ({
               setValue('interval', option.value);
             }}
           />
-        </Field>
-        <Field
+        </InlineField>
+        <InlineField
           invalid={!!errors.time}
           error={errors.time && errors.time.message}
           label="Time of day"
-          description="Time of day to queue the schedule on"
+          tooltip="Time of day to queue the schedule on"
+          required
         >
           <TimeOfDayPicker
             value={formatTimeToDate(watch('time'))}
@@ -100,13 +113,13 @@ export const CreateScheduleFormPartial = ({
               setValue('time', selected.format('HH:mm'));
             }}
           />
-        </Field>
+        </InlineField>
         {(watch('interval') || 0) > 2 && (
           <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
             <Input type="number" {...register('day', { valueAsNumber: true })} id="schedule-day" width={40} />
           </Field>
         )}
-      </FieldSet>
+      </InlineFieldRow>
 
       <Controller
         render={({ field: { onChange, value: selectedPanels } }) => {

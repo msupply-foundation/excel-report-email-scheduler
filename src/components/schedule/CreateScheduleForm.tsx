@@ -1,12 +1,13 @@
-import { Form, FormAPI } from '@grafana/ui';
+import { Form, FormAPI, PageToolbar } from '@grafana/ui';
 import { createSchedule, getReportGroups, getScheduleByID } from 'api';
 import { CreateScheduleFormPartial, Loading } from 'components';
-import { PLUGIN_BASE_URL } from '../../constants';
+import { PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { PanelContext } from 'context';
 import React, { useContext } from 'react';
 import { useMutation, useQuery } from 'react-query';
 import { ScheduleType, ReportGroupType, PanelDetails } from 'types';
 import { useHistory, useParams } from 'react-router-dom';
+import { prefixRoute } from 'utils';
 
 const defaultFormValues: ScheduleType = {
   id: '',
@@ -98,18 +99,33 @@ const CreateScheduleForm: React.FC = () => {
   }
 
   return (
-    <Form onSubmit={submitCreateSchedule} validateOnMount={false} defaultValues={defaultSchedule} validateOn="onSubmit">
-      {(props: FormAPI<ScheduleType>) => {
-        return (
-          <CreateScheduleFormPartial
-            isEditMode={isEditMode}
-            defaultSchedule={defaultSchedule}
-            {...props}
-            reportGroups={reportGroups}
-          />
-        );
-      }}
-    </Form>
+    <>
+      <PageToolbar
+        parent="Schedules"
+        titleHref="#"
+        parentHref={prefixRoute(ROUTES.SCHEDULES)}
+        title={`${isEditMode ? 'Edit "' + defaultSchedule?.name + '"' : 'New'}`}
+        onGoBack={() => history.push(prefixRoute(ROUTES.SCHEDULES))}
+      />
+      <Form
+        style={{ marginTop: '30px' }}
+        onSubmit={submitCreateSchedule}
+        validateOnMount={false}
+        defaultValues={defaultSchedule}
+        validateOn="onSubmit"
+      >
+        {(props: FormAPI<ScheduleType>) => {
+          return (
+            <CreateScheduleFormPartial
+              isEditMode={isEditMode}
+              defaultSchedule={defaultSchedule}
+              {...props}
+              reportGroups={reportGroups}
+            />
+          );
+        }}
+      </Form>
+    </>
   );
 };
 

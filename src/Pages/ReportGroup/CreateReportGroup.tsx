@@ -1,6 +1,6 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
-import { Button, Field, FieldSet, Form, Input } from '@grafana/ui';
+import { Alert, Button, Field, FieldSet, Form, Input, PageToolbar, ToolbarButton } from '@grafana/ui';
 import { useMutation, useQuery } from 'react-query';
 
 import { Loading, Page, UserList } from '../../components';
@@ -96,23 +96,29 @@ const CreateReportGroup = ({ history, match }: any) => {
       headerProps={{
         title: NAVIGATION_TITLE,
         subTitle: NAVIGATION_SUBTITLE,
-        backButton: {
-          icon: 'arrow-left',
-          href: prefixRoute(ROUTES.REPORT_GROUP),
-        },
       }}
     >
       <Page.Contents>
+        <PageToolbar
+          parent="Report Groups"
+          titleHref="#"
+          parentHref={prefixRoute(ROUTES.REPORT_GROUP)}
+          title={`${isEditMode ? 'Edit "' + defaultReportGroup?.name + '"' : 'New'}`}
+          onGoBack={() => history.push(prefixRoute(ROUTES.REPORT_GROUP))}
+        />
         <Form
           onSubmit={submitCreateReportGroup}
           validateOnMount={false}
           validateOn="onSubmit"
           defaultValues={defaultReportGroup}
+          style={{
+            marginTop: '30px',
+          }}
         >
           {({ register, errors, control }) => {
             return (
               <>
-                <FieldSet label={`${isEditMode ? 'Edit "' + defaultReportGroup?.name + '"' : 'New'} Report Group`}>
+                <FieldSet label="Details">
                   <Field
                     invalid={!!errors.name}
                     error={errors.name && errors.name.message}
@@ -131,7 +137,7 @@ const CreateReportGroup = ({ history, match }: any) => {
                   </Field>
                 </FieldSet>
 
-                {users && (
+                {users ? (
                   <Controller
                     render={({ field: { onChange, value: selectedMembers } }) => (
                       <UserList
@@ -150,6 +156,11 @@ const CreateReportGroup = ({ history, match }: any) => {
                     name="members"
                     control={control}
                   />
+                ) : (
+                  <Alert title="User(s) not found" severity="warning">
+                    Report group must have members to be assigned from mSupply user. Please make sure you have mSupply
+                    datasource selected in Plugin configuration.
+                  </Alert>
                 )}
 
                 <div className="gf-form-button-row">

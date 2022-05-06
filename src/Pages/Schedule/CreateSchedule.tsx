@@ -6,16 +6,13 @@ import { prefixRoute } from '../../utils';
 import { PanelProvider } from 'context';
 import { CreateScheduleForm } from 'components/schedule/CreateScheduleForm';
 import { RouteComponentProps } from 'react-router-dom';
+import { PageToolbar } from '@grafana/ui';
 
 const CreateSchedule: React.FC<RouteComponentProps> = () => (
   <Page
     headerProps={{
       title: NAVIGATION_TITLE,
       subTitle: NAVIGATION_SUBTITLE,
-      backButton: {
-        icon: 'arrow-left',
-        href: prefixRoute(ROUTES.SCHEDULES),
-      },
     }}
   >
     <PanelProvider>

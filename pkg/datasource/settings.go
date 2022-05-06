@@ -24,6 +24,26 @@ func (datasource *MsupplyEresDatasource) CreateOrUpdateSettings(settings setting
 	}
 
 	if exists {
+		existingSettings, err := datasource.NewSettings()
+		if err != nil {
+			log.DefaultLogger.Error("CreateOrUpdateSettings: datasource.NewSettings(): ", err.Error())
+			return err
+		}
+
+		var grafanPassword string
+		if settings.GrafanaPassword == "" {
+			grafanPassword = existingSettings.GrafanaPassword
+		} else {
+			grafanPassword = settings.GrafanaPassword
+		}
+
+		var emailPassword string
+		if settings.EmailPassword == "" {
+			emailPassword = existingSettings.EmailPassword
+		} else {
+			emailPassword = settings.EmailPassword
+		}
+
 		stmt, err := db.Prepare("UPDATE Config set id = ?, grafanaUsername = ?, grafanaPassword = ?, email = ?, emailPassword = ?, datasourceID = ?, emailHost = ?, emailPort = ?, grafanaURL = ?")
 		if err != nil {
 			log.DefaultLogger.Error("CreateOrUpdateSettings: db.Prepare()1: ", err.Error())
@@ -31,7 +51,7 @@ func (datasource *MsupplyEresDatasource) CreateOrUpdateSettings(settings setting
 		}
 		defer stmt.Close()
 
-		_, err = stmt.Exec("ID", settings.GrafanaUsername, settings.GrafanaPassword, settings.Email, settings.EmailPassword, settings.DatasourceID, settings.EmailHost, settings.EmailPort, settings.GrafanaURL)
+		_, err = stmt.Exec("ID", settings.GrafanaUsername, grafanPassword, settings.Email, emailPassword, settings.DatasourceID, settings.EmailHost, settings.EmailPort, settings.GrafanaURL)
 		if err != nil {
 			log.DefaultLogger.Error("CreateOrUpdateSettings: stmt.Exec()2: ", err.Error())
 			return err

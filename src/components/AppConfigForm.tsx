@@ -15,6 +15,7 @@ interface Props extends PluginConfigPageProps<AppPluginMeta<AppConfigProps>> {}
 const AppConfigForm = ({ plugin }: Props) => {
   const style = useStyles2(getStyles);
 
+  const [loading, setLoading] = useState(true);
   const { data: datasources, isLoading: isDatasourceListLoading } = useQuery('datasources', getDatasources);
 
   const { enabled, pinned, jsonData } = plugin.meta;
@@ -31,8 +32,6 @@ const AppConfigForm = ({ plugin }: Props) => {
     senderEmailPort: jsonData?.senderEmailPort || 0,
     datasourceID: jsonData?.datasourceID || 0,
   });
-
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     intl.init({ currentLocale: 'en', locales }).then(() => {
@@ -164,7 +163,7 @@ const AppConfigForm = ({ plugin }: Props) => {
           />
         </Field>
 
-        <Field label={intl.get('grafana_password')} description={intl.get('email_password_tooltip')}>
+        <Field label={intl.get('email_password')} description={intl.get('email_password_tooltip')}>
           <SecretInput
             width={60}
             id="api-email-password"
