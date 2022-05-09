@@ -42,5 +42,5 @@ func (server *HttpServer) updateSettings(rw http.ResponseWriter, request *http.R
 		return
 	}
 
-	server.Success(rw, "Setting successfully deleted")
+	rw.WriteHeader(http.StatusOK)
 }
