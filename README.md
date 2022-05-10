@@ -8,6 +8,14 @@ The timing of the scheduler can be set in the plugin.
 
 The app plugin is built with Golang as backend and react as frontend.
 
+## Requirements
+
+- Golang version 1.16 or above
+  - [Mage build tool](https://magefile.org/)
+- Node.JS version 16 or above
+- Grafana version 8 (Not required if you are using Docker, it will install this for you in a container)
+- Yarn
+
 ## Installation instructions
 
 ### Development
@@ -18,14 +26,6 @@ The Docker route need docker installed in your system along with Node.js, Golang
 
 - [Docker development installation (recommended)](./docs/developers-docker-recommented-build.md)
 - [Normal development installation](./docs/normal-installation.md)
-
-## Requirements
-
-- Golang version 1.16 or above
-  - [Mage build tool](https://magefile.org/)
-- Node.JS version 16 or above
-- Grafana version 8
-- Yarn
 
 ## Build for Production
 
