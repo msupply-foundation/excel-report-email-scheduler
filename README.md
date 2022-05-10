@@ -13,8 +13,8 @@ The app plugin is built with Golang as backend and react as frontend.
 The plugin has three main pages
 
 - [Configuration](./docs/configuration.md)
-- Report Groups
-- Schedules
+- [Report Groups](./docs/report-groups.md)
+- [Schedules](./docs/schedule.md)
 
 ## Requirements
 
