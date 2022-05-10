@@ -16,6 +16,8 @@ The plugin has three main pages
 - [Report Groups](./docs/report-groups.md)
 - [Schedules](./docs/schedule.md)
 
+Once a schedule is created it will run automatically on the date and time specified in the schedule options on the interval specified.
+
 ## Requirements
 
 - Golang version 1.16 or above
