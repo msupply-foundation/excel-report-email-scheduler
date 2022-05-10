@@ -10,9 +10,9 @@ services:
     restart: always
     volumes:
       - ./config/grafana.ini:/etc/grafana/grafana.ini
+      - ./plugins:/var/lib/grafana/plugins
       - ./dist:/var/lib/grafana/plugins/excel-report-email-scheduler
       - grafana_data:/var/lib/grafana
-      - ./data:/var/lib/grafana/plugins/data
     env_file:
       - ./config.env
     logging:

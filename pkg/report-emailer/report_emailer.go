@@ -28,15 +28,9 @@ func (re *ReportEmailer) Init() {
 	c := cron.New()
 	c.AddFunc("@every 2m", func() {
 		re.CreateReports()
-		printCronEntries(c.Entries())
 	})
 
-	printCronEntries(c.Entries())
 	c.Start()
-}
-
-func printCronEntries(cronEntries []*cron.Entry) {
-	log.DefaultLogger.Info(fmt.Sprintf("Cron Info: %+v\n", &cronEntries))
 }
 
 func (re *ReportEmailer) configs() (*auth.AuthConfig, *auth.EmailConfig, int, error) {
