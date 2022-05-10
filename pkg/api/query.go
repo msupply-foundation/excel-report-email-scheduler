@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
+	"excel-report-email-scheduler/pkg/ereserror"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -80,6 +82,12 @@ func NewQueryResponse(response *http.Response) (*QueryResponse, error) {
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.DefaultLogger.Error("NewQueryResponse: ioutil.ReadAll: " + err.Error())
+		return nil, err
+	}
+
+	if response.StatusCode != 200 {
+		err := errors.New(string(body))
+		err = ereserror.New(response.StatusCode, err, "Authentication failed")
 		return nil, err
 	}
 

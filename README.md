@@ -8,6 +8,14 @@ The timing of the scheduler can be set in the plugin.
 
 The app plugin is built with Golang as backend and react as frontend.
 
+## How it works
+
+The plugin has three main pages
+
+- [Configuration](./docs/configuration.md)
+- Report Groups
+- Schedules
+
 ## Requirements
 
 - Golang version 1.16 or above
@@ -15,8 +23,9 @@ The app plugin is built with Golang as backend and react as frontend.
 - Node.JS version 16 or above
 - Grafana version 8 (Not required if you are using Docker, it will install this for you in a container)
 - Yarn
-- You must have `msupply.db` database in the designated grafana `plugins/data` folder. We have included an empty `msupply_example.db` file in the `plugins/data` folder in this repo. Rename it to `msupply.db` and add it to your Grafana installation's `plugins/data` folder. Please do not skip this as the plugin would not work without this database file.
-- You must have `template.xlsx` file in the designated grafana `plugins/data` folder. We have included a `template.xlsx` file in the `plugins/data` folder in this repo, add it to your Grafana installation's `plugins/data` folder. Please do not skip this as the plugin would not work without this template file.
+- If you are using Docker for development the files are moved automatically, just have to rename the `msupply_example.db` file.
+  - You must have `msupply.db` database in the designated grafana `plugins/data` folder. We have included an empty `msupply_example.db` file in the `plugins/data` folder in this repo. Rename it to `msupply.db` and add it to your Grafana installation's `plugins/data` folder. Please do not skip this as the plugin would not work without this database file.
+  - You must have `template.xlsx` file in the designated grafana `plugins/data` folder. We have included a `template.xlsx` file in the `plugins/data` folder in this repo, add it to your Grafana installation's `plugins/data` folder. Please do not skip this as the plugin would not work without this template file.
 
 ## Installation instructions
 

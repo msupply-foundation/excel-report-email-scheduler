@@ -72,52 +72,55 @@ const Schedule: React.FC = () => {
                 <Card.Description className={styles.description}>{schedule.description}</Card.Description>
                 {schedule.panelDetails && (
                   <Card.Meta>
-                    {[
+                    {
                       <HorizontalGroup
+                        spacing="lg"
                         key="panelDetails"
                         wrap={true}
                         style={{ marginBottom: '25px' }}
                         align="flex-start"
                         justify="flex-start"
                       >
-                        <PanelProvider>
-                          <PanelContext.Consumer>
-                            {({ panels }) => {
-                              const lookbacks = getLookbacks();
+                        <div style={{ flexWrap: 'wrap', lineHeight: '2em' }}>
+                          <PanelProvider>
+                            <PanelContext.Consumer>
+                              {({ panels }) => {
+                                const lookbacks = getLookbacks();
 
-                              if (!panels || !panels.length) {
-                                return <Loading />;
-                              }
+                                if (!panels || !panels.length) {
+                                  return <Loading />;
+                                }
 
-                              return (
-                                !!panels &&
-                                schedule.panelDetails.map(({ id, panelID, lookback, variables }: any) => {
-                                  const panel = panels.find((panel: any) => panel.id === panelID);
-                                  const lookbackLabel = lookbacks.find((el) => el.value === lookback)?.label;
+                                return (
+                                  !!panels &&
+                                  schedule.panelDetails.map(({ id, panelID, lookback, variables }: any) => {
+                                    const panel = panels.find((panel: any) => panel.id === panelID);
+                                    const lookbackLabel = lookbacks.find((el) => el.value === lookback)?.label;
 
-                                  if (!panel) {
-                                    return false;
-                                  }
+                                    if (!panel) {
+                                      return false;
+                                    }
 
-                                  return (
-                                    <Tag
-                                      key={id}
-                                      icon="user"
-                                      className={styles.tag}
-                                      name={
-                                        `Panel: ${panel.title}` +
-                                        (!!lookback ? ` | Lookback: ${lookbackLabel}` : '') +
-                                        (!!variables ? ` | Variables: ${variables}` : '')
-                                      }
-                                    />
-                                  );
-                                })
-                              );
-                            }}
-                          </PanelContext.Consumer>
-                        </PanelProvider>
-                      </HorizontalGroup>,
-                    ]}
+                                    return (
+                                      <Tag
+                                        key={id}
+                                        icon="user"
+                                        className={styles.tag}
+                                        name={
+                                          `Panel: ${panel.title}` +
+                                          (!!lookback ? ` | Lookback: ${lookbackLabel}` : '') +
+                                          (!!variables ? ` | Variables: ${variables}` : '')
+                                        }
+                                      />
+                                    );
+                                  })
+                                );
+                              }}
+                            </PanelContext.Consumer>
+                          </PanelProvider>
+                        </div>
+                      </HorizontalGroup>
+                    }
                   </Card.Meta>
                 )}
                 <Card.Actions className={styles.actions}>
@@ -174,11 +177,12 @@ const getStyles = (theme: GrafanaTheme2) => ({
   `,
   tag: css`
     margin-right: 5px;
+    padding: 5px;
   `,
   list: css({
     listStyle: 'none',
     display: 'grid',
-    // gap: '8px', Add back when legacy support for old Card interface is dropped
+    gap: '8px',
   }),
   adjustButtonToRight: css`
     display: flex;

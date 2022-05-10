@@ -239,10 +239,12 @@ const AppConfigForm = ({ plugin }: Props) => {
               secureJsonData:
                 state.isGrafanaPasswordSet && state.isSenderEmailPasswordSet
                   ? undefined
-                  : {
-                      grafanaPassword: state.grafanaPassword,
-                      senderEmailPassword: state.senderEmailPassword,
-                    },
+                  : Object.fromEntries(
+                      Object.entries({
+                        grafanaPassword: state.grafanaPassword,
+                        senderEmailPassword: state.senderEmailPassword,
+                      }).filter(([_, v]) => v !== '')
+                    ),
             })
           }
           disabled={Boolean(
