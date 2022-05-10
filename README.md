@@ -19,6 +19,14 @@ The Docker route need docker installed in your system along with Node.js, Golang
 - [Docker development installation (recommended)](./docs/developers-docker-recommented-build.md)
 - [Normal development installation](./docs/normal-installation.md)
 
+## Requirements
+
+- Golang version 1.16 or above
+  - [Mage build tool](https://magefile.org/)
+- Node.JS version 16 or above
+- Grafana version 8
+- Yarn
+
 ## Build for Production
 
 - Do everything instructed in the Development section above.
