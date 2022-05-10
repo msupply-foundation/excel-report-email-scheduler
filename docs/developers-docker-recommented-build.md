@@ -1,6 +1,6 @@
 # Docker development installation (recommended)
 
-The instructions below would walk you through installing the app plugin along with fresh grafana install in docker. The plugin has docker-compose.yml, Dockerfile, config.env.example and config/grafana.ini files fo this soul purpose. If you do not want to use docker these files would have no effect in your installation.
+The instructions below would walk you through installing the app plugin along with fresh grafana install in docker. The plugin has docker-compose.yml, Dockerfile, config.env.example and config/grafana.ini files for this soul purpose. If you do not want to use docker, these files would have no effect in your installation.
 
 Docker development environment is recommended as it is the easiest way to run and test the plugin.
 
@@ -10,11 +10,11 @@ Docker development environment is recommended as it is the easiest way to run an
 - The plugin expects the mSupply dashboard postgres datasource to be setup and enabled.
 - Docker must be installed in your system, also it expects docker-compose installed
 - Node version 16 is recommended
-- Yarn package manager for Node is recommended
+- Yarn package manager is recommended
 - Golang version 1.18 is recommended
   - Mage is expected to be installed globally but you can download Mage executable, put it in the root folder and run the build
 - Grafana v8.4.4 image is being used by the docker container.
-- For development at least we are expecting the plugins to run unsigned. We have setup `GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS` in config.env for this purposed.
+- For development at least, we are expecting the plugins to run unsigned. We have setup `GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS` in config.env for this purposed.
   - We want to run the plugin unsigned because we would be constantly editing code and debugging and signed plugin would not like that.
 
 ## Steps
@@ -25,10 +25,11 @@ Docker development environment is recommended as it is the easiest way to run an
   - Select it as the datasource.
     > Note: If you have the postgresql database setup in main computer's `localhost` and the plugin and grafana installation is inside docker. You would have to specify the Host of the datasource setting differently. In this case, the host would have `host.docker.internal`.
 - Make sure you have plugin's SQLite database ready
-  - The plugin uses a SQLite database named `msupply.db` to store its internal data, that is report_group and scheduler and its settings data.
+  - The plugin uses a SQLite database named `msupply.db` to store its internal data, that is report_group and scheduler and its variable data.
   - `plugins/data` folder is where `msupply.db` would live. This is our plugin's noSQL database. A blank database at least, is expected to be in this path.
-    > Waring: The path is hard coded so it cannot be changed. Without `msupply.db` database the plugin would not work at all.
-    > Make sure it is there at the path the plugin expects. The path is `../data` for windows and `<plugins folder>/data` for linux (which is this docker installation).
+    > Warning: The path is hard coded so it cannot be changed.
+    > Without `msupply.db` database the plugin would not work at all.
+    > Make sure it is there at the path the plugin expects. The path is `../data` for windows and `/var/lib/grafana/plugins/data` for linux (which is this docker installation).
 - Download and add necessary plugins in plugins folder (optional)
   - If you want to use Grafana Panels that uses mSupply-table, msupply-worldmap, msupply-regionmap, msupply-horizontal-bar and other plugins, please download them and put them in plugins folder.
   - These plugins (and everything in plugins folder) are picked up by docker and added to Grafana plugin folder.
