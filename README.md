@@ -10,7 +10,7 @@ The app plugin is built with Golang as backend and react as frontend.
 
 ## Development
 
-- ### [Docker development recommended build](./docs/developers-docker-recommented-build.md)
+- ### [Docker development recommended](./docs/developers-docker-recommented-build.md)
 
 ## Production build
 
