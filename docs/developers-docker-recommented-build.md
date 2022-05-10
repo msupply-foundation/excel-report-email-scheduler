@@ -1,4 +1,8 @@
-# Docker development recommended
+# Docker development installation (recommended)
+
+The instructions below would walk you through installing the app plugin along with fresh grafana install in docker. The plugin has docker-compose.yml, Dockerfile, config.env.example and config/grafana.ini files fo this soul purpose. If you do not want to use docker these files would have no effect in your installation.
+
+Docker development environment is recommended as it is the easiest way to run and test the plugin.
 
 ## Pre-requisite
 
@@ -15,9 +19,16 @@
 
 ## Steps
 
-- Make sure you have plugin's noSQL database ready
-  - `plugins/data` folder is where msupply.db would live. This is our plugin's noSQL database. A blank database at least, is expected to be in this path.
-    > Waring: Without `msupply.db` database the plugin would not work at all. Make sure it is there at the path the plugin expects. The path is `../data` for windows and `<plugins folder>/data` for linux (which is this docker installation).
+- Enable mSupply dashboard's postgresql datasource
+  - The plugin expect mSupply dashboard's postgresql datasource to be the source of it's users and panel data. Make sure it is installed and ready with appropriate data.
+  - Make sure the datasource is started in mSupply dashboard and is available to select in the plugin's configuration page.
+  - Select it as the datasource.
+    > Note: If you have the postgresql database setup in main computer's `localhost` and the plugin and grafana installation is inside docker. You would have to specify the Host of the datasource setting differently. In this case, the host would have `host.docker.internal`.
+- Make sure you have plugin's SQLite database ready
+  - The plugin uses a SQLite database named `msupply.db` to store its internal data, that is report_group and scheduler and its settings data.
+  - `plugins/data` folder is where `msupply.db` would live. This is our plugin's noSQL database. A blank database at least, is expected to be in this path.
+    > Waring: The path is hard coded so it cannot be changed. Without `msupply.db` database the plugin would not work at all.
+    > Make sure it is there at the path the plugin expects. The path is `../data` for windows and `<plugins folder>/data` for linux (which is this docker installation).
 - Download and add necessary plugins in plugins folder (optional)
   - If you want to use Grafana Panels that uses mSupply-table, msupply-worldmap, msupply-regionmap, msupply-horizontal-bar and other plugins, please download them and put them in plugins folder.
   - These plugins (and everything in plugins folder) are picked up by docker and added to Grafana plugin folder.

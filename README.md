@@ -8,10 +8,12 @@ The timing of the scheduler can be set in the plugin.
 
 The app plugin is built with Golang as backend and react as frontend.
 
-## Installation
+## Installation instructions
 
-- ### [Docker development installation (recommended)](./docs/developers-docker-recommented-build.md)
+### Development
 
-## Production build
+- [Docker development installation (recommended)](./docs/developers-docker-recommented-build.md)
+
+### Production
 
 - Instructions coming soon
