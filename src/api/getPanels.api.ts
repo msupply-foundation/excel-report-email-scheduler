@@ -76,8 +76,6 @@ export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
     })
     .flat();
 
-  console.log('panels', panels);
-
   return panels;
 };
 
