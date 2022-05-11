@@ -31,7 +31,16 @@ export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
             if (type === 'datasource' || type === 'adhoc') {
               return true;
             } else if (type === 'query') {
-              return varDatasource.type.includes(datasourceName);
+              // Note: Having a strange issue where templating.list.datasource never populates
+              if (varDatasource === undefined) {
+                return false;
+              }
+
+              if (typeof varDatasource === 'object' && varDatasource !== null) {
+                return varDatasource.type.includes(datasourceName);
+              }
+
+              return varDatasource !== datasourceName;
             } else {
               return false;
             }
