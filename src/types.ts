@@ -68,7 +68,10 @@ export type Variable = {
   name: string;
   definition: string;
   refresh: number;
-  datasource: string;
+  datasource: {
+    type: string;
+    uid: string;
+  };
   options: VariableOption[];
   multi: boolean;
 };
