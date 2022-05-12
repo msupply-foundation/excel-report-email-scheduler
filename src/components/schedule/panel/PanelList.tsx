@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { GrafanaTheme2 } from '@grafana/data';
 import { Card, FieldSet, HorizontalGroup, Icon, Legend, Tag, Tooltip, useStyles2 } from '@grafana/ui';
 import { css, cx } from '@emotion/css';
-import { Panel, PanelDetails } from 'types';
+import { Panel, PanelDetails, PanelListSelectedType } from 'types';
 import intl from 'react-intl-universal';
 import { Loading, PanelItem } from 'components';
 import { PanelContext } from 'context';
@@ -12,7 +12,7 @@ import { PanelContext } from 'context';
 type PanelListProps = {
   panelListError: any;
   onPanelChecked: (panel: Panel) => void;
-  checkedPanels: number[];
+  checkedPanels: PanelListSelectedType[];
 };
 
 const PanelList: React.FC<PanelListProps> = ({ panelListError, onPanelChecked, checkedPanels }) => {
@@ -37,12 +37,17 @@ const PanelList: React.FC<PanelListProps> = ({ panelListError, onPanelChecked, c
               {!!checkedPanels && checkedPanels.length > 0 ? (
                 <HorizontalGroup wrap={true} style={{ marginBottom: '25px' }} align="flex-start" justify="flex-start">
                   {checkedPanels.map((checkedPanel) => {
-                    const panel = panels.find((panel: Panel) => panel.id === checkedPanel);
+                    const panel = panels.find(
+                      (panel: Panel) =>
+                        panel.id === checkedPanel.panelID && panel.dashboardID === checkedPanel.dashboardID
+                    );
                     if (!panel) {
                       return false;
                     }
 
-                    return <Tag key={checkedPanel} icon="user" name={panel.title} />;
+                    return (
+                      <Tag key={checkedPanel.panelID + 'a' + checkedPanel.dashboardID} icon="user" name={panel.title} />
+                    );
                   })}
                 </HorizontalGroup>
               ) : (

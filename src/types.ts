@@ -53,7 +53,7 @@ type ScheduleType = {
   time: string;
   day: number;
   reportGroupID: string;
-  panels: number[];
+  panels: PanelListSelectedType[];
   panelDetails: PanelDetails[];
 };
 
@@ -169,6 +169,11 @@ export type PanelDetails = {
   lookback: number;
   dashboardID: string;
   variables: string | null;
+};
+
+export type PanelListSelectedType = {
+  panelID: number;
+  dashboardID: string;
 };
 
 export { AppConfigProps, ScheduleType, AppConfigStateType, ReportGroupType, ReportGroupTypeWithMembersDetail };

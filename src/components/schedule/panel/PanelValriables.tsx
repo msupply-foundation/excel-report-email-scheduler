@@ -11,7 +11,6 @@ import { PanelVariableTextInput } from 'components';
 
 type Props = {
   panel: Panel;
-  checkedPanels: number[];
   panelDetail: PanelDetails;
   onUpdateLookback: (selectedValue: SelectableValue) => void;
   onUpdateVariable: (variableName: string) => (selectedValue: SelectableValue) => void;

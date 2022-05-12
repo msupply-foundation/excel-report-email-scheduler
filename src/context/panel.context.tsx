@@ -33,7 +33,7 @@ const PanelProvider: React.FC = ({ children }) => {
 
   const datasourceID = useDatasourceID();
 
-  const { data: panels } = useQuery<Panel[], Error>(['panels'], () => getPanels(datasourceID), {
+  const { data: panels } = useQuery<Panel[], Error>('all-panels', () => getPanels(datasourceID), {
     enabled: !!datasourceID,
     refetchOnWindowFocus: false,
     retry: 0,

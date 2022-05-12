@@ -22,11 +22,9 @@ const defaultFormValues: ScheduleType = {
 };
 
 const CreateScheduleForm: React.FC = () => {
-  const { panelDetails } = useContext(PanelContext);
+  const { panelDetails, setPanelDetails } = useContext(PanelContext);
 
   const [defaultSchedule, setDefaultSchedule] = React.useState<ScheduleType>(defaultFormValues);
-
-  const { setPanelDetails } = useContext(PanelContext);
 
   const history = useHistory();
 
@@ -57,8 +55,10 @@ const CreateScheduleForm: React.FC = () => {
       setPanelDetails((prevDetails: PanelDetails[]) =>
         prevDetails.map(
           (prevDetail: PanelDetails) =>
-            defaultScheduleFetched.panelDetails.find((defaultDetail) => defaultDetail.panelID === prevDetail.panelID) ||
-            prevDetail
+            defaultScheduleFetched.panelDetails.find(
+              (defaultDetail) =>
+                defaultDetail.panelID === prevDetail.panelID && defaultDetail.dashboardID === prevDetail.dashboardID
+            ) || prevDetail
         )
       );
     }
@@ -88,9 +88,10 @@ const CreateScheduleForm: React.FC = () => {
   });
 
   const submitCreateSchedule = (data: ScheduleType) => {
-    const selectedPanels = panelDetails.filter((detail: PanelDetails) => data.panels.includes(detail.panelID));
+    const selectedPanels = panelDetails.filter((detail: PanelDetails) =>
+      data.panels.find((panel) => panel.panelID === detail.panelID && panel.dashboardID === detail.dashboardID)
+    );
     data.panelDetails = selectedPanels;
-
     createScheduleMutation.mutate(data);
   };
 

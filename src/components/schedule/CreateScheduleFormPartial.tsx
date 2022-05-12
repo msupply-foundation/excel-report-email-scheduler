@@ -13,7 +13,7 @@ import {
   TimeOfDayPicker,
 } from '@grafana/ui';
 import { getIntervals } from '../../constants';
-import { Panel, ReportGroupType, ScheduleType } from 'types';
+import { Panel, PanelListSelectedType, ReportGroupType, ScheduleType } from 'types';
 import { formatTimeToDate } from 'utils';
 import { PanelList } from 'components';
 import { Controller } from 'react-hook-form';
@@ -33,9 +33,9 @@ export const CreateScheduleFormPartial = ({
   defaultSchedule: ScheduleType;
 }) => {
   useEffect(() => {
-    // register('reportGroupID', { required: 'Report group is required' });
-    // register('time', { required: 'time of day is required' });
-    // register('interval', { required: 'Interval is required' });
+    register('reportGroupID', { required: 'Report group is required' });
+    register('time', { required: 'time of day is required' });
+    register('interval', { required: 'Interval is required' });
   }, [register]);
 
   const getReportGroupOptions = (reportGroups: ReportGroupType[] | undefined) =>
@@ -128,9 +128,17 @@ export const CreateScheduleFormPartial = ({
               panelListError={errors.panels}
               checkedPanels={selectedPanels}
               onPanelChecked={(panel: Panel) => {
-                const updatedSelectedPanels = selectedPanels.includes(panel.id)
-                  ? selectedPanels.filter((el: Number) => el !== panel.id)
-                  : [...selectedPanels, panel.id];
+                const foundElement = selectedPanels.find(
+                  (selectedPanel: PanelListSelectedType) =>
+                    selectedPanel.panelID === panel.id && selectedPanel.dashboardID === panel.dashboardID
+                );
+
+                const updatedSelectedPanels = foundElement
+                  ? selectedPanels.filter(
+                      (selectedPanel: PanelListSelectedType) =>
+                        !(selectedPanel.panelID === panel.id && selectedPanel.dashboardID === panel.dashboardID)
+                    )
+                  : [...selectedPanels, { panelID: panel.id, dashboardID: panel.dashboardID }];
 
                 onChange(updatedSelectedPanels);
               }}
@@ -139,7 +147,10 @@ export const CreateScheduleFormPartial = ({
         }}
         name="panels"
         control={control}
-        defaultValue={defaultSchedule.panelDetails.map((panelDetail) => panelDetail.panelID)}
+        defaultValue={defaultSchedule.panelDetails.map((panelDetail) => ({
+          panelID: panelDetail.panelID,
+          dashboardID: panelDetail.dashboardID,
+        }))}
       />
 
       <div className="gf-form-button-row">
