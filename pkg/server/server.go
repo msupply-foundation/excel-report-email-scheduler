@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"path/filepath"
 	"runtime"
 
 	"excel-report-email-scheduler/pkg/datasource"
@@ -42,6 +43,17 @@ func (server *HttpServer) ResourceHandler(mSupplyEresDatasource *datasource.Msup
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.fetchSingleReportGroupWithMembers)).Methods("GET")
 	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.CreateReportGroupWithMembers)).Methods("POST")
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.deleteReportGroupsWithMembers)).Methods("DELETE")
+
+	mux.HandleFunc("/export-panel", bugsnag.HandlerFunc(server.exportPanel)).Methods("POST")
+
+	var dataPath string
+	if runtime.GOOS == "windows" {
+		dataPath = filepath.Join("..", "data")
+	} else {
+		dataPath = filepath.Join("/var/lib/grafana/plugins", "data")
+	}
+
+	mux.PathPrefix("/download/").Handler(http.StripPrefix("/download/", http.FileServer(http.Dir(dataPath)))).Methods("GET")
 
 	return httpadapter.New(mux)
 }

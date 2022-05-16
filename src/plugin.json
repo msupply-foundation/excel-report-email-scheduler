@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "app",
   "name": "Excel report e-mail scheduler",
-  "id": "msupplyfoundation-excelreportemailscheduler-app",
+  "id": "msupplyfoundation-datasource",
   "backend": true,
   "alerting": false,
   "metrics": false,

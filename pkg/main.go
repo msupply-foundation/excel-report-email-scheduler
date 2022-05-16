@@ -10,7 +10,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
 
-const ERES_PLUGIN_ID = "msupplyfoundation-excelreportemailscheduler-app"
+const ERES_PLUGIN_ID = "msupplyfoundation-datasource"
 
 func main() {
 	bugsnag.Configure(bugsnag.Configuration{

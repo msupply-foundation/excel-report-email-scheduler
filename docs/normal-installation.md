@@ -34,7 +34,7 @@ The instructions below would walk you through installing the app plugin in your 
   ```
   ...
   [plugins]
-  allow_loading_unsigned_plugins = msupplyfoundation-excelreportemailscheduler-app
+  allow_loading_unsigned_plugins = msupplyfoundation-datasource
   ...
   ```
 
