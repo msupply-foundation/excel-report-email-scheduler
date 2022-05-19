@@ -26,7 +26,7 @@ Docker development environment is recommended as it is the easiest way to run an
     > Note: If you have the postgresql database setup in main computer's `localhost` and the plugin and grafana installation is inside docker. You would have to specify the Host of the datasource setting differently. In this case, the host would have `host.docker.internal`.
 - Make sure you have plugin's SQLite database ready
   - The plugin uses a SQLite database named `msupply.db` to store its internal data, that is report_group and scheduler and its variable data.
-  - `plugins/data` folder is where `msupply.db` would live. This is our plugin's noSQL database. A blank database at least, is expected to be in this path.
+  - `plugins/data` folder is where `msupply.db` would live. This is our plugin's sqlite database. A blank database at least, is expected to be in this path.
     > Warning: The path is hard coded so it cannot be changed.
     > Without `msupply.db` database the plugin would not work at all.
     > Make sure it is there at the path the plugin expects. The path is `../data` for windows and `/var/lib/grafana/plugins/data` for linux (which is this docker installation).

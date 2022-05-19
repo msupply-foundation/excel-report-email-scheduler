@@ -1,6 +1,6 @@
 # Configuration Page
 
-- Setup your plugin configurations in this page
+- Setup your plugin configuration in this page
 - Enable or disable the plugin in this page
 
 ## Screenshot

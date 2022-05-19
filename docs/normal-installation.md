@@ -1,6 +1,6 @@
 # Normal development installation
 
-The instructions below would walk you through installing the app plugin in your normal system without using docker. The plugin has docker-compose.yml, Dockerfile, config.env.example and config/grafana.ini files for docker installation, these files would have no effect in your installation.
+The instructions below walk you through installing the app plugin in your normal system without using docker. The plugin has docker-compose.yml, Dockerfile, config.env.example and config/grafana.ini files for docker installation, these files would have no effect in your installation.
 
 ## Pre-requisite
 
