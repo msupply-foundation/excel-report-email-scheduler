@@ -1,5 +1,5 @@
-import { Form, FormAPI, PageToolbar } from '@grafana/ui';
-import { createSchedule, getReportGroups, getScheduleByID } from 'api';
+import { Form, FormAPI, PageToolbar, Spinner, ToolbarButton } from '@grafana/ui';
+import { createSchedule, getReportGroups, getScheduleByID, sendTestEmail } from 'api';
 import { CreateScheduleFormPartial, Loading } from 'components';
 import { PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { PanelContext } from 'context';
@@ -8,6 +8,7 @@ import { useMutation, useQuery } from 'react-query';
 import { ScheduleType, ReportGroupType, PanelDetails } from 'types';
 import { useHistory, useParams } from 'react-router-dom';
 import { prefixRoute } from 'utils';
+import intl from 'react-intl-universal';
 
 const defaultFormValues: ScheduleType = {
   id: '',
@@ -87,6 +88,8 @@ const CreateScheduleForm: React.FC = () => {
     },
   });
 
+  const { mutate: testEmails, isLoading: isSendTestEmailLoading } = useMutation(sendTestEmail);
+
   const submitCreateSchedule = (data: ScheduleType) => {
     const selectedPanels = panelDetails.filter((detail: PanelDetails) =>
       data.panels.find((panel) => panel.panelID === detail.panelID && panel.dashboardID === detail.dashboardID)
@@ -107,7 +110,16 @@ const CreateScheduleForm: React.FC = () => {
         parentHref={prefixRoute(ROUTES.SCHEDULES)}
         title={`${isEditMode ? 'Edit "' + defaultSchedule?.name + '"' : 'New'}`}
         onGoBack={() => history.push(prefixRoute(ROUTES.SCHEDULES))}
-      />
+      >
+        {isEditMode &&
+          (isSendTestEmailLoading ? (
+            <Spinner />
+          ) : (
+            <ToolbarButton icon="envelope" onClick={() => testEmails(defaultSchedule.id)}>
+              {intl.get('send_test_emails')}
+            </ToolbarButton>
+          ))}
+      </PageToolbar>
       <Form
         style={{ marginTop: '30px' }}
         onSubmit={submitCreateSchedule}

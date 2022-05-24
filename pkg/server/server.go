@@ -44,6 +44,7 @@ func (server *HttpServer) ResourceHandler(mSupplyEresDatasource *datasource.Msup
 	mux.HandleFunc("/report-group", bugsnag.HandlerFunc(server.CreateReportGroupWithMembers)).Methods("POST")
 	mux.HandleFunc("/report-group/{id}", bugsnag.HandlerFunc(server.deleteReportGroupsWithMembers)).Methods("DELETE")
 
+	mux.HandleFunc("/test-email", bugsnag.HandlerFunc(server.testEmail)).Queries("schedule-id", "{schedule-id}").Methods("GET")
 	mux.HandleFunc("/export-panel", bugsnag.HandlerFunc(server.exportPanel)).Methods("POST")
 
 	var dataPath string

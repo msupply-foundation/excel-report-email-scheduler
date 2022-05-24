@@ -5,3 +5,4 @@ export * from './getDatasource.api';
 export * from './getDatasource.api';
 export * from './getPanels.api';
 export * from './Schedule.api';
+export * from './sendTestEmail.api';
