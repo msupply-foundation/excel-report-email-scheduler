@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { css, cx } from '@emotion/css';
 import intl from 'react-intl-universal';
 import { GrafanaTheme2 } from '@grafana/data';
-import { getLookbacks, PLUGIN_BASE_URL, ROUTES } from '../../constants';
+import { PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { prefixRoute } from '../../utils/navigation';
 import { EmptyListCTA, Loading } from 'components/common';
 import { ScheduleType } from 'types';
@@ -61,90 +61,71 @@ const Schedule: React.FC = () => {
         </LinkButton>
       </div>
       <ul className={styles.list}>
-        {schedules.map((schedule) => {
-          return (
-            <li key={schedule.id}>
-              <Card
-                className={cx(styles.card, 'card-parent')}
-                href={`${PLUGIN_BASE_URL}/schedules/edit/${schedule.id}`}
-              >
-                <Card.Heading className={styles.heading}>{schedule.name}</Card.Heading>
-                <Card.Description className={styles.description}>{schedule.description}</Card.Description>
-                {schedule.panelDetails && (
-                  <Card.Meta>
-                    {
-                      <HorizontalGroup
-                        spacing="lg"
-                        key="panelDetails"
-                        wrap={true}
-                        style={{ marginBottom: '25px' }}
-                        align="flex-start"
-                        justify="flex-start"
-                      >
-                        <div style={{ flexWrap: 'wrap', lineHeight: '2em' }}>
-                          <PanelProvider>
-                            <PanelContext.Consumer>
-                              {({ panels }) => {
-                                const lookbacks = getLookbacks();
+        {schedules.map((schedule) => (
+          <li key={schedule.id}>
+            <Card className={cx(styles.card, 'card-parent')} href={`${PLUGIN_BASE_URL}/schedules/edit/${schedule.id}`}>
+              <Card.Heading className={styles.heading}>{schedule.name}</Card.Heading>
+              <Card.Description className={styles.description}>{schedule.description}</Card.Description>
+              {schedule.panelDetails && (
+                <Card.Meta>
+                  {
+                    <HorizontalGroup
+                      spacing="lg"
+                      key="panelDetails"
+                      wrap={true}
+                      style={{ marginBottom: '25px' }}
+                      align="flex-start"
+                      justify="flex-start"
+                    >
+                      <div style={{ flexWrap: 'wrap', lineHeight: '2.6em', marginBottom: '10px' }}>
+                        <PanelProvider>
+                          <PanelContext.Consumer>
+                            {({ panels }) => {
+                              if (!panels || !panels.length) {
+                                return <Loading />;
+                              }
 
-                                if (!panels || !panels.length) {
-                                  return <Loading />;
-                                }
+                              return (
+                                !!panels &&
+                                schedule.panelDetails.map(({ id, panelID }: any) => {
+                                  const panel = panels.find((panel: any) => panel.id === panelID);
 
-                                return (
-                                  !!panels &&
-                                  schedule.panelDetails.map(({ id, panelID, lookback, variables }: any) => {
-                                    const panel = panels.find((panel: any) => panel.id === panelID);
-                                    const lookbackLabel = lookbacks.find((el) => el.value === lookback)?.label;
+                                  if (!panel) {
+                                    return false;
+                                  }
 
-                                    if (!panel) {
-                                      return false;
-                                    }
-
-                                    return (
-                                      <Tag
-                                        key={id}
-                                        icon="user"
-                                        className={styles.tag}
-                                        name={
-                                          `Panel: ${panel.title}` +
-                                          (!!lookback ? ` | Lookback: ${lookbackLabel}` : '') +
-                                          (!!variables ? ` | Variables: ${variables}` : '')
-                                        }
-                                      />
-                                    );
-                                  })
-                                );
-                              }}
-                            </PanelContext.Consumer>
-                          </PanelProvider>
-                        </div>
-                      </HorizontalGroup>
-                    }
-                  </Card.Meta>
-                )}
-                <Card.Actions className={styles.actions}>
-                  <LinkButton
-                    icon="cog"
-                    key="edit"
-                    variant="secondary"
-                    href={`${PLUGIN_BASE_URL}/schedules/edit/${schedule.id}`}
-                  >
-                    Edit
-                  </LinkButton>
-                  <Button
-                    key="delete"
-                    icon="trash-alt"
-                    variant="destructive"
-                    onClick={(e) => onScheduleDelete(schedule.id)}
-                  >
-                    {intl.get('delete')}
-                  </Button>
-                </Card.Actions>
-              </Card>
-            </li>
-          );
-        })}
+                                  return <Tag key={id} icon="user" className={styles.tag} name={panel.title} />;
+                                })
+                              );
+                            }}
+                          </PanelContext.Consumer>
+                        </PanelProvider>
+                      </div>
+                    </HorizontalGroup>
+                  }
+                </Card.Meta>
+              )}
+              <Card.Actions className={styles.actions}>
+                <LinkButton
+                  icon="cog"
+                  key="edit"
+                  variant="secondary"
+                  href={`${PLUGIN_BASE_URL}/schedules/edit/${schedule.id}`}
+                >
+                  Edit
+                </LinkButton>
+                <Button
+                  key="delete"
+                  icon="trash-alt"
+                  variant="destructive"
+                  onClick={(e) => onScheduleDelete(schedule.id)}
+                >
+                  {intl.get('delete')}
+                </Button>
+              </Card.Actions>
+            </Card>
+          </li>
+        ))}
       </ul>
       <ConfirmModal
         isOpen={deleteAlertIsOpen}
@@ -176,7 +157,8 @@ const getStyles = (theme: GrafanaTheme2) => ({
     margin-top: ${theme.spacing(2)};
   `,
   tag: css`
-    margin-right: 5px;
+    margin-bottom: 6px;
+    margin-right: 7px;
     padding: 5px;
   `,
   list: css({
