@@ -5,7 +5,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { prefixRoute } from '../../utils/navigation';
 import { EmptyListCTA, Loading } from 'components/common';
-import { ScheduleType } from 'types';
+import { Panel, PanelDetails, ScheduleType } from 'types';
 import { useQuery, useMutation } from 'react-query';
 import { deleteSchedule, getSchedules } from 'api';
 import { Button, Card, ConfirmModal, HorizontalGroup, LinkButton, Spinner, Tag, useStyles2 } from '@grafana/ui';
@@ -87,8 +87,10 @@ const Schedule: React.FC = () => {
 
                               return (
                                 !!panels &&
-                                schedule.panelDetails.map(({ id, panelID }: any) => {
-                                  const panel = panels.find((panel: any) => panel.id === panelID);
+                                schedule.panelDetails.map(({ id, panelID, dashboardID }: PanelDetails) => {
+                                  const panel = panels.find(
+                                    (panel: Panel) => panel.id === panelID && panel.dashboardID === dashboardID
+                                  );
 
                                   if (!panel) {
                                     return false;
