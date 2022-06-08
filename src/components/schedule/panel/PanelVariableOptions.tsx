@@ -23,8 +23,13 @@ export const PanelVariableOptions: React.FC<Props> = ({
   variable,
   selectedOptions,
 }) => {
-  const { refresh } = variable;
+  const { refresh, includeAll } = variable;
   const datasourceID = useDatasourceID();
+
+  const selectAllOption: SelectableValue = {
+    value: '$__all',
+    label: 'All',
+  };
 
   // When a query variable is set to refresh, it does not by default have `options` pre-populated.
   // So, when refresh is true, query for the data and map it to the matching array.
@@ -32,12 +37,21 @@ export const PanelVariableOptions: React.FC<Props> = ({
     enabled: !!refresh,
   });
 
-  const options = selectableOptions?.length > 0 ? selectableOptions : data;
+  const options =
+    selectableOptions?.length > 0
+      ? includeAll
+        ? [selectAllOption, ...selectableOptions]
+        : selectableOptions
+      : includeAll
+      ? data
+        ? [selectAllOption, ...data]
+        : [selectAllOption]
+      : data;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'row', marginTop: '5px' }}>
       <InlineFormLabel>{name}</InlineFormLabel>
-      {multiSelectable ? (
+      {!multiSelectable ? (
         <Select
           value={options?.filter((f: any) => !!selectedOptions?.find((s1: any) => s1 === f.value.value))}
           onChange={(selected: SelectableValue<SelectableVariable>) => {

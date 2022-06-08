@@ -67,6 +67,7 @@ export type Variable = {
   type: string;
   name: string;
   definition: string;
+  includeAll: boolean;
   refresh: number;
   datasource: {
     type: string;
