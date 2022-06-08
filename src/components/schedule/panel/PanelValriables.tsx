@@ -35,18 +35,18 @@ export const PanelVariables: React.FC<Props> = ({ panel, onUpdateVariable, panel
         <Icon name="info-circle" size="sm" style={{ marginLeft: '10px' }} />
       </Tooltip>
 
-      {/* {usesMacro && ( */}
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
-        <InlineFormLabel tooltip={intl.get('lookback_period_description')}>
-          {intl.get('lookback_period')}
-        </InlineFormLabel>
-        <Select
-          options={lookbacks}
-          value={!!panelDetail && panelDetail.lookback}
-          onChange={(selected: SelectableValue<Number>) => onUpdateLookback(selected)}
-        />
-      </div>
-      {/* )} */}
+      {usesMacro && (
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+          <InlineFormLabel tooltip={intl.get('lookback_period_description')}>
+            {intl.get('lookback_period')}
+          </InlineFormLabel>
+          <Select
+            options={lookbacks}
+            value={!!panelDetail && panelDetail.lookback}
+            onChange={(selected: SelectableValue<Number>) => onUpdateLookback(selected)}
+          />
+        </div>
+      )}
 
       {panel.variables.map((variable: Variable) => {
         const { name, options: variableOptions, multi, label } = variable;
