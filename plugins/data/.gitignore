@@ -1,3 +1,8 @@
-# A fresh msupply.db is created by the Golang app when it will first initiate
+# Ignore everything
+*
 
-msupply.db
+!msupply_example.db
+!template.xlsx
+
+# ...even if they are in subdirectories
+!*/
