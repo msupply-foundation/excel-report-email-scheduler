@@ -119,9 +119,9 @@ func (re *ReportEmailer) CreateReport(schedule datasource.Schedule, authConfig *
 	panels[schedule.ID] = []api.TablePanel{}
 
 	for _, content := range reportContent {
-		interval := int64(schedule.Interval)
-		to := strconv.FormatInt(time.Now().Unix(), 10)
-		from := strconv.FormatInt(time.Now().Unix()-interval, 10)
+		lookback := int64(content.Lookback)
+		to := strconv.FormatInt(time.Now().Unix()*int64(time.Millisecond), 10)
+		from := strconv.FormatInt((time.Now().Unix()-lookback)*int64(time.Millisecond), 10)
 
 		dashboard, err := api.NewDashboard(authConfig, content.DashboardID, from, to, datasourceID)
 
@@ -243,9 +243,9 @@ func (re *ReportEmailer) CreateReports() {
 		panels[schedule.ID] = []api.TablePanel{}
 
 		for _, content := range reportContent {
-			interval := int64(schedule.Interval)
-			to := strconv.FormatInt(time.Now().Unix(), 10)
-			from := strconv.FormatInt(time.Now().Unix()-interval, 10)
+			lookback := int64(content.Lookback)
+			to := strconv.FormatInt(time.Now().Unix()*int64(time.Millisecond), 10)
+			from := strconv.FormatInt((time.Now().Unix()-lookback)*int64(time.Millisecond), 10)
 
 			dashboard, err := api.NewDashboard(authConfig, content.DashboardID, from, to, datasourceID)
 
