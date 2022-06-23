@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewSchedule(ID string, interval int, nextReportTime int, name string, description string, lookback int, reportGroupID string, time string, day int) Schedule {
+func NewSchedule(ID string, interval int, nextReportTime int, name string, description string, lookback string, reportGroupID string, time string, day int) Schedule {
 	schedule := Schedule{
 		ID:             ID,
 		Interval:       interval,
@@ -44,8 +44,8 @@ func (datasource *MsupplyEresDatasource) GetSchedules() ([]Schedule, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var ID, Name, Description, ReportGroupID, Time string
-		var Day, Interval, NextReportTime, Lookback int
+		var ID, Name, Description, ReportGroupID, Time, Lookback string
+		var Day, Interval, NextReportTime int
 
 		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day)
 		if err != nil {
@@ -96,8 +96,8 @@ func (datasource *MsupplyEresDatasource) GetSchedule(id string) (*Schedule, erro
 	}
 
 	for rows.Next() {
-		var ID, Name, Description, ReportGroupID, Time string
-		var Day, Interval, NextReportTime, Lookback int
+		var ID, Name, Description, ReportGroupID, Time, Lookback string
+		var Day, Interval, NextReportTime int
 
 		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day)
 		if err != nil {
@@ -211,8 +211,8 @@ func (datasource *MsupplyEresDatasource) OverdueSchedules() ([]Schedule, error) 
 
 	var schedules []Schedule
 	for rows.Next() {
-		var ID, Name, Description, ReportGroupID, Time string
-		var Day, Interval, NextReportTime, Lookback int
+		var ID, Name, Description, ReportGroupID, Time, Lookback string
+		var Day, Interval, NextReportTime int
 		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day)
 		if err != nil {
 			log.DefaultLogger.Error("OverdueSchedules: sql.Open", err.Error())

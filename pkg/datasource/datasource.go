@@ -143,7 +143,7 @@ func (datasource *MsupplyEresDatasource) Init() (*bool, error) {
 		return nil, err
 	}
 
-	stmt, err := sqlClient.Db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback INTEGER, reportGroupID TEXT, time TEXT, day INTEGER, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
+	stmt, err := sqlClient.Db.Prepare("CREATE TABLE IF NOT EXISTS Schedule (id TEXT PRIMARY KEY, interval INTEGER, nextReportTime INTEGER, name TEXT, description TEXT, lookback TEXT, reportGroupID TEXT, time TEXT, day INTEGER, FOREIGN KEY(reportGroupID) REFERENCES ReportGroup(id))")
 	stmt.Exec()
 	defer stmt.Close()
 	if err != nil {
@@ -173,7 +173,7 @@ func (datasource *MsupplyEresDatasource) Init() (*bool, error) {
 		return nil, err
 	}
 
-	stmt, err = sqlClient.Db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback INTEGER, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
+	stmt, err = sqlClient.Db.Prepare("CREATE TABLE IF NOT EXISTS ReportContent (id TEXT PRIMARY KEY, scheduleID TEXT, panelID INTEGER, dashboardID TEXT, lookback TEXT, variables TEXT, FOREIGN KEY(scheduleID) REFERENCES Schedule(id))")
 	stmt.Exec()
 	if err != nil {
 		err = fmt.Errorf("FATAL. Could not create ReportContent: %w", err)

@@ -41,14 +41,14 @@ export const getIntervals = () => [
   { label: intl.get('yearly'), value: 5 },
 ];
 
-export const getLookbacks = (): Array<SelectableValue<Number>> => [
-  { label: intl.get('1day'), value: 24 * 60 * 1000 * 60 },
-  { label: intl.get('2days'), value: 2 * 24 * 60 * 1000 * 60 },
-  { label: intl.get('3days'), value: 3 * 24 * 60 * 1000 * 60 },
-  { label: intl.get('1week'), value: 7 * 24 * 60 * 1000 * 60 },
-  { label: intl.get('2weeks'), value: 14 * 24 * 60 * 1000 * 60 },
-  { label: intl.get('4weeks'), value: 28 * 24 * 60 * 1000 * 60 },
-  { label: intl.get('3months'), value: 28 * 3 * 24 * 60 * 1000 * 60 },
-  { label: intl.get('6months'), value: 28 * 6 * 24 * 60 * 1000 * 60 },
-  { label: intl.get('1year'), value: 356 * 24 * 60 * 1000 * 60 },
+export const getLookbacks = (): Array<SelectableValue<String>> => [
+  { label: intl.get('1day'), value: 'now-1d' },
+  { label: intl.get('2days'), value: 'now-2d' },
+  { label: intl.get('3days'), value: 'now-3d' },
+  { label: intl.get('1week'), value: 'now-1d' },
+  { label: intl.get('2weeks'), value: 'now-2w' },
+  { label: intl.get('4weeks'), value: 'now-4w' },
+  { label: intl.get('3months'), value: 'now-3M' },
+  { label: intl.get('6months'), value: 'now-6M' },
+  { label: intl.get('1year'), value: 'now-1y' },
 ];
