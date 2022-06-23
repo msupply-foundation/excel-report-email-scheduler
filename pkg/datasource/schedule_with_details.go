@@ -16,7 +16,7 @@ type Schedule struct {
 	NextReportTime int             `json:"nextReportTime"`
 	Name           string          `json:"name"`
 	Description    string          `json:"description"`
-	Lookback       int             `json:"lookback"`
+	Lookback       string          `json:"lookback"`
 	ReportGroupID  string          `json:"reportGroupID"`
 	Time           string          `json:"time"`
 	Day            int             `json:"day"`
@@ -28,7 +28,7 @@ type ReportContent struct {
 	ScheduleID  string `json:"scheduleID"`
 	PanelID     int    `json:"panelID"`
 	DashboardID string `json:"dashboardID"`
-	Lookback    int    `json:"lookback"`
+	Lookback    string `json:"lookback"`
 	Variables   string `json:"variables"`
 }
 
