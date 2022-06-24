@@ -54,3 +54,12 @@ The Docker route need docker installed in your system along with Node.js, Golang
     - Once you have signed the plugin you cannot change the content of the plugin folder (dist). Any add, edit or deletion of files in the folder would render the plugin invalid and it would not work in Grafana.
     - If you want to use the signed plugin in development mode but you have not been abled to, there is manifest file that gets generated when the plugin is singed. That file must be deleted if you want to use the plugin unsigned for development.
 - Alternatively, if you do `yarn build`, it will run all of the above commands for you. (I just wanted to explain what this will do to you.)
+
+## Migrating from v1
+
+- The plugin expect Grafana v8 to be installed in your system.
+- Please make sure you have created the mSupply dashboard datasource, without it this plugin would not work.
+- Please make sure the mSupply.db SQLite database and Template.xlsx files is in the expected path `plugins/data`
+- The Settings have changed slightly so you might have to re-enter them for the plugin to work. If you see errors, make sure you have reentered the plugin settings.
+- If you are using legacy `mSupply.db`, please update the data type of `ReportContent.lookback` field to `TEXT`. Previously it was `INTEGER`. If you are using older content, you might have to re-select Lookups from Panel variables form fields, in Scheduler edit page.
+- The remain data stays unchanged so you can use the legacy database with newer version of the plugin.
