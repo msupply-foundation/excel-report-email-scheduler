@@ -51,6 +51,7 @@ The Docker route need docker installed in your system along with Node.js, Golang
   - Do `yarn build:frontend` to build the Javascript parts
   - Do `yarn sign` to sign the plugin.
     - Note: You would need a GRAFANA_API_KEY to sing the plugin.
+    - Also you would need to add the url of the site you are deploying to, in the sites in `sign` script, in package.json before building.
     - Once you have signed the plugin you cannot change the content of the plugin folder (dist). Any add, edit or deletion of files in the folder would render the plugin invalid and it would not work in Grafana.
     - If you want to use the signed plugin in development mode but you have not been abled to, there is manifest file that gets generated when the plugin is singed. That file must be deleted if you want to use the plugin unsigned for development.
 - Alternatively, if you do `yarn build`, it will run all of the above commands for you. (I just wanted to explain what this will do to you.)
