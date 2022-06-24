@@ -1,54 +1,56 @@
-# mSupply Dashboard App
+# mSupply Dashboard: Excel report e-mail scheduler
 
-mSupply dashboard app is a grafana app plugin. Contained is a frontend and backend. The frontend is a plugin which can be enabled (once installed) through the standard plugins list. The backend is a datasource which can be created through the standard datasource list.
+The Open mSupply Dashboard Excel report e-mail scheduler plugin which takes data from panels of mSupply dashboard to generate excel reports.
 
-# Getting Started
+The reports are then emailed to a custom user report group, this report group is curated from the list of mSupply users, pulled from mSupply Dashboard's datasource.
 
-TLDR: All you really need to do is have grafana all setup for development: With Go, Node and Yarn, clone the grafana repo, `yarn install --pure-lockfile` to build the frontend assets, `make run` compiles the backend then `yarn start` will allow you to connect to `http://localhost:3000` for grafana. The directory `data/plugins` is searched for plugins and you can install them through there. You still need to enable plugins and create data sources within the grafana UI, though. For the plugin, cd ./backend && yarn install && go run mage.go && yarn watch and for the frontned: cd ./frontend && yarn install && yarn watch
+The timing of the scheduler can be set in the plugin.
 
-#### Prerequisites
+The app plugin is built with Golang as backend and react as frontend.
 
-- Setup grafana for development [here](https://github.com/grafana/grafana/blob/master/contribute/developer-guide.md) - this includes having node, go and yarn.
-- Clone this repo
-- Do the coding
+## How it works
 
-#### Tips and TIL:
+The plugin has three main pages
 
-- Grafana reads plugins from its data/plugins directory. You can point the plugin lookup to a different directory in the grafana custom.ini file (more [here](https://grafana.com/docs/grafana/latest/administration/configuration/)). You may need to create a `custom.ini` file - but you can then add the following:
+- [Configuration](./docs/configuration.md)
+- [Report Groups](./docs/report-groups.md)
+- [Schedules](./docs/schedule.md)
 
-```
-[paths]
-plugins = "/Users/joshuagriffin/repos/grafana-plugins"
-```
+Once a schedule is created it will run automatically on the date and time specified in the schedule options on the interval specified.
 
-- The plugin is not signed so you might need to add this also to your `custom.ini`:
+## Requirements
 
-```
-[plugins]
-allow_loading_unsigned_plugins = msupply, msupply-datasource
-```
+- Golang version 1.16 or above
+  - [Mage build tool](https://magefile.org/)
+- Node.JS version 16 or above
+- Grafana version 8 (Not required if you are using Docker, it will install this for you in a container)
+- Yarn
+- If you are using Docker for development the files are moved automatically, just have to rename the `msupply_example.db` file.
+  - You must have `msupply.db` database in the designated grafana `plugins/data` folder. We have included an empty `msupply_example.db` file in the `plugins/data` folder in this repo. Rename it to `msupply.db` and add it to your Grafana installation's `plugins/data` folder. Please do not skip this as the plugin would not work without this database file.
+  - You must have `template.xlsx` file in the designated grafana `plugins/data` folder. We have included a `template.xlsx` file in the `plugins/data` folder in this repo, add it to your Grafana installation's `plugins/data` folder. Please do not skip this as the plugin would not work without this template file.
 
-- `yarn watch` in the frontend project will watch for changes - but at the moment I don't know how to make grafana hot-reload and listen for the changes. This means you can make UI changes with a simple refresh of the webpage. For backend changes you need to restart the grafana server.
-- `yarn storybook` is amazing (in grafana repo)
+## Installation instructions
 
-#### Weird things, maybe?
+### Development
 
-- `go run mage.go` in the backend will build the project - I couldn't get it to build properly with `go build`
-- Essentially this is two projects in one and they share `package.json` etc .. :shrug: I reckon there's a way to combine the two plugins to get built together but I'm not sure, yet.
-- Need to restart the server if you make any changes to `plugin.json`'s
+If you want to develop and change this plugin's file, you can install the plugin in your system through one if the two routes explained below.
 
-# Frontend
+The Docker route need docker installed in your system along with Node.js, Golang and yarn but it gives you fresh grafana install. It will also auto-setup grafana for you (to some extent) so it is the recommended path.
 
-To build: cd ./frontend && yarn install && yarn start
+- [Docker development installation (recommended)](./docs/developers-docker-recommended-build.md)
+- [Normal development installation](./docs/normal-installation.md)
 
-The frontend is for setting up report groups and schedules. This frontend communicates with the backend through a RESTful server running within the backend/datasource plugin.
+## Build for Production
 
-The UI uses only `@grafana/ui` [components](https://grafana.com/docs/grafana/latest/packages_api/ui/). The docs are still a WIP, I think. Best to use the storybook.
-
-Using [react-query](https://github.com/tannerlinsley/react-query) for async calls. It's nice.
-
-# Backend
-
-To build: cd ./backend && yarn install && yarn start && go run mage.go
-
-The backend primarily creates a static binary which grafana executes. This binary runs an http server which listens on `http://xxxx/api/plugins/msupplyfoundation-datasource/resources` and the various end points are [here](https://github.com/openmsupply/msupply-dashboard-app/blob/869132fa53b41601bf9459a7c0ab00bdf8ec5476/backend/pkg/http_handler.go#L65-L91) _documentation to come ;-)_
+- Do everything instructed in the Development section above.
+- Now it's time to build for Production
+  - Do `mage clean` to delete the dist folder. A fresh start.
+  - Do `mage -v` to build for all platforms
+    - Do `mage build:windows` if you want to build for Windows only
+    - Do `mage build:linuxARM64` if you want to build for Linux only
+  - Do `yarn build:frontend` to build the Javascript parts
+  - Do `yarn sign` to sign the plugin.
+    - Note: You would need a GRAFANA_API_KEY to sing the plugin.
+    - Once you have signed the plugin you cannot change the content of the plugin folder (dist). Any add, edit or deletion of files in the folder would render the plugin invalid and it would not work in Grafana.
+    - If you want to use the signed plugin in development mode but you have not been abled to, there is manifest file that gets generated when the plugin is singed. That file must be deleted if you want to use the plugin unsigned for development.
+- Alternatively, if you do `yarn build`, it will run all of the above commands for you. (I just wanted to explain what this will do to you.)

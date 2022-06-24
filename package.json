@@ -1,0 +1,52 @@
+{
+  "name": "msupply-foundation-excel-report-email-scheduler",
+  "version": "2.0.0",
+  "description": "Grafana plugin for mSupply Dashboard application. The plugin takes data from panels of mSupply dashboard to generate excel reports. The reports are then emailed to a custom user group created with mSupply users pulled from mSupply Dashboard's datasource. The timing of the scheduler can be set in the plugin.",
+  "scripts": {
+    "build": "rm -rf dist && yarn build:frontend && mage -v && yarn sign",
+    "build:frontend": "webpack -c ./.webpack/webpack.prod.conf.js",
+    "dev:frontend": "webpack -w -c ./.webpack/webpack.dev.conf.js",
+    "test": "grafana-toolkit plugin:test",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --cache --ignore-path ./.gitignore --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "yarn lint --fix",
+    "sign": "rm -rf ./dist/.DS_Store & grafana-toolkit plugin:sign --signatureType private --rootUrls https://demo-board.msupply.org:3000,https://ci.msupply.org:3000,https://liberia.msupply.org:3000,https://tonga-vax.msupply.org:3000,https://timor.msupply.org:3000,http://localhost:3000,https://vanuatu-vax.msupply.org:3000,https://tokelau.msupply.org:3000,https://tonga.msupply.org:3000,https://who-demo.msupply.org:3000",
+    "start": "yarn dev:frontend"
+  },
+  "author": "mSupply Foundation",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@grafana/data": "latest",
+    "@grafana/eslint-config": "^3.0.0",
+    "@grafana/runtime": "latest",
+    "@grafana/toolkit": "latest",
+    "@grafana/tsconfig": "^1.2.0-rc1",
+    "@grafana/ui": "latest",
+    "@types/lodash": "latest",
+    "@types/react-router-dom": "^5.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "babel-loader": "^8.2.4",
+    "copy-webpack-plugin": "^10.2.4",
+    "emotion": "^11.0.0",
+    "eslint": "^8.12.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-jsdoc": "^38.1.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-react-hooks": "^4.4.0",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-livereload-plugin": "^3.0.2"
+  },
+  "resolutions": {
+    "rxjs": "7.3.0"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "dependencies": {
+    "react-intl-universal": "^2.4.12",
+    "react-query": "^3.34.19"
+  }
+}

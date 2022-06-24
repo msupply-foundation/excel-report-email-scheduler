@@ -1,0 +1,9 @@
+# Ignore everything
+*
+
+# Except these files
+!msupply_example.db
+!template.xlsx
+
+# ...even if they are in subdirectories
+!*/

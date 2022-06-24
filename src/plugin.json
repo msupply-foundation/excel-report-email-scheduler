@@ -1,0 +1,69 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "app",
+  "name": "Excel report e-mail scheduler",
+  "id": "msupplyfoundation-datasource",
+  "backend": true,
+  "alerting": false,
+  "metrics": false,
+  "annotations": false,
+  "executable": "gpx_excel_report_email_scheduler",
+  "info": {
+    "description": "Grafana plugin for mSupply Dashboard application. The plugin takes data from panels of mSupply dashboard to generate excel reports. The reports are then emailed to a custom user group created with mSupply users pulled from mSupply Dashboard's datasource. The timing of the scheduler can be set in the plugin.",
+    "author": {
+      "name": "mSupply Foundation",
+      "url": "https://msupply.foundation/"
+    },
+    "keywords": ["grafana-plugin", "mSupply-foundation", "mSupply-dashboard", "datasource", "panel"],
+    "logos": {
+      "small": "img/msupply_light_icon.svg",
+      "large": "img/msupply_light_icon.svg"
+    },
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://github.com/openmsupply/msupply-dashboard-app"
+      },
+      {
+        "name": "License",
+        "url": "https://github.com/openmsupply/msupply-dashboard-app/blob/master/LICENSE"
+      }
+    ],
+    "screenshots": [],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "includes": [
+    {
+      "type": "page",
+      "name": "Report Groups",
+      "icon": "fa fa-group",
+      "path": "/a/%PLUGIN_ID%",
+      "role": "Admin",
+      "addToNav": true,
+      "defaultNav": true
+    },
+    {
+      "type": "page",
+      "name": "Schedules",
+      "icon": "fa fa-calendar",
+      "path": "/a/%PLUGIN_ID%/schedules",
+      "role": "Admin",
+      "addToNav": true
+    },
+
+    {
+      "type": "page",
+      "icon": "fa fa-cog",
+      "name": "Configuration",
+      "path": "/plugins/%PLUGIN_ID%",
+      "role": "Admin",
+      "addToNav": true
+    }
+  ],
+  "dependencies": {
+    "grafanaDependency": ">=8.0.0",
+    "grafanaVersion": "8.0.0",
+    "plugins": []
+  }
+}
