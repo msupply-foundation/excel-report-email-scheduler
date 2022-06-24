@@ -45,7 +45,7 @@ export const getLookbacks = (): Array<SelectableValue<String>> => [
   { label: intl.get('1day'), value: 'now-1d' },
   { label: intl.get('2days'), value: 'now-2d' },
   { label: intl.get('3days'), value: 'now-3d' },
-  { label: intl.get('1week'), value: 'now-1d' },
+  { label: intl.get('1week'), value: 'now-1w' },
   { label: intl.get('2weeks'), value: 'now-2w' },
   { label: intl.get('4weeks'), value: 'now-4w' },
   { label: intl.get('3months'), value: 'now-3M' },
