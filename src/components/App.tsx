@@ -2,7 +2,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import intl from 'react-intl-universal';
 
-import { AppRootProps, getLocale } from '@grafana/data';
+import { AppRootProps } from '@grafana/data';
 
 import { PluginPropsContext } from '../context';
 import { AppRoutes } from './AppRoutes';
@@ -30,7 +30,8 @@ class App extends React.PureComponent<AppRootProps<AppSettings>, AppRootState> {
     // react-intl-universal is singleton, so you should init it only once in your app
     intl
       .init({
-        currentLocale: getLocale(), // TODO: determine locale here
+        currentLocale: 'en-UK', // TODO: determine locale here
+        fallbackLocale: 'en-US',
         locales,
       })
       .then(() => {
