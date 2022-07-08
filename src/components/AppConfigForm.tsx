@@ -34,10 +34,15 @@ const AppConfigForm = ({ plugin }: Props) => {
   });
 
   useEffect(() => {
-    intl.init({ currentLocale: 'en', locales }).then(() => {
-      // After loading locale data, start to render
-      setLoading(false);
-    });
+    intl
+      .init({
+        currentLocale: 'en-US',
+        locales,
+      })
+      .then(() => {
+        // After loading locale data, start to render
+        setLoading(false);
+      });
   }, []);
 
   const onResetGrafanaPassword = () =>
@@ -108,160 +113,162 @@ const AppConfigForm = ({ plugin }: Props) => {
   }
 
   return (
-    <div>
-      {/* Grafana Username */}
-      <FieldSet label={intl.get('grafana_details')}>
-        <Field label={intl.get('grafana_url')} description="Full URL of your Grafana installation">
-          <Input
-            width={60}
-            id="api-grafana-url"
-            data-testid="api-grafana-url"
-            label={intl.get('grafana_url')}
-            value={state?.grafanaURL}
-            placeholder={intl.get('grafana_url')}
-            onChange={onChangeGrafanaURL}
-          />
-        </Field>
+    !loading && (
+      <div>
+        {/* Grafana Username */}
+        <FieldSet label={intl.get('grafana_details')}>
+          <Field label={intl.get('grafana_url')} description="Full URL of your Grafana installation">
+            <Input
+              width={60}
+              id="api-grafana-url"
+              data-testid="api-grafana-url"
+              label={intl.get('grafana_url')}
+              value={state?.grafanaURL}
+              placeholder={intl.get('grafana_url')}
+              onChange={onChangeGrafanaURL}
+            />
+          </Field>
 
-        <Field label={intl.get('grafana_username')}>
-          <Input
-            width={60}
-            id="api-grafana-username"
-            data-testid="api-grafana-username"
-            label={intl.get('grafana_username')}
-            value={state?.grafanaUsername}
-            placeholder={intl.get('grafana_username')}
-            onChange={onChangeGrafanaUsername}
-          />
-        </Field>
+          <Field label={intl.get('grafana_username')}>
+            <Input
+              width={60}
+              id="api-grafana-username"
+              data-testid="api-grafana-username"
+              label={intl.get('grafana_username')}
+              value={state?.grafanaUsername}
+              placeholder={intl.get('grafana_username')}
+              onChange={onChangeGrafanaUsername}
+            />
+          </Field>
 
-        <Field label={intl.get('grafana_password')} description={intl.get('grafana_password_tooltip')}>
-          <SecretInput
-            width={60}
-            id="api-grafana-password"
-            data-testid="api-grafana-password"
-            label={intl.get('grafana_password')}
-            value={state?.grafanaPassword}
-            isConfigured={state.isGrafanaPasswordSet}
-            placeholder={intl.get('grafana_password')}
-            onChange={onChangeGrafanaPassword}
-            onReset={onResetGrafanaPassword}
-          />
-        </Field>
-      </FieldSet>
+          <Field label={intl.get('grafana_password')} description={intl.get('grafana_password_tooltip')}>
+            <SecretInput
+              width={60}
+              id="api-grafana-password"
+              data-testid="api-grafana-password"
+              label={intl.get('grafana_password')}
+              value={state?.grafanaPassword}
+              isConfigured={state.isGrafanaPasswordSet}
+              placeholder={intl.get('grafana_password')}
+              onChange={onChangeGrafanaPassword}
+              onReset={onResetGrafanaPassword}
+            />
+          </Field>
+        </FieldSet>
 
-      <FieldSet label={intl.get('email_details')}>
-        <Field label={intl.get('email_address')}>
-          <Input
-            width={60}
-            id="api-email-address"
-            data-testid="api-email-address"
-            label={intl.get('email_address')}
-            value={state?.senderEmailAddress}
-            placeholder={intl.get('email_address')}
-            onChange={onEmailAddressChange}
-          />
-        </Field>
+        <FieldSet label={intl.get('email_details')}>
+          <Field label={intl.get('email_address')}>
+            <Input
+              width={60}
+              id="api-email-address"
+              data-testid="api-email-address"
+              label={intl.get('email_address')}
+              value={state?.senderEmailAddress}
+              placeholder={intl.get('email_address')}
+              onChange={onEmailAddressChange}
+            />
+          </Field>
 
-        <Field label={intl.get('email_password')} description={intl.get('email_password_tooltip')}>
-          <SecretInput
-            width={60}
-            id="api-email-password"
-            data-testid="api-email-password"
-            label={intl.get('email_password')}
-            value={state?.senderEmailPassword}
-            isConfigured={state.isSenderEmailPasswordSet}
-            placeholder={intl.get('email_password')}
-            onChange={onChangeSenderEmailPassword}
-            onReset={onResetSenderEmailPassword}
-          />
-        </Field>
+          <Field label={intl.get('email_password')} description={intl.get('email_password_tooltip')}>
+            <SecretInput
+              width={60}
+              id="api-email-password"
+              data-testid="api-email-password"
+              label={intl.get('email_password')}
+              value={state?.senderEmailPassword}
+              isConfigured={state.isSenderEmailPasswordSet}
+              placeholder={intl.get('email_password')}
+              onChange={onChangeSenderEmailPassword}
+              onReset={onResetSenderEmailPassword}
+            />
+          </Field>
 
-        <Field label={intl.get('email_host')} description={intl.get('email_host_tooltip')}>
-          <Input
-            width={60}
-            id="api-email-host"
-            data-testid="api-email-host"
-            label={intl.get('email_host')}
-            value={state?.senderEmailHost}
-            placeholder={intl.get('email_host')}
-            onChange={onSenderEmailHost}
-          />
-        </Field>
+          <Field label={intl.get('email_host')} description={intl.get('email_host_tooltip')}>
+            <Input
+              width={60}
+              id="api-email-host"
+              data-testid="api-email-host"
+              label={intl.get('email_host')}
+              value={state?.senderEmailHost}
+              placeholder={intl.get('email_host')}
+              onChange={onSenderEmailHost}
+            />
+          </Field>
 
-        <Field label={intl.get('email_port')} description={intl.get('email_port_tooltip')}>
-          <Input
-            width={60}
-            id="api-email-port"
-            data-testid="api-email-port"
-            label={intl.get('email_port')}
-            value={state?.senderEmailPort}
-            placeholder={intl.get('email_port')}
-            onChange={onSenderEmailPort}
-          />
-        </Field>
-      </FieldSet>
+          <Field label={intl.get('email_port')} description={intl.get('email_port_tooltip')}>
+            <Input
+              width={60}
+              id="api-email-port"
+              data-testid="api-email-port"
+              label={intl.get('email_port')}
+              value={state?.senderEmailPort}
+              placeholder={intl.get('email_port')}
+              onChange={onSenderEmailPort}
+            />
+          </Field>
+        </FieldSet>
 
-      <FieldSet label={intl.get('datasource_details')}>
-        <Field label={intl.get('datasource')}>
-          <Select
-            width={60}
-            menuShouldPortal
-            value={state?.datasourceID}
-            options={datasources?.map((datasource: any) => ({ label: datasource.name, value: datasource.id })) ?? []}
-            onChange={(selectedDatasource: SelectableValue) => {
-              setState({
-                ...state,
-                datasourceID: Number(selectedDatasource.value),
-              });
-            }}
-          ></Select>
-        </Field>
-      </FieldSet>
+        <FieldSet label={intl.get('datasource_details')}>
+          <Field label={intl.get('datasource')}>
+            <Select
+              width={60}
+              menuShouldPortal
+              value={state?.datasourceID}
+              options={datasources?.map((datasource: any) => ({ label: datasource.name, value: datasource.id })) ?? []}
+              onChange={(selectedDatasource: SelectableValue) => {
+                setState({
+                  ...state,
+                  datasourceID: Number(selectedDatasource.value),
+                });
+              }}
+            ></Select>
+          </Field>
+        </FieldSet>
 
-      <div className={style.marginTop}>
-        <Button
-          type="submit"
-          onClick={() =>
-            updatePluginAndReload(plugin.meta.id, {
-              enabled,
-              pinned,
-              jsonData: {
-                grafanaUsername: state.grafanaUsername,
-                grafanaURL: state.grafanaURL,
-                isGrafanaPasswordSet: true,
-                senderEmailAddress: state.senderEmailAddress,
-                isSenderEmailPasswordSet: true,
-                senderEmailHost: state.senderEmailHost,
-                senderEmailPort: state.senderEmailPort,
-                datasourceID: state.datasourceID,
-              },
-              secureJsonData:
-                state.isGrafanaPasswordSet && state.isSenderEmailPasswordSet
-                  ? undefined
-                  : Object.fromEntries(
-                      Object.entries({
-                        grafanaPassword: state.grafanaPassword,
-                        senderEmailPassword: state.senderEmailPassword,
-                      }).filter(([_, v]) => v !== '')
-                    ),
-            })
-          }
-          disabled={Boolean(
-            !state.grafanaUsername ||
-              (!state.isGrafanaPasswordSet && !state.grafanaPassword) ||
-              (!state.isSenderEmailPasswordSet && !state.senderEmailPassword) ||
-              !state.senderEmailAddress ||
-              !state.senderEmailHost ||
-              !state.senderEmailPort ||
-              !state.grafanaURL ||
-              !state.datasourceID
-          )}
-        >
-          Save settings
-        </Button>
+        <div className={style.marginTop}>
+          <Button
+            type="submit"
+            onClick={() =>
+              updatePluginAndReload(plugin.meta.id, {
+                enabled,
+                pinned,
+                jsonData: {
+                  grafanaUsername: state.grafanaUsername,
+                  grafanaURL: state.grafanaURL,
+                  isGrafanaPasswordSet: true,
+                  senderEmailAddress: state.senderEmailAddress,
+                  isSenderEmailPasswordSet: true,
+                  senderEmailHost: state.senderEmailHost,
+                  senderEmailPort: state.senderEmailPort,
+                  datasourceID: state.datasourceID,
+                },
+                secureJsonData:
+                  state.isGrafanaPasswordSet && state.isSenderEmailPasswordSet
+                    ? undefined
+                    : Object.fromEntries(
+                        Object.entries({
+                          grafanaPassword: state.grafanaPassword,
+                          senderEmailPassword: state.senderEmailPassword,
+                        }).filter(([_, v]) => v !== '')
+                      ),
+              })
+            }
+            disabled={Boolean(
+              !state.grafanaUsername ||
+                (!state.isGrafanaPasswordSet && !state.grafanaPassword) ||
+                (!state.isSenderEmailPasswordSet && !state.senderEmailPassword) ||
+                !state.senderEmailAddress ||
+                !state.senderEmailHost ||
+                !state.senderEmailPort ||
+                !state.grafanaURL ||
+                !state.datasourceID
+            )}
+          >
+            Save settings
+          </Button>
+        </div>
       </div>
-    </div>
+    )
   );
 };
 
