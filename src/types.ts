@@ -167,7 +167,7 @@ export type PanelDetails = {
   id: string;
   scheduleID: string;
   panelID: number;
-  lookback: string | number;
+  lookback: string;
   dashboardID: string;
   variables: string | null;
 };

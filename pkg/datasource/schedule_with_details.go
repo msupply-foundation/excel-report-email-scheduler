@@ -16,7 +16,7 @@ type Schedule struct {
 	NextReportTime int             `json:"nextReportTime"`
 	Name           string          `json:"name"`
 	Description    string          `json:"description"`
-	Lookback       string          `json:"lookback"`
+	Lookback       string          `json:"lookback,string"`
 	ReportGroupID  string          `json:"reportGroupID"`
 	Time           string          `json:"time"`
 	Day            int             `json:"day"`
