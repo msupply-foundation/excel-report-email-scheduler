@@ -4,7 +4,7 @@ import { useDatasourceID } from 'hooks';
 import React, { useState, useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { ContentVariables, Panel, PanelDetails, SelectableVariable } from 'types';
-import { panelUsesMacro, parseOrDefault } from 'utils';
+import { parseOrDefault } from 'utils';
 
 type PanelContextProps = {
   panels: Panel[];
@@ -42,18 +42,14 @@ const PanelProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (panels) {
-      const newPanelDetails = panels.map((panel) => {
-        const usesMacro = panelUsesMacro(panel.rawSql);
-
-        return {
-          id: '',
-          scheduleID: '',
-          panelID: panel.id,
-          dashboardID: panel.dashboardID,
-          lookback: usesMacro ? 1 : 0,
-          variables: '',
-        };
-      });
+      const newPanelDetails = panels.map((panel) => ({
+        id: '',
+        scheduleID: '',
+        panelID: panel.id,
+        dashboardID: panel.dashboardID,
+        lookback: '',
+        variables: '',
+      }));
 
       setPanelDetails(newPanelDetails);
     }

@@ -42,7 +42,7 @@ export const PanelVariables: React.FC<Props> = ({ panel, onUpdateVariable, panel
           </InlineFormLabel>
           <Select
             options={lookbacks}
-            value={!!panelDetail && String(panelDetail.lookback)}
+            value={!!panelDetail && panelDetail.lookback}
             onChange={(selected: SelectableValue<String>) => onUpdateLookback(selected)}
           />
         </div>
