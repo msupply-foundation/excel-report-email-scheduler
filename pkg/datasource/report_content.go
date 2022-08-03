@@ -27,8 +27,8 @@ func (datasource *MsupplyEresDatasource) GetReportContent(scheduleID string) ([]
 	defer rows.Close()
 
 	for rows.Next() {
-		var ID, ScheduleID, DashboardID, Variables, Lookback string
-		var PanelID int
+		var ID, ScheduleID, DashboardID, Variables string
+		var PanelID, Lookback int
 		err = rows.Scan(&ID, &ScheduleID, &PanelID, &DashboardID, &Lookback, &Variables)
 		if err != nil {
 			log.DefaultLogger.Error("GetReportContent: rows.Scan() ", err.Error())

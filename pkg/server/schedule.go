@@ -5,9 +5,12 @@ import (
 	"excel-report-email-scheduler/pkg/datasource"
 	"io/ioutil"
 	"net/http"
+	"fmt"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
 
 func (server *HttpServer) fetchSchedules(rw http.ResponseWriter, request *http.Request) {
@@ -68,6 +71,8 @@ func (server *HttpServer) createSchedule(rw http.ResponseWriter, request *http.R
 	err = json.Unmarshal(bodyAsBytes, &schedule)
 	if err != nil {
 		server.Error(rw, errors.Wrap(err, frame.Function))
+		log.DefaultLogger.Info(fmt.Sprintf("createSchedule: Schedule: %s", bodyAsBytes))
+
 		return
 	}
 

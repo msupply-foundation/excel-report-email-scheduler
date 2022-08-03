@@ -62,7 +62,10 @@ type DashboardResponse struct {
 		ID           int           `json:"id"`
 		Links        []interface{} `json:"links"`
 		Panels       []struct {
-			Datasource  string `json:"datasource"`
+			Datasource  struct {
+				Type string `json:"type"`
+				Uid string `json:"uid"`
+			} `json:"datasource"`
 			FieldConfig struct {
 				Defaults struct {
 					Custom struct {
@@ -156,6 +159,7 @@ func NewDashboardResponse(response *http.Response) (*DashboardResponse, error) {
 	err = json.Unmarshal(body, &dashboardResponse)
 	if err != nil {
 		log.DefaultLogger.Error("NewDashboardResponse: json.Unmarshal: " + err.Error())
+		log.DefaultLogger.Info(fmt.Sprintf("NewDashboard: Dashboard response body: %s", body))
 		return nil, err
 	}
 

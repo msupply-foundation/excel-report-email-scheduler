@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint --cache --ignore-path ./.gitignore --ext .js,.jsx,.ts,.tsx .",
     "lint:fix": "yarn lint --fix",
-    "sign": "rm -rf ./dist/.DS_Store & grafana-toolkit plugin:sign --signatureType private --rootUrls https://demo-board.msupply.org:3000,https://png.msupply.org:3000,https://ci.msupply.org:3000,https://liberia.msupply.org:3000,https://tonga-vax.msupply.org:3000,https://timor.msupply.org:3000,http://localhost:3000,https://vanuatu-vax.msupply.org:3000,https://tokelau.msupply.org:3000,https://tonga.msupply.org:3000,https://who-demo.msupply.org:3000,https://msupply.health.gov.ws:3000",
+    "sign": "rm -rf ./dist/.DS_Store & grafana-toolkit plugin:sign --signatureType private --rootUrls https://demo-board.msupply.org:3000,https://png.msupply.org:3000,https://ci.msupply.org:3000,https://liberia.msupply.org:3000,https://tonga-vax.msupply.org:3000,https://timor.msupply.org:3000,http://localhost:3000,https://vanuatu-vax.msupply.org:3000,https://tokelau.msupply.org:3000,https://tonga.msupply.org:3000,https://who-demo.msupply.org:3000,https://msupply.health.gov.ws:3000,https://msupply.ambulance.vic.gov.au/grafana",
     "start": "yarn dev:frontend"
   },
   "author": "mSupply Foundation",
