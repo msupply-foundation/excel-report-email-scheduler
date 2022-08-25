@@ -118,6 +118,8 @@ export type DashboardResponse = {
 
 export type DashboardMeta = {
   uid: string;
+  folderTitle: string;
+  type: string;
 };
 
 /**
