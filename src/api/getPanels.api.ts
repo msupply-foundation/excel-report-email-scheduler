@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { SelectableValue } from '@grafana/data';
 import { getBackendSrv } from '@grafana/runtime';
 import { DashboardMeta, DashboardResponse, Panel, SelectableVariable, Variable } from 'types';
