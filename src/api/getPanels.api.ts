@@ -90,16 +90,19 @@ export const getPanels = async (datasourceID: number): Promise<Panel[]> => {
 
 export const getDashboards = async () => {
   const dashboardMeta = await searchForDashboards();
-  const dashboardResponses = await Promise.all<DashboardResponse>(dashboardMeta.map(({ uid }) => getDashboard(uid)));
+  const newDashboardMeta = dashboardMeta.filter(({ folderTitle, type }) =>
+    type !== 'dash-folder' && !!folderTitle ? folderTitle.toLowerCase() !== 'develop' : true
+  );
+  const dashboardResponses = await Promise.all<DashboardResponse>(newDashboardMeta.map(({ uid }) => getDashboard(uid)));
   return dashboardResponses.map(({ dashboard }) => dashboard);
 };
 
 export const getDashboard = async (uuid: string): Promise<DashboardResponse> => {
-  return getBackendSrv().get(`./api/dashboards/uid/${uuid}`);
+  return await getBackendSrv().get(`./api/dashboards/uid/${uuid}`);
 };
 
 export const searchForDashboards = async (): Promise<DashboardMeta[]> => {
-  return getBackendSrv().get('./api/search');
+  return await getBackendSrv().get('./api/search');
 };
 
 export const refreshPanelOptions = async (
