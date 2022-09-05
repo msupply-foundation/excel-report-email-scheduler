@@ -132,9 +132,17 @@ func (schedule *Schedule) UpdateNextReportTime() {
 			reportTime = reportTime.AddDate(0, 1, daysOffset)
 		}
 	case 2: // fortnightly
-		reportTime = reportTime.AddDate(0, 0, 14)
+		if daysOffset > 14 {
+			reportTime = reportTime.AddDate(0, 0, -reportTime.Day())
+		} else {
+			reportTime = reportTime.AddDate(0, 0, daysOffset)
+		}
 	case 1: // weekly
-		reportTime = reportTime.AddDate(0, 0, 7)
+		if daysOffset > 7 {
+			reportTime = reportTime.AddDate(0, 0, -reportTime.Day())
+		} else {
+			reportTime = reportTime.AddDate(0, 0, daysOffset)
+		}
 	default: // 0 == daily
 		if reportTime.Unix() < now.Unix() {
 			// run tomorrow

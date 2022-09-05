@@ -114,12 +114,12 @@ export const CreateScheduleFormPartial = ({
             }}
           />
         </InlineField>
-        {(watch('interval') || 0) > 2 && (
+        {(watch('interval') || 0) > 0 && (
           <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
             <Input type="number" {...register('day', { valueAsNumber: true })} id="schedule-day" width={40} />
           </Field>
         )}
-      </InlineFieldRow>
+      </InlineFieldRow> 
 
       <Controller
         render={({ field: { onChange, value: selectedPanels } }) => {
