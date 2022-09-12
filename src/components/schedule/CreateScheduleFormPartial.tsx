@@ -51,10 +51,23 @@ export const CreateScheduleFormPartial = ({
         return false;
       case 1:
         return (
-          <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
+          <Field label="Report Day" description="The day to send the report in the week.">
             <Select
               value={getWeekDays().filter((inter: any) => inter.value === watch('day'))}
               options={getWeekDays()}
+              prefix={<Icon name="arrow-down" />}
+              onChange={(option: any) => {
+                setValue('day', option.value);
+              }}
+            />
+          </Field>
+        );
+      case 2:
+        return (
+          <Field label="Report Day" description="The day to send the report in fortnight.">
+            <Select
+              value={watch('day')}
+              options={[...Array(14).keys()].map((key) => ({ label: (key + 1).toString(), value: key + 1 }))}
               prefix={<Icon name="arrow-down" />}
               onChange={(option: any) => {
                 setValue('day', option.value);

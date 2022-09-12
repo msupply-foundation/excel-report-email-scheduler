@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { css, cx } from '@emotion/css';
 import intl from 'react-intl-universal';
 import { GrafanaTheme2 } from '@grafana/data';
-import { getIntervals, PLUGIN_BASE_URL, ROUTES } from '../../constants';
+import { PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { prefixRoute } from '../../utils/navigation';
 import { EmptyListCTA, Loading } from 'components/common';
 import { Panel, PanelDetails, ScheduleType } from 'types';
@@ -69,7 +69,11 @@ const Schedule: React.FC = () => {
               <Card.Heading className={styles.heading}>{schedule.name}</Card.Heading>
               <Card.Description className={styles.description}>{schedule.description}</Card.Description>
               <Card.Meta>
-                <h6>Next schedule: {moment.unix(schedule.nextReportTime).format('LLLL')}</h6>
+                {schedule.nextReportTime ? (
+                  <h6>Next schedule: {moment.unix(schedule.nextReportTime).format('LLLL')}</h6>
+                ) : (
+                  ''
+                )}
                 {schedule.panelDetails && (
                   <HorizontalGroup
                     spacing="lg"

@@ -64,6 +64,9 @@ func (datasource *MsupplyEresDatasource) CreateScheduleWithDetails(scheduleWithD
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not update schedule record")
 			return nil, err
 		}
+		defer stmt.Close()
+
+		scheduleWithDetails.UpdateNextReportTime()
 
 		_, err = stmt.Exec(scheduleWithDetails.NextReportTime, scheduleWithDetails.Interval, scheduleWithDetails.Name, scheduleWithDetails.Description, scheduleWithDetails.Lookback, scheduleWithDetails.ReportGroupID, scheduleWithDetails.Time, scheduleWithDetails.Day, scheduleWithDetails.ID)
 		if err != nil {
@@ -133,11 +136,8 @@ func (schedule *Schedule) UpdateNextReportTime() {
 			reportTime = reportTime.AddDate(0, 1, daysOffset)
 		}
 	case 2: // fortnightly
-		if daysOffset > 14 {
-			reportTime = reportTime.AddDate(0, 0, -reportTime.Day())
-		} else {
-			reportTime = reportTime.AddDate(0, 0, daysOffset)
-		}
+		daysToAdd := (scheduleDays - int(reportTime.Day()) + 14) % 14
+		reportTime = reportTime.AddDate(0, 0, daysToAdd)
 	case 1: // weekly
 		daysToAdd := (scheduleDays - int(reportTime.Weekday()) + 7) % 7
 		reportTime = reportTime.AddDate(0, 0, daysToAdd)
