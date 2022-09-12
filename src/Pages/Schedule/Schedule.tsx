@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { css, cx } from '@emotion/css';
 import intl from 'react-intl-universal';
 import { GrafanaTheme2 } from '@grafana/data';
-import { PLUGIN_BASE_URL, ROUTES } from '../../constants';
+import { getIntervals, PLUGIN_BASE_URL, ROUTES } from '../../constants';
 import { prefixRoute } from '../../utils/navigation';
 import { EmptyListCTA, Loading } from 'components/common';
 import { Panel, PanelDetails, ScheduleType } from 'types';
@@ -11,6 +11,8 @@ import { deleteSchedule, getSchedules } from 'api';
 import { Button, Card, ConfirmModal, HorizontalGroup, LinkButton, Spinner, Tag, useStyles2 } from '@grafana/ui';
 import { useToggle } from 'hooks';
 import { PanelContext, PanelProvider } from 'context';
+// eslint-disable-next-line no-restricted-imports
+import moment from 'moment';
 
 const Schedule: React.FC = () => {
   const styles = useStyles2(getStyles);
@@ -66,47 +68,46 @@ const Schedule: React.FC = () => {
             <Card className={cx(styles.card, 'card-parent')} href={`${PLUGIN_BASE_URL}/schedules/edit/${schedule.id}`}>
               <Card.Heading className={styles.heading}>{schedule.name}</Card.Heading>
               <Card.Description className={styles.description}>{schedule.description}</Card.Description>
-              {schedule.panelDetails && (
-                <Card.Meta>
-                  {
-                    <HorizontalGroup
-                      spacing="lg"
-                      key="panelDetails"
-                      wrap={true}
-                      style={{ marginBottom: '25px' }}
-                      align="flex-start"
-                      justify="flex-start"
-                    >
-                      <div style={{ flexWrap: 'wrap', lineHeight: '2.6em', marginBottom: '10px' }}>
-                        <PanelProvider>
-                          <PanelContext.Consumer>
-                            {({ panels }) => {
-                              if (!panels || !panels.length) {
-                                return <Loading />;
-                              }
+              <Card.Meta>
+                <h6>Next schedule: {moment.unix(schedule.nextReportTime).format('LLLL')}</h6>
+                {schedule.panelDetails && (
+                  <HorizontalGroup
+                    spacing="lg"
+                    key="panelDetails"
+                    wrap={true}
+                    style={{ marginBottom: '25px' }}
+                    align="flex-start"
+                    justify="flex-start"
+                  >
+                    <div style={{ flexWrap: 'wrap', lineHeight: '2.6em', marginBottom: '10px' }}>
+                      <PanelProvider>
+                        <PanelContext.Consumer>
+                          {({ panels }) => {
+                            if (!panels || !panels.length) {
+                              return <Loading />;
+                            }
 
-                              return (
-                                !!panels &&
-                                schedule.panelDetails.map(({ id, panelID, dashboardID }: PanelDetails) => {
-                                  const panel = panels.find(
-                                    (panel: Panel) => panel.id === panelID && panel.dashboardID === dashboardID
-                                  );
+                            return (
+                              !!panels &&
+                              schedule.panelDetails.map(({ id, panelID, dashboardID }: PanelDetails) => {
+                                const panel = panels.find(
+                                  (panel: Panel) => panel.id === panelID && panel.dashboardID === dashboardID
+                                );
 
-                                  if (!panel) {
-                                    return false;
-                                  }
+                                if (!panel) {
+                                  return false;
+                                }
 
-                                  return <Tag key={id} icon="user" className={styles.tag} name={panel.title} />;
-                                })
-                              );
-                            }}
-                          </PanelContext.Consumer>
-                        </PanelProvider>
-                      </div>
-                    </HorizontalGroup>
-                  }
-                </Card.Meta>
-              )}
+                                return <Tag key={id} icon="user" className={styles.tag} name={panel.title} />;
+                              })
+                            );
+                          }}
+                        </PanelContext.Consumer>
+                      </PanelProvider>
+                    </div>
+                  </HorizontalGroup>
+                )}
+              </Card.Meta>
               <Card.Actions className={styles.actions}>
                 <LinkButton
                   icon="cog"

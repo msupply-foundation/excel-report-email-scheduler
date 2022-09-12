@@ -97,8 +97,9 @@ func (datasource *MsupplyEresDatasource) CreateScheduleWithDetails(scheduleWithD
 func (schedule *Schedule) UpdateNextReportTime() {
 	now := time.Now()
 	daysOffset := 1
+	scheduleDays := 1
 	if schedule.Day > 0 {
-		daysOffset = schedule.Day
+		scheduleDays = schedule.Day
 	}
 
 	reportTime := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
@@ -110,7 +111,7 @@ func (schedule *Schedule) UpdateNextReportTime() {
 	}
 
 	// for the intervals using x Day of y, remove the current Day value
-	daysOffset = (-1 * int(reportTime.Day())) + daysOffset
+	daysOffset = (-1 * int(reportTime.Day())) + scheduleDays
 
 	switch schedule.Interval {
 	case 5: //yearly
@@ -138,11 +139,8 @@ func (schedule *Schedule) UpdateNextReportTime() {
 			reportTime = reportTime.AddDate(0, 0, daysOffset)
 		}
 	case 1: // weekly
-		if daysOffset > 7 {
-			reportTime = reportTime.AddDate(0, 0, -reportTime.Day())
-		} else {
-			reportTime = reportTime.AddDate(0, 0, daysOffset)
-		}
+		daysToAdd := (scheduleDays - int(reportTime.Weekday()) + 7) % 7
+		reportTime = reportTime.AddDate(0, 0, daysToAdd)
 	default: // 0 == daily
 		if reportTime.Unix() < now.Unix() {
 			// run tomorrow

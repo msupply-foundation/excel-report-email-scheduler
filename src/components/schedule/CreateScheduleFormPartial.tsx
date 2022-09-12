@@ -12,7 +12,7 @@ import {
   Select,
   TimeOfDayPicker,
 } from '@grafana/ui';
-import { getIntervals } from '../../constants';
+import { getIntervals, getWeekDays } from '../../constants';
 import { Panel, PanelListSelectedType, ReportGroupType, ScheduleType } from 'types';
 import { formatTimeToDate } from 'utils';
 import { PanelList } from 'components';
@@ -44,6 +44,32 @@ export const CreateScheduleFormPartial = ({
       description: reportGroup.description,
       value: reportGroup,
     }));
+
+  const renderInterval = () => {
+    switch (watch('interval')) {
+      case 0:
+        return false;
+      case 1:
+        return (
+          <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
+            <Select
+              value={getWeekDays().filter((inter: any) => inter.value === watch('day'))}
+              options={getWeekDays()}
+              prefix={<Icon name="arrow-down" />}
+              onChange={(option: any) => {
+                setValue('day', option.value);
+              }}
+            />
+          </Field>
+        );
+      default:
+        return (
+          <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
+            <Input type="number" {...register('day', { valueAsNumber: true })} id="schedule-day" width={40} />
+          </Field>
+        );
+    }
+  };
 
   return (
     <>
@@ -114,12 +140,8 @@ export const CreateScheduleFormPartial = ({
             }}
           />
         </InlineField>
-        {(watch('interval') || 0) > 0 && (
-          <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
-            <Input type="number" {...register('day', { valueAsNumber: true })} id="schedule-day" width={40} />
-          </Field>
-        )}
-      </InlineFieldRow> 
+        {renderInterval()}
+      </InlineFieldRow>
 
       <Controller
         render={({ field: { onChange, value: selectedPanels } }) => {
