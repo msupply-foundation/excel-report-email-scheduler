@@ -53,6 +53,7 @@ type ScheduleType = {
   time: string;
   day: number;
   reportGroupID: string;
+  nextReportTime?: number;
   panels: PanelListSelectedType[];
   panelDetails: PanelDetails[];
 };

@@ -49,8 +49,9 @@ const CreateScheduleForm: React.FC = () => {
 
   React.useEffect(() => {
     if (!!defaultScheduleFetched) {
+      const { nextReportTime, ...restDefaultScheduleFetched } = defaultScheduleFetched;
       setDefaultSchedule({
-        ...defaultScheduleFetched,
+        ...restDefaultScheduleFetched,
       });
 
       setPanelDetails((prevDetails: PanelDetails[]) =>

@@ -64,6 +64,9 @@ func (datasource *MsupplyEresDatasource) CreateScheduleWithDetails(scheduleWithD
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not update schedule record")
 			return nil, err
 		}
+		defer stmt.Close()
+
+		scheduleWithDetails.UpdateNextReportTime()
 
 		_, err = stmt.Exec(scheduleWithDetails.NextReportTime, scheduleWithDetails.Interval, scheduleWithDetails.Name, scheduleWithDetails.Description, scheduleWithDetails.Lookback, scheduleWithDetails.ReportGroupID, scheduleWithDetails.Time, scheduleWithDetails.Day, scheduleWithDetails.ID)
 		if err != nil {
@@ -97,8 +100,9 @@ func (datasource *MsupplyEresDatasource) CreateScheduleWithDetails(scheduleWithD
 func (schedule *Schedule) UpdateNextReportTime() {
 	now := time.Now()
 	daysOffset := 1
+	scheduleDays := 1
 	if schedule.Day > 0 {
-		daysOffset = schedule.Day
+		scheduleDays = schedule.Day
 	}
 
 	reportTime := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), 0, 0, now.Location())
@@ -110,7 +114,7 @@ func (schedule *Schedule) UpdateNextReportTime() {
 	}
 
 	// for the intervals using x Day of y, remove the current Day value
-	daysOffset = (-1 * int(reportTime.Day())) + daysOffset
+	daysOffset = (-1 * int(reportTime.Day())) + scheduleDays
 
 	switch schedule.Interval {
 	case 5: //yearly
@@ -132,9 +136,11 @@ func (schedule *Schedule) UpdateNextReportTime() {
 			reportTime = reportTime.AddDate(0, 1, daysOffset)
 		}
 	case 2: // fortnightly
-		reportTime = reportTime.AddDate(0, 0, 14)
+		daysToAdd := (scheduleDays - int(reportTime.Day()) + 14) % 14
+		reportTime = reportTime.AddDate(0, 0, daysToAdd)
 	case 1: // weekly
-		reportTime = reportTime.AddDate(0, 0, 7)
+		daysToAdd := (scheduleDays - int(reportTime.Weekday()) + 7) % 7
+		reportTime = reportTime.AddDate(0, 0, daysToAdd)
 	default: // 0 == daily
 		if reportTime.Unix() < now.Unix() {
 			// run tomorrow

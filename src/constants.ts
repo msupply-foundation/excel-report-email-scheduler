@@ -41,6 +41,16 @@ export const getIntervals = () => [
   { label: intl.get('yearly'), value: 5 },
 ];
 
+export const getWeekDays = () => [
+  { label: intl.get('sunday'), value: 0 },
+  { label: intl.get('monday'), value: 1 },
+  { label: intl.get('tuesday'), value: 2 },
+  { label: intl.get('wednesday'), value: 3 },
+  { label: intl.get('thursday'), value: 4 },
+  { label: intl.get('friday'), value: 5 },
+  { label: intl.get('saturday'), value: 6 },
+];
+
 export const getLookbacks = (): Array<SelectableValue<String>> => [
   { label: intl.get('1day'), value: 'now-1d' },
   { label: intl.get('2days'), value: 'now-2d' },
