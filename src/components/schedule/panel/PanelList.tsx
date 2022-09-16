@@ -79,8 +79,7 @@ const PanelList: React.FC<PanelListProps> = ({ panelListError, onPanelChecked, c
                 checkedPanels={checkedPanels}
                 panelDetail={
                   panelDetails.find(
-                    (detail: PanelDetails) =>
-                      detail.id !== '' && detail.panelID === panel.id && detail.dashboardID === panel.dashboardID
+                    (detail: PanelDetails) => detail.panelID === panel.id && detail.dashboardID === panel.dashboardID
                   )!
                 }
               />

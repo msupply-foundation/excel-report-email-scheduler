@@ -23,7 +23,7 @@ const defaultFormValues: ScheduleType = {
 };
 
 const CreateScheduleForm: React.FC = () => {
-  const { panelDetails, setPanelDetails } = useContext(PanelContext);
+  const { panelDetails, setPanelDetails, isPanelsLoading } = useContext(PanelContext);
 
   const [defaultSchedule, setDefaultSchedule] = React.useState<ScheduleType>(defaultFormValues);
 
@@ -32,6 +32,7 @@ const CreateScheduleForm: React.FC = () => {
   const { id: scheduleIdToEdit } = useParams<{ id: string }>();
   const isEditMode = !!scheduleIdToEdit;
   const [ready, setReady] = React.useState(false);
+  const [isDefaultScheduleFetched, setIsDefaultScheduleFetched] = React.useState(false);
 
   const {
     data: defaultScheduleFetched,
@@ -48,7 +49,7 @@ const CreateScheduleForm: React.FC = () => {
   });
 
   React.useEffect(() => {
-    if (!!defaultScheduleFetched) {
+    if (!isPanelsLoading && !!defaultScheduleFetched) {
       const { nextReportTime, ...restDefaultScheduleFetched } = defaultScheduleFetched;
       setDefaultSchedule({
         ...restDefaultScheduleFetched,
@@ -63,18 +64,21 @@ const CreateScheduleForm: React.FC = () => {
             ) || prevDetail
         )
       );
+
+      setIsDefaultScheduleFetched(true);
     }
-  }, [defaultScheduleFetched, setPanelDetails]);
+  }, [defaultScheduleFetched, isPanelsLoading, setPanelDetails]);
 
   React.useEffect(() => {
     if (!isEditMode) {
       setReady(true);
+      setIsDefaultScheduleFetched(true);
     }
 
-    if (isEditMode && !isRefetching && !isScheduleByIDLoading) {
+    if (!isPanelsLoading && isEditMode && !isRefetching && !isScheduleByIDLoading && isDefaultScheduleFetched) {
       setReady(true);
     }
-  }, [isEditMode, isRefetching, isScheduleByIDLoading]);
+  }, [isEditMode, isRefetching, isScheduleByIDLoading, isDefaultScheduleFetched, isPanelsLoading]);
 
   const { data: reportGroups } = useQuery<ReportGroupType[], Error>(`reportGroups`, getReportGroups, {
     refetchOnMount: true,
