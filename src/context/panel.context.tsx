@@ -8,6 +8,7 @@ import { parseOrDefault } from 'utils';
 
 type PanelContextProps = {
   panels: Panel[];
+  isPanelsLoading: boolean;
   panelDetails: PanelDetails[];
   setPanelDetails: any;
   onUpdateLookback: (content: PanelDetails) => (selectableValue: SelectableValue) => void;
@@ -18,6 +19,7 @@ type PanelContextProps = {
 };
 
 const panelContextDefault = {
+  isPanelsLoading: true,
   panels: [],
   panelDetails: [],
   setPanelDetails: (panelDetails: PanelDetails[]) => {},
@@ -30,6 +32,7 @@ const PanelContext = React.createContext<PanelContextProps>(panelContextDefault)
 
 const PanelProvider: React.FC = ({ children }) => {
   const [panelDetails, setPanelDetails] = useState<PanelDetails[] | []>([]);
+  const [isPanelsLoading, setIsPanelsLoading] = useState<boolean>(true);
 
   const datasourceID = useDatasourceID();
 
@@ -41,7 +44,7 @@ const PanelProvider: React.FC = ({ children }) => {
   });
 
   useEffect(() => {
-    if (panels) {
+    if (!!panels) {
       const newPanelDetails = panels.map((panel) => ({
         id: '',
         scheduleID: '',
@@ -52,6 +55,7 @@ const PanelProvider: React.FC = ({ children }) => {
       }));
 
       setPanelDetails(newPanelDetails);
+      setIsPanelsLoading(false);
     }
   }, [panels]);
 
@@ -96,6 +100,7 @@ const PanelProvider: React.FC = ({ children }) => {
       value={{
         panels: panels || [],
         panelDetails,
+        isPanelsLoading,
         setPanelDetails,
         onUpdateLookback,
         onUpdateVariable,

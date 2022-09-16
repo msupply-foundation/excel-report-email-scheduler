@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { SelectableValue } from '@grafana/data';
 import { Tooltip, Icon, InlineFormLabel, Select } from '@grafana/ui';
 import { getLookbacks } from '../../../constants';
@@ -8,6 +8,7 @@ import { ContentVariables, Panel, PanelDetails, SelectableVariable, Variable, Va
 import { PanelVariableOptions } from './PanelVariableOptions';
 import { panelUsesMacro, parseOrDefault } from 'utils';
 import { PanelVariableTextInput } from 'components';
+import { PanelContext } from 'context/panel.context';
 
 type Props = {
   panel: Panel;
@@ -18,6 +19,7 @@ type Props = {
 
 export const PanelVariables: React.FC<Props> = ({ panel, onUpdateVariable, panelDetail, onUpdateLookback }) => {
   const lookbacks = getLookbacks();
+  const { panelDetails } = useContext(PanelContext);
 
   const vars = parseOrDefault<ContentVariables>(panelDetail?.variables, {});
 
