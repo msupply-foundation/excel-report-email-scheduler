@@ -12,7 +12,7 @@ import {
   Select,
   TimeOfDayPicker,
 } from '@grafana/ui';
-import { getIntervals, getWeekDays } from '../../constants';
+import { getIntervals, getWeekDays, getDateFormat } from '../../constants';
 import { Panel, PanelListSelectedType, ReportGroupType, ScheduleType } from 'types';
 import { formatTimeToDate } from 'utils';
 import { PanelList } from 'components';
@@ -36,6 +36,7 @@ export const CreateScheduleFormPartial = ({
     register('reportGroupID', { required: 'Report group is required' });
     register('time', { required: 'time of day is required' });
     register('interval', { required: 'Interval is required' });
+    register('dateFormat');
   }, [register]);
 
   const getReportGroupOptions = (reportGroups: ReportGroupType[] | undefined) =>
@@ -51,7 +52,12 @@ export const CreateScheduleFormPartial = ({
         return false;
       case 1:
         return (
-          <Field label="Report Day" description="The day to send the report in the week.">
+          <InlineFieldRow label="Report Day">
+            <InlineField
+            label="Report Day"
+            grow
+            tooltip="The day to send the report in Weekly"
+            >
             <Select
               value={getWeekDays().filter((inter: any) => inter.value === watch('day'))}
               options={getWeekDays()}
@@ -60,11 +66,17 @@ export const CreateScheduleFormPartial = ({
                 setValue('day', option.value);
               }}
             />
-          </Field>
+            </InlineField>
+          </InlineFieldRow>
         );
       case 2:
         return (
-          <Field label="Report Day" description="The day to send the report in fortnight.">
+          <InlineFieldRow label="Report Day">
+          <InlineField
+          label="Report Day"
+          grow
+          tooltip="The day to send the report in Fortnightly"
+          >
             <Select
               value={watch('day')}
               options={[...Array(14).keys()].map((key) => ({ label: (key + 1).toString(), value: key + 1 }))}
@@ -73,13 +85,20 @@ export const CreateScheduleFormPartial = ({
                 setValue('day', option.value);
               }}
             />
-          </Field>
+          </InlineField>
+        </InlineFieldRow>
         );
       default:
         return (
-          <Field label="Report Day" description="The day to send the report in the month, half-year or year.">
+          <InlineFieldRow label="Report Day">
+          <InlineField
+          label="Report Day"
+          grow
+          tooltip="The day to send the report in the month, half-year or year."
+          >
             <Input type="number" {...register('day', { valueAsNumber: true })} id="schedule-day" width={40} />
-          </Field>
+          </InlineField>
+        </InlineFieldRow>
         );
     }
   };
@@ -154,8 +173,23 @@ export const CreateScheduleFormPartial = ({
           />
         </InlineField>
         {renderInterval()}
+        <InlineField
+          label="Date Format"
+          grow
+          tooltip="Date format to attach in filename."
+        >
+          <Select
+            value={getDateFormat().filter((dateFormat: any) => {
+              return dateFormat.value === watch('dateFormat');
+            })}
+            options={getDateFormat()}
+            prefix={<Icon name="arrow-down" />}
+            onChange={(option: any) => {
+              setValue('dateFormat', option.value);
+            }}
+          />
+        </InlineField>
       </InlineFieldRow>
-
       <Controller
         render={({ field: { onChange, value: selectedPanels } }) => {
           return (

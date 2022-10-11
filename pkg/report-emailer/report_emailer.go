@@ -155,7 +155,9 @@ func (re *ReportEmailer) CreateReport(schedule datasource.Schedule, authConfig *
 			bugsnag.Notify(err)
 		} else {
 			log.DefaultLogger.Debug(fmt.Sprintf("ReportEmailer.createReport: schedule: %s", schedule.Name))
-			report := reporter.CreateNewReport(scheduleID, schedule.Name)
+			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat)
+			log.DefaultLogger.Info("schedularFileName", schedularFileName)
+			report := reporter.CreateNewReport(scheduleID, schedularFileName)
 			report.SetSheets(reportSheetPanels)
 			err := report.Write(*authConfig)
 			if err != nil {
@@ -171,9 +173,10 @@ func (re *ReportEmailer) CreateReport(schedule datasource.Schedule, authConfig *
 			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
 			bugsnag.Notify(err)
 		} else {
-			attachmentPath := GetFilePath(schedule.Name)
-			log.DefaultLogger.Debug("ReportEmailer.createReport: attachmentPath:", attachmentPath)
-			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedule.Name, schedule.Description)
+			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat)
+			attachmentPath := GetFilePath(schedularFileName)
+			log.DefaultLogger.Info("scheduleDescription", schedule.Description, attachmentPath)
+			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedularFileName, schedule.Description)
 		}
 	}
 
@@ -271,7 +274,9 @@ func (re *ReportEmailer) CreateReports() {
 			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
 			bugsnag.Notify(err)
 		} else {
-			report := reporter.CreateNewReport(scheduleID, schedule.Name)
+			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat)
+			log.DefaultLogger.Info("schedularFileName", schedularFileName)
+			report := reporter.CreateNewReport(scheduleID, schedularFileName)
 
 			report.SetSheets(reportSheetPanels)
 			err := report.Write(*authConfig)
@@ -289,8 +294,10 @@ func (re *ReportEmailer) CreateReports() {
 			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
 			bugsnag.Notify(err)
 		} else {
-			attachmentPath := GetFilePath(schedule.Name)
-			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedule.Name, schedule.Description)
+			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat)
+			attachmentPath := GetFilePath(schedularFileName)
+			log.DefaultLogger.Info("scheduleDescription", schedule.Description)
+			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedularFileName, schedule.Description)
 		}
 	}
 

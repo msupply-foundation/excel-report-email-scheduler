@@ -56,6 +56,7 @@ type ScheduleType = {
   nextReportTime?: number;
   panels: PanelListSelectedType[];
   panelDetails: PanelDetails[];
+  dateFormat: string;
 };
 
 export type VariableOption = {

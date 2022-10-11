@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func NewSchedule(ID string, interval int, nextReportTime int, name string, description string, lookback string, reportGroupID string, time string, day int) Schedule {
+func NewSchedule(ID string, interval int, nextReportTime int, name string, description string, lookback string, reportGroupID string, time string, day int, dateFormat string) Schedule {
 	schedule := Schedule{
 		ID:             ID,
 		Interval:       interval,
@@ -21,6 +21,7 @@ func NewSchedule(ID string, interval int, nextReportTime int, name string, descr
 		Time:           time,
 		Day:            day,
 		PanelDetails:   []ReportContent{},
+		DateFormat:     dateFormat,
 	}
 	return schedule
 }
@@ -44,10 +45,10 @@ func (datasource *MsupplyEresDatasource) GetSchedules() ([]Schedule, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var ID, Name, Description, ReportGroupID, Time, Lookback string
+		var ID, Name, Description, ReportGroupID, Time, Lookback, DateFormat string
 		var Day, Interval, NextReportTime int
 
-		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day)
+		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day, &DateFormat)
 		if err != nil {
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not scan schedule rows")
 			return nil, err
@@ -70,6 +71,7 @@ func (datasource *MsupplyEresDatasource) GetSchedules() ([]Schedule, error) {
 			Time:           Time,
 			Day:            Day,
 			PanelDetails:   reportContent,
+			DateFormat:     DateFormat,
 		}
 		schedules = append(schedules, schedule)
 	}
@@ -96,10 +98,10 @@ func (datasource *MsupplyEresDatasource) GetSchedule(id string) (*Schedule, erro
 	}
 
 	for rows.Next() {
-		var ID, Name, Description, ReportGroupID, Time, Lookback string
+		var ID, Name, Description, ReportGroupID, Time, Lookback, DateFormat string
 		var Day, Interval, NextReportTime int
 
-		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day)
+		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day, &DateFormat)
 		if err != nil {
 			log.DefaultLogger.Error("GetSchedules: rows.Scan(): ", err.Error())
 			return nil, err
@@ -122,6 +124,7 @@ func (datasource *MsupplyEresDatasource) GetSchedule(id string) (*Schedule, erro
 			Time:           Time,
 			Day:            Day,
 			PanelDetails:   reportContent,
+			DateFormat:     DateFormat,
 		}
 		schedules = append(schedules, schedule)
 	}
@@ -142,14 +145,14 @@ func (datasource *MsupplyEresDatasource) UpdateSchedule(id string, schedule Sche
 		return nil, err
 	}
 
-	stmt, err := db.Prepare("UPDATE Schedule SET nextReportTime = ?, interval = ?, name = ?, description = ?, lookback = ?, reportGroupID = ?, time = ?, day = ? where id = ?")
+	stmt, err := db.Prepare("UPDATE Schedule SET nextReportTime = ?, interval = ?, name = ?, description = ?, lookback = ?, reportGroupID = ?, time = ?, day = ?, dateFormat = ? where id = ?")
 	if err != nil {
 		log.DefaultLogger.Error("UpdateSchedule: db.Prepare()", err.Error())
 		return nil, err
 	}
 
 	schedule.UpdateNextReportTime()
-	_, err = stmt.Exec(schedule.NextReportTime, schedule.Interval, schedule.Name, schedule.Description, schedule.Lookback, schedule.ReportGroupID, schedule.Time, schedule.Day, id)
+	_, err = stmt.Exec(schedule.NextReportTime, schedule.Interval, schedule.Name, schedule.Description, schedule.Lookback, schedule.ReportGroupID, schedule.Time, schedule.Day, schedule.DateFormat, id)
 	defer stmt.Close()
 	if err != nil {
 		log.DefaultLogger.Error("UpdateSchedule: stmt.Exec()", err.Error())
@@ -211,14 +214,14 @@ func (datasource *MsupplyEresDatasource) OverdueSchedules() ([]Schedule, error) 
 
 	var schedules []Schedule
 	for rows.Next() {
-		var ID, Name, Description, ReportGroupID, Time, Lookback string
+		var ID, Name, Description, ReportGroupID, Time, Lookback, DateFormat string
 		var Day, Interval, NextReportTime int
-		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day)
+		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day, &DateFormat)
 		if err != nil {
 			log.DefaultLogger.Error("OverdueSchedules: sql.Open", err.Error())
 			return nil, err
 		}
-		schedules = append(schedules, NewSchedule(ID, Interval, NextReportTime, Name, Description, Lookback, ReportGroupID, Time, Day))
+		schedules = append(schedules, NewSchedule(ID, Interval, NextReportTime, Name, Description, Lookback, ReportGroupID, Time, Day, DateFormat))
 	}
 
 	return schedules, nil

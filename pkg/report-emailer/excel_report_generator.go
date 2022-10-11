@@ -36,10 +36,12 @@ func intToCol(i int) string {
 }
 
 func NewReport(id string, name string, templatePath string) *Report {
+	log.DefaultLogger.Info("Third, NewReport")
 	return &Report{id: id, name: name, templatePath: templatePath}
 }
 
 func (r *Report) openTemplate() error {
+	log.DefaultLogger.Info("Forth, openTemplate")
 	f, err := excelize.OpenFile(r.templatePath)
 	if err != nil {
 		log.DefaultLogger.Error("Could not open template: ", err.Error())
@@ -331,20 +333,16 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 	}
 
 	r.file.DeleteSheet("templateSheet")
-
-	log.DefaultLogger.Info("Saving report...")
-
+	log.DefaultLogger.Info("Saving report...", r.dateFormat)
 	savePath := GetFilePath(r.name)
 	if err := r.file.SaveAs(savePath); err != nil {
 		log.DefaultLogger.Error("Write: ", err.Error())
 	}
-
-	log.DefaultLogger.Info(fmt.Sprintf("Report finished! %s (%s) :tada", r.id, savePath))
-
 	return nil
 }
 
 func (r *Reporter) ExportPanel(authConfig *auth.AuthConfig, datasourceID int, dashboardID string, panelID int, query string, title string) (string, error) {
+	log.DefaultLogger.Info("First, ExportPanel")
 
 	dashboard, err := api.NewDashboard(authConfig, dashboardID, "", "", datasourceID)
 	if err != nil {
@@ -392,11 +390,28 @@ func GetFilePath(fileName string) string {
 	return filePath
 }
 
+func GetFormattedFileName(schedularName string, schedularDateFormat string) string {
+	var schedularFileName string
+
+	if schedularDateFormat != "" {
+		tCurrentDate := time.Now()
+		switch schedularDateFormat {
+		case "MMM YYYY":
+			schedularFileName = schedularName + "-" + tCurrentDate.Format("Jan") + " " + tCurrentDate.Format("2006")
+		default: //for now just DD-MM-YYYY
+			schedularFileName = schedularName + "-" + tCurrentDate.Format(schedularDateFormat)
+		}
+	}
+	return schedularFileName
+}
+
 func NewReporter(templatePath string) *Reporter {
 	return &Reporter{templatePath: templatePath}
 }
 
 func (r *Reporter) CreateNewReport(scheduleID string, scheduleName string) *Report {
+	log.DefaultLogger.Info("Second, CreateNewReport")
+	log.DefaultLogger.Info("schedularFileName", scheduleName)
 	report := NewReport(scheduleID, scheduleName, r.templatePath)
 	return report
 }
