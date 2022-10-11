@@ -12,7 +12,7 @@ import {
   Select,
   TimeOfDayPicker,
 } from '@grafana/ui';
-import { getIntervals, getWeekDays, getDateFormat } from '../../constants';
+import { getIntervals, getWeekDays, getDateFormat, getDatePosition } from '../../constants';
 import { Panel, PanelListSelectedType, ReportGroupType, ScheduleType } from 'types';
 import { formatTimeToDate } from 'utils';
 import { PanelList } from 'components';
@@ -37,6 +37,7 @@ export const CreateScheduleFormPartial = ({
     register('time', { required: 'time of day is required' });
     register('interval', { required: 'Interval is required' });
     register('dateFormat');
+    register('datePosition');
   }, [register]);
 
   const getReportGroupOptions = (reportGroups: ReportGroupType[] | undefined) =>
@@ -186,6 +187,22 @@ export const CreateScheduleFormPartial = ({
             prefix={<Icon name="arrow-down" />}
             onChange={(option: any) => {
               setValue('dateFormat', option.value);
+            }}
+          />
+        </InlineField>
+        <InlineField
+          label="Add Date To"
+          grow
+          tooltip="Add date either in start or end of filename."
+        >
+          <Select
+            value={getDatePosition().filter((datePosition: any) => {
+              return datePosition.value === watch('datePosition');
+            })}
+            options={getDatePosition()}
+            prefix={<Icon name="arrow-down" />}
+            onChange={(option: any) => {
+              setValue('datePosition', option.value);
             }}
           />
         </InlineField>

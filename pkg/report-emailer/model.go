@@ -26,7 +26,6 @@ type Reporter struct {
 
 type Report struct {
 	id           string
-	dateFormat   string
 	name         string
 	templatePath string
 	file         *excelize.File

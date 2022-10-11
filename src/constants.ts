@@ -68,3 +68,8 @@ export const getDateFormat = () => [
   { label: intl.get('DDMMYYYY'), value: '02-01-2006' },
   { label: intl.get('MMMYYYY'), value: 'MMM YYYY' },
 ];
+
+export const getDatePosition = () => [
+  { label: intl.get('start'), value: 'start' },
+  { label: intl.get('end'), value: 'end' },
+];

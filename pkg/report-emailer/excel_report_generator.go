@@ -333,7 +333,6 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 	}
 
 	r.file.DeleteSheet("templateSheet")
-	log.DefaultLogger.Info("Saving report...", r.dateFormat)
 	savePath := GetFilePath(r.name)
 	if err := r.file.SaveAs(savePath); err != nil {
 		log.DefaultLogger.Error("Write: ", err.Error())
@@ -390,16 +389,26 @@ func GetFilePath(fileName string) string {
 	return filePath
 }
 
-func GetFormattedFileName(schedularName string, schedularDateFormat string) string {
+func GetFormattedFileName(schedularName string, schedularDateFormat string, schedularDatePosition string) string {
 	var schedularFileName string
-
+	//default set schedular file name
+	schedularFileName = schedularName
 	if schedularDateFormat != "" {
 		tCurrentDate := time.Now()
-		switch schedularDateFormat {
-		case "MMM YYYY":
-			schedularFileName = schedularName + "-" + tCurrentDate.Format("Jan") + " " + tCurrentDate.Format("2006")
-		default: //for now just DD-MM-YYYY
-			schedularFileName = schedularName + "-" + tCurrentDate.Format(schedularDateFormat)
+		if schedularDatePosition == "end" {
+			switch schedularDateFormat {
+			case "MMM YYYY":
+				schedularFileName = schedularName + tCurrentDate.Format("Jan") + " " + tCurrentDate.Format("2006")
+			default: //for now just DD-MM-YYYY
+				schedularFileName = schedularName + tCurrentDate.Format(schedularDateFormat)
+			}
+		} else {
+			switch schedularDateFormat {
+			case "MMM YYYY":
+				schedularFileName = tCurrentDate.Format("Jan") + " " + tCurrentDate.Format("2006") + schedularName
+			default: //for now just DD-MM-YYYY
+				schedularFileName = tCurrentDate.Format(schedularDateFormat) + schedularName
+			}
 		}
 	}
 	return schedularFileName

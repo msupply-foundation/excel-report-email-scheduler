@@ -21,6 +21,7 @@ const defaultFormValues: ScheduleType = {
   panels: [],
   panelDetails: [],
   dateFormat:'',
+  datePosition:'',
 };
 
 const CreateScheduleForm: React.FC = () => {

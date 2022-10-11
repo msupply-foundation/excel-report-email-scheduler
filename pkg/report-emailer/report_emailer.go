@@ -155,7 +155,7 @@ func (re *ReportEmailer) CreateReport(schedule datasource.Schedule, authConfig *
 			bugsnag.Notify(err)
 		} else {
 			log.DefaultLogger.Debug(fmt.Sprintf("ReportEmailer.createReport: schedule: %s", schedule.Name))
-			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat)
+			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat, schedule.DatePosition)
 			log.DefaultLogger.Info("schedularFileName", schedularFileName)
 			report := reporter.CreateNewReport(scheduleID, schedularFileName)
 			report.SetSheets(reportSheetPanels)
@@ -173,7 +173,7 @@ func (re *ReportEmailer) CreateReport(schedule datasource.Schedule, authConfig *
 			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
 			bugsnag.Notify(err)
 		} else {
-			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat)
+			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat, schedule.DatePosition)
 			attachmentPath := GetFilePath(schedularFileName)
 			log.DefaultLogger.Info("scheduleDescription", schedule.Description, attachmentPath)
 			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedularFileName, schedule.Description)
@@ -274,7 +274,7 @@ func (re *ReportEmailer) CreateReports() {
 			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
 			bugsnag.Notify(err)
 		} else {
-			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat)
+			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat, schedule.DatePosition)
 			log.DefaultLogger.Info("schedularFileName", schedularFileName)
 			report := reporter.CreateNewReport(scheduleID, schedularFileName)
 
@@ -294,7 +294,7 @@ func (re *ReportEmailer) CreateReports() {
 			log.DefaultLogger.Error("ReportEmailer: GetSchedule: Could not create report to send.", err.Error())
 			bugsnag.Notify(err)
 		} else {
-			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat)
+			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat, schedule.DatePosition)
 			attachmentPath := GetFilePath(schedularFileName)
 			log.DefaultLogger.Info("scheduleDescription", schedule.Description)
 			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedularFileName, schedule.Description)

@@ -22,6 +22,7 @@ type Schedule struct {
 	Day            int             `json:"day"`
 	PanelDetails   []ReportContent `json:"panelDetails"`
 	DateFormat     string          `json:"dateFormat"`
+	DatePosition   string          `json:"datePosition"`
 }
 
 type ReportContent struct {
@@ -43,7 +44,7 @@ func (datasource *MsupplyEresDatasource) CreateScheduleWithDetails(scheduleWithD
 	defer sqlClient.Db.Close()
 
 	if scheduleWithDetails.ID == "" {
-		stmt, err := sqlClient.Db.Prepare("INSERT INTO Schedule (id, nextReportTime, interval, name, description, lookback,reportGroupID,time,day,dateFormat) VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING *")
+		stmt, err := sqlClient.Db.Prepare("INSERT INTO Schedule (id, nextReportTime, interval, name, description, lookback,reportGroupID,time,day,dateFormat, datePosition) VALUES (?,?,?,?,?,?,?,?,?,?,?) RETURNING *")
 		if err != nil {
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not create schedule record")
 			return nil, err
@@ -54,13 +55,13 @@ func (datasource *MsupplyEresDatasource) CreateScheduleWithDetails(scheduleWithD
 
 		scheduleWithDetails.UpdateNextReportTime()
 
-		_, err = stmt.Exec(scheduleWithDetails.ID, scheduleWithDetails.NextReportTime, scheduleWithDetails.Interval, scheduleWithDetails.Name, scheduleWithDetails.Description, scheduleWithDetails.Lookback, scheduleWithDetails.ReportGroupID, scheduleWithDetails.Time, scheduleWithDetails.Day, scheduleWithDetails.DateFormat)
+		_, err = stmt.Exec(scheduleWithDetails.ID, scheduleWithDetails.NextReportTime, scheduleWithDetails.Interval, scheduleWithDetails.Name, scheduleWithDetails.Description, scheduleWithDetails.Lookback, scheduleWithDetails.ReportGroupID, scheduleWithDetails.Time, scheduleWithDetails.Day, scheduleWithDetails.DateFormat, scheduleWithDetails.DatePosition)
 		if err != nil {
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not create schedule record")
 			return nil, err
 		}
 	} else {
-		stmt, err := sqlClient.Db.Prepare("UPDATE Schedule SET nextReportTime = ?, interval = ?, name = ?, description = ?, lookback = ?, reportGroupID = ?, time = ?, day = ?, dateFormat = ? where id = ? RETURNING *")
+		stmt, err := sqlClient.Db.Prepare("UPDATE Schedule SET nextReportTime = ?, interval = ?, name = ?, description = ?, lookback = ?, reportGroupID = ?, time = ?, day = ?, dateFormat = ?, datePosition = ? where id = ? RETURNING *")
 		if err != nil {
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not update schedule record")
 			return nil, err
@@ -69,7 +70,7 @@ func (datasource *MsupplyEresDatasource) CreateScheduleWithDetails(scheduleWithD
 
 		scheduleWithDetails.UpdateNextReportTime()
 
-		_, err = stmt.Exec(scheduleWithDetails.NextReportTime, scheduleWithDetails.Interval, scheduleWithDetails.Name, scheduleWithDetails.Description, scheduleWithDetails.Lookback, scheduleWithDetails.ReportGroupID, scheduleWithDetails.Time, scheduleWithDetails.Day, scheduleWithDetails.DateFormat, scheduleWithDetails.ID)
+		_, err = stmt.Exec(scheduleWithDetails.NextReportTime, scheduleWithDetails.Interval, scheduleWithDetails.Name, scheduleWithDetails.Description, scheduleWithDetails.Lookback, scheduleWithDetails.ReportGroupID, scheduleWithDetails.Time, scheduleWithDetails.Day, scheduleWithDetails.DateFormat, scheduleWithDetails.DatePosition, scheduleWithDetails.ID)
 		if err != nil {
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not update schedule record")
 			return nil, err

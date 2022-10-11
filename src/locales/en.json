@@ -75,6 +75,8 @@
   "DDMMYYYY": "DD-MM-YYYY",
   "MMMYYYY": "MMM YYYY",
   "none": "None",
+  "start":"Start",
+  "end": "End",
   "new_report_group": "New report group",
   "variables": "Variables",
   "variables_tooltip": "These are the variables which are used within this panels query. They are created within the panels dashboard settings - view that for more information.",

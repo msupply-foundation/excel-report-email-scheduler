@@ -57,6 +57,7 @@ type ScheduleType = {
   panels: PanelListSelectedType[];
   panelDetails: PanelDetails[];
   dateFormat: string;
+  datePosition: string;
 };
 
 export type VariableOption = {
