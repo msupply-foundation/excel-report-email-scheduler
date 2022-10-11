@@ -177,7 +177,7 @@ export const CreateScheduleFormPartial = ({
         <InlineField
           label="Date Format"
           grow
-          tooltip="Date format to attach in filename."
+          tooltip="Format of date to add to the filename."
         >
           <Select
             value={getDateFormat().filter((dateFormat: any) => {
@@ -193,7 +193,7 @@ export const CreateScheduleFormPartial = ({
         <InlineField
           label="Add Date To"
           grow
-          tooltip="Add date either in start or end of filename."
+          tooltip="Choose whether the date is placed at the start or end of the filename."
         >
           <Select
             value={getDatePosition().filter((datePosition: any) => {
