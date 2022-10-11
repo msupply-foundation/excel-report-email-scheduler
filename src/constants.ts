@@ -66,7 +66,7 @@ export const getLookbacks = (): Array<SelectableValue<String>> => [
 export const getDateFormat = () => [
   { label: intl.get('none'), value: '' },
   { label: intl.get('DDMMYYYY'), value: '02-01-2006' },
-  { label: intl.get('MMMYYYY'), value: 'MMM YYYY' },
+  { label: intl.get('MMMYYYY'), value: 'Jan 2006' },
 ];
 
 export const getDatePosition = () => [

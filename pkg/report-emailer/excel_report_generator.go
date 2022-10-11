@@ -396,19 +396,9 @@ func GetFormattedFileName(schedularName string, schedularDateFormat string, sche
 	if schedularDateFormat != "" {
 		tCurrentDate := time.Now()
 		if schedularDatePosition == "end" {
-			switch schedularDateFormat {
-			case "MMM YYYY":
-				schedularFileName = schedularName + tCurrentDate.Format("Jan") + " " + tCurrentDate.Format("2006")
-			default: //for now just DD-MM-YYYY
-				schedularFileName = schedularName + tCurrentDate.Format(schedularDateFormat)
-			}
+			schedularFileName = schedularName + tCurrentDate.Format(schedularDateFormat)
 		} else {
-			switch schedularDateFormat {
-			case "MMM YYYY":
-				schedularFileName = tCurrentDate.Format("Jan") + " " + tCurrentDate.Format("2006") + schedularName
-			default: //for now just DD-MM-YYYY
-				schedularFileName = tCurrentDate.Format(schedularDateFormat) + schedularName
-			}
+			schedularFileName = tCurrentDate.Format(schedularDateFormat) + schedularName
 		}
 	}
 	return schedularFileName
