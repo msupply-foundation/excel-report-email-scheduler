@@ -49,7 +49,7 @@ func (datasource *MsupplyEresDatasource) GetSchedules() ([]Schedule, error) {
 		var ID, Name, Description, ReportGroupID, Time, Lookback, DateFormat, DatePosition string
 		var Day, Interval, NextReportTime int
 
-		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day, &DateFormat)
+		err = rows.Scan(&ID, &Interval, &NextReportTime, &Name, &Description, &Lookback, &ReportGroupID, &Time, &Day, &DateFormat, &DatePosition)
 		if err != nil {
 			err = ereserror.New(500, errors.Wrap(err, frame.Function), "Could not scan schedule rows")
 			return nil, err

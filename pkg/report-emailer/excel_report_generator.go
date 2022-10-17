@@ -36,12 +36,10 @@ func intToCol(i int) string {
 }
 
 func NewReport(id string, name string, templatePath string) *Report {
-	log.DefaultLogger.Info("Third, NewReport")
 	return &Report{id: id, name: name, templatePath: templatePath}
 }
 
 func (r *Report) openTemplate() error {
-	log.DefaultLogger.Info("Forth, openTemplate")
 	f, err := excelize.OpenFile(r.templatePath)
 	if err != nil {
 		log.DefaultLogger.Error("Could not open template: ", err.Error())
@@ -409,8 +407,6 @@ func NewReporter(templatePath string) *Reporter {
 }
 
 func (r *Reporter) CreateNewReport(scheduleID string, scheduleName string) *Report {
-	log.DefaultLogger.Info("Second, CreateNewReport")
-	log.DefaultLogger.Info("schedularFileName", scheduleName)
 	report := NewReport(scheduleID, scheduleName, r.templatePath)
 	return report
 }

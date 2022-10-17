@@ -175,7 +175,6 @@ func (re *ReportEmailer) CreateReport(schedule datasource.Schedule, authConfig *
 		} else {
 			schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat, schedule.DatePosition)
 			attachmentPath := GetFilePath(schedularFileName)
-			log.DefaultLogger.Info("scheduleDescription", schedule.Description, attachmentPath)
 			em.BulkCreateAndSend(attachmentPath, recipientEmails, schedularFileName, schedule.Description)
 		}
 	}
