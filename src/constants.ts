@@ -62,3 +62,14 @@ export const getLookbacks = (): Array<SelectableValue<String>> => [
   { label: intl.get('6months'), value: 'now-6M' },
   { label: intl.get('1year'), value: 'now-1y' },
 ];
+
+export const getDateFormat = () => [
+  { label: intl.get('none'), value: '' },
+  { label: intl.get('DDMMYYYY'), value: '02-01-2006' },
+  { label: intl.get('MMMYYYY'), value: 'Jan 2006' },
+];
+
+export const getDatePosition = () => [
+  { label: intl.get('start'), value: 'start' },
+  { label: intl.get('end'), value: 'end' },
+];

@@ -331,20 +331,15 @@ func (r *Report) Write(auth auth.AuthConfig) error {
 	}
 
 	r.file.DeleteSheet("templateSheet")
-
-	log.DefaultLogger.Info("Saving report...")
-
 	savePath := GetFilePath(r.name)
 	if err := r.file.SaveAs(savePath); err != nil {
 		log.DefaultLogger.Error("Write: ", err.Error())
 	}
-
-	log.DefaultLogger.Info(fmt.Sprintf("Report finished! %s (%s) :tada", r.id, savePath))
-
 	return nil
 }
 
 func (r *Reporter) ExportPanel(authConfig *auth.AuthConfig, datasourceID int, dashboardID string, panelID int, query string, title string) (string, error) {
+	log.DefaultLogger.Info("First, ExportPanel")
 
 	dashboard, err := api.NewDashboard(authConfig, dashboardID, "", "", datasourceID)
 	if err != nil {
@@ -390,6 +385,21 @@ func GetFilePath(fileName string) string {
 
 	log.DefaultLogger.Debug("mSupply App: ReportFilePath=" + filePath)
 	return filePath
+}
+
+func GetFormattedFileName(schedularName string, schedularDateFormat string, schedularDatePosition string) string {
+	var schedularFileName string
+	//default set schedular file name
+	schedularFileName = schedularName
+	if schedularDateFormat != "" {
+		tCurrentDate := time.Now()
+		if schedularDatePosition == "end" {
+			schedularFileName = schedularName + tCurrentDate.Format(schedularDateFormat)
+		} else {
+			schedularFileName = tCurrentDate.Format(schedularDateFormat) + schedularName
+		}
+	}
+	return schedularFileName
 }
 
 func NewReporter(templatePath string) *Reporter {
