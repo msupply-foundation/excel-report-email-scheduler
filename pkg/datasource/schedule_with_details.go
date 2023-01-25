@@ -136,7 +136,7 @@ func (schedule *Schedule) UpdateNextReportTime() {
 			reportTime = reportTime.AddDate(0, 1, daysOffset)
 		}
 	case 2: // fortnightly
-		if scheduleDays == int(reportTime.Weekday()) {
+		if scheduleDays == int(reportTime.Day()) {
 			reportTime = reportTime.AddDate(0, 0, 14)
 		} else {
 			daysToAdd := (scheduleDays - int(reportTime.Day()) + 14) % 14
