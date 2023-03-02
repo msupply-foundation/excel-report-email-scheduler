@@ -6,7 +6,6 @@ import (
 	"excel-report-email-scheduler/pkg/datasource"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/bugsnag/bugsnag-go"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
@@ -120,7 +119,7 @@ func (re *ReportEmailer) CreateReport(schedule datasource.Schedule, authConfig *
 	for _, content := range reportContent {
 		lookback := content.Lookback
 		to := "now"
-		from := strconv.Itoa(lookback)
+		from := lookback
 
 		dashboard, err := api.NewDashboard(authConfig, content.DashboardID, from, to, datasourceID)
 
@@ -242,7 +241,7 @@ func (re *ReportEmailer) CreateReports() {
 		panels[schedule.ID] = []api.TablePanel{}
 
 		for _, content := range reportContent {
-			lookback := strconv.Itoa(content.Lookback)
+			lookback := content.Lookback
 			to := "now"
 			from := lookback
 

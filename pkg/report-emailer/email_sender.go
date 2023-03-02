@@ -22,7 +22,7 @@ func (e *Emailer) CreateAndSend(attachmentPath, email, subject, body string) err
 	m.SetBody("text/html", body)
 
 	m.Attach(attachmentPath)
-	d := gomail.NewDialer(e.host, e.port, e.email, e.password)
+	d := gomail.NewDialer(e.host, e.port, "", e.password)
 
 	if err := d.DialAndSend(m); err != nil {
 		log.DefaultLogger.Error("CreateAndSend: DialAndSend: " + err.Error())

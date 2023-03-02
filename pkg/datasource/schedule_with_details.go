@@ -28,7 +28,7 @@ type ReportContent struct {
 	ScheduleID  string `json:"scheduleID"`
 	PanelID     int    `json:"panelID"`
 	DashboardID string `json:"dashboardID"`
-	Lookback    int    `json:"lookback"`
+	Lookback    string    `json:"lookback"`
 	Variables   string `json:"variables"`
 }
 
