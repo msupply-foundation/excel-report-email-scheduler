@@ -24,7 +24,7 @@ func (re *ReportEmailer) Init() {
 
 	// Set up scheduler which will try to send reports every 10 minutes
 	c := cron.New()
-	c.AddFunc("@every 2m", func() {
+	c.AddFunc("@every 5m", func() {
 		re.CreateReports()
 	})
 
@@ -58,16 +58,14 @@ func (re *ReportEmailer) cleanup(schedules []datasource.Schedule) {
 	for _, schedule := range schedules {
 
 		log.DefaultLogger.Info(fmt.Sprintf("Deleting %s.xlsx...", schedule.Name))
-		path := GetFilePath(schedule.Name)
+		schedularFileName := GetFormattedFileName(schedule.Name, schedule.DateFormat, schedule.DatePosition)
+		path := GetFilePath(schedularFileName)
 		err := os.Remove(path)
 		if err != nil {
 			// Failure case shouldn't be much of a problem since we're using the schedule ID for the report name, at the moment
 			// as it will just write to the same file and not create infinitely many if deleting always fails.
-			log.DefaultLogger.Error(fmt.Sprintf("Could not delete %s... : %s.xlsx", schedule.Name, err.Error()))
+			log.DefaultLogger.Error(fmt.Sprintf("Could not delete %s... : %s.xlsx", schedularFileName, err.Error()))
 		}
-
-		schedule.UpdateNextReportTime()
-		re.datasource.UpdateSchedule(schedule.ID, schedule)
 	}
 
 	re.inProgress = false
@@ -76,7 +74,6 @@ func (re *ReportEmailer) cleanup(schedules []datasource.Schedule) {
 func (re *ReportEmailer) CreateReport(schedule datasource.Schedule, authConfig *auth.AuthConfig, datasourceID int, em Emailer) error {
 
 	log.DefaultLogger.Debug("ReportEmailer.createReport: start")
-
 	emails := make(map[string][]string)
 	panels := make(map[string][]api.TablePanel)
 
@@ -215,6 +212,8 @@ func (re *ReportEmailer) CreateReports() {
 	panels := make(map[string][]api.TablePanel)
 	for _, schedule := range schedules {
 		reportGroup, err := re.datasource.ReportGroupFromSchedule(schedule)
+		schedule.UpdateNextReportTime()
+		re.datasource.UpdateSchedule(schedule.ID, schedule)
 		if err != nil {
 			log.DefaultLogger.Error("ReportEmailer.createReports: ReportGroupFromSchedule: " + err.Error())
 			return
