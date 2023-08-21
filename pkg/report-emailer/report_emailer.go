@@ -200,8 +200,13 @@ func (re *ReportEmailer) CreateReports() {
 
 	if len(schedules) > 0 {
 		log.DefaultLogger.Info("Found schedules which are overdue...")
+		//anyway we are updating the date and time even if it fails or success
 		for _, schedule := range schedules {
 			log.DefaultLogger.Info(fmt.Sprintf("- %s : %s", schedule.Name, schedule.Description))
+			//update date and time as well
+			log.DefaultLogger.Info(fmt.Sprintf("Updating date and time for- %s : %s", schedule.Name, schedule.Description))
+			schedule.UpdateNextReportTime()
+			re.datasource.UpdateSchedule(schedule.ID, schedule)
 		}
 	} else {
 		log.DefaultLogger.Info("No schedules are overdue...")
@@ -212,8 +217,7 @@ func (re *ReportEmailer) CreateReports() {
 	panels := make(map[string][]api.TablePanel)
 	for _, schedule := range schedules {
 		reportGroup, err := re.datasource.ReportGroupFromSchedule(schedule)
-		schedule.UpdateNextReportTime()
-		re.datasource.UpdateSchedule(schedule.ID, schedule)
+
 		if err != nil {
 			log.DefaultLogger.Error("ReportEmailer.createReports: ReportGroupFromSchedule: " + err.Error())
 			return
