@@ -48,8 +48,8 @@ type DashboardResponse struct {
 		Annotations struct {
 			List []struct {
 				BuiltIn    int    `json:"builtIn"`
-				Datasource string `json:"datasource"`
-				Enable     bool   `json:"enable"`
+				Datasource interface{} `json:"datasource"`
+				Enable     bool       `json:"enable"`
 				Hide       bool   `json:"hide"`
 				IconColor  string `json:"iconColor"`
 				Name       string `json:"name"`
@@ -62,7 +62,7 @@ type DashboardResponse struct {
 		ID           int           `json:"id"`
 		Links        []interface{} `json:"links"`
 		Panels       []struct {
-			Datasource  string `json:"datasource"`
+			Datasource  interface{} `json:"datasource"`
 			FieldConfig struct {
 				Defaults struct {
 					Custom struct {
